@@ -417,7 +417,37 @@ public class CustomReportService : ICustomReportService
             return new { row.LineNo, row.ItemName, Amount = amount, row.Indent };
         }).ToList();
 
-        // TODO: 支持简单公式计算（R1+R2-R3）
+        // 支持简单公式计算（如 R1+R2-R3，引用其他行金额进行四则运算）
+        if (rows.Any(r => !string.IsNullOrEmpty(r.Formula)))
+        {
+            var rowDict = result.ToDictionary(r => r.LineNo);
+            foreach (var row in rows.Where(r => !string.IsNullOrEmpty(r.Formula) && rowDict.ContainsKey(r.LineNo)))
+            {
+                var formula = row.Formula!;
+                // 替换 R{n} 为对应行的金额值
+                var evalExpr = System.Text.RegularExpressions.Regex.Replace(
+                    formula, @"R(\d+)",
+                    match => rowDict.ContainsKey(int.Parse(match.Groups[1].Value))
+                        ? rowDict[int.Parse(match.Groups[1].Value)].Amount.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                        : "0");
+                // 安全计算简单四则表达式
+                try
+                {
+                    var dt = new System.Data.DataTable();
+                    var computed = Convert.ToDecimal(dt.Compute(evalExpr, string.Empty));
+                    var resultRow = rowDict[row.LineNo];
+                    // 用反射更新Amount字段（匿名类型只读，需重新构建）
+                    result = result.Select(r => r.LineNo == row.LineNo
+                        ? new { r.LineNo, r.ItemName, Amount = computed, r.Indent }
+                        : r).ToList();
+                    rowDict[row.LineNo] = new { row.LineNo, row.ItemName, Amount = computed, row.Indent };
+                }
+                catch
+                {
+                    // 公式计算失败保持原值，不中断报表生成
+                }
+            }
+        }
 
         return new { TemplateName = template.TemplateName, Period = period, Rows = result };
     }

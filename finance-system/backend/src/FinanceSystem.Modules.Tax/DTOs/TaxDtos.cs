@@ -48,4 +48,6 @@ public class TaxCalculateRequest
 {
     public long TaxCategoryId { get; set; }
     public string DeclarePeriod { get; set; } = string.Empty;
+    /// <summary>手动指定的应纳税额基数（仅当税种未关联科目时使用）</summary>
+    public decimal? TaxBase { get; set; }
 }

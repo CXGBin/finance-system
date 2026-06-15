@@ -1,4 +1,4 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -24,6 +24,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceSystem.Modules.Tax", "src\FinanceSystem.Modules.Tax\FinanceSystem.Modules.Tax.csproj", "{A1B2C3D4-0010-0010-0010-000000000010}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceSystem.Api", "src\FinanceSystem.Api\FinanceSystem.Api.csproj", "{A1B2C3D4-0011-0011-0011-000000000011}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{972FBC48-710B-4A53-B87F-04F210AB4FF0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceSystem.Tests", "src\FinanceSystem.Tests\FinanceSystem.Tests.csproj", "{44455812-C68A-45EB-9787-57DA0184F38A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,5 +79,12 @@ Global
 		{A1B2C3D4-0011-0011-0011-000000000011}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1B2C3D4-0011-0011-0011-000000000011}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1B2C3D4-0011-0011-0011-000000000011}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44455812-C68A-45EB-9787-57DA0184F38A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44455812-C68A-45EB-9787-57DA0184F38A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44455812-C68A-45EB-9787-57DA0184F38A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44455812-C68A-45EB-9787-57DA0184F38A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{44455812-C68A-45EB-9787-57DA0184F38A} = {972FBC48-710B-4A53-B87F-04F210AB4FF0}
 	EndGlobalSection
 EndGlobal

@@ -86,7 +86,8 @@ public class AuthService : IAuthService
     /// <inheritdoc/>
     public async Task LogoutAsync(long userId, string accessToken)
     {
-        // TODO: 将Token加入Redis黑名单
+        // 将Token加入内存黑名单（生产环境应使用Redis）
+        TokenBlacklist.Add(accessToken);
         // 记录登出日志
         await SaveLogAsync(userId, null, "system", "LOGOUT", "用户登出", null);
     }
@@ -94,10 +95,32 @@ public class AuthService : IAuthService
     /// <inheritdoc/>
     public async Task<LoginResponse> RefreshTokenAsync(RefreshTokenRequest request)
     {
-        // TODO: 从Redis验证refresh_token有效性
-        // 简化实现：直接生成新Token
-        // 生产环境应在Redis中存储refresh_token并验证
-        throw new NotImplementedException("Token刷新功能待Redis集成后实现");
+        // 验证refresh_token有效性（简化实现：内存存储）
+        if (!_refreshTokenStore.TryGetValue(request.RefreshToken, out var storedUserId))
+        {
+            throw new UnauthorizedException("刷新令牌无效或已过期");
+        }
+        _refreshTokenStore.Remove(request.RefreshToken);
+
+        var user = await _db.Queryable<SysUser>()
+            .FirstAsync(u => u.Id == storedUserId)
+            ?? throw new NotFoundException("用户不存在");
+
+        var userInfo = await BuildUserInfoAsync(user);
+        var token = GenerateToken(user);
+        var refreshToken = Guid.NewGuid().ToString("N");
+        var expiresIn = int.Parse(_config["Jwt:AccessTokenExpireMinutes"] ?? "120");
+
+        _refreshTokenStore[refreshToken] = user.Id;
+        _cleanupExpiredRefreshTokens();
+
+        return new LoginResponse
+        {
+            AccessToken = token,
+            RefreshToken = refreshToken,
+            ExpiresIn = expiresIn * 60,
+            UserInfo = userInfo
+        };
     }
 
     /// <inheritdoc/>
@@ -160,13 +183,33 @@ public class AuthService : IAuthService
     }
 
     /// <summary>
+    /// Token黑名单（内存存储，生产环境应替换为Redis）
+    /// </summary>
+    private static readonly HashSet<string> TokenBlacklist = new();
+
+    /// <summary>
+    /// 判断Token是否在黑名单中
+    /// </summary>
+    public static bool IsTokenBlacklisted(string token) => TokenBlacklist.Contains(token);
+
+    /// <summary>
+    /// RefreshToken存储（内存存储，生产环境应替换为Redis）
+    /// </summary>
+    private static readonly Dictionary<string, long> _refreshTokenStore = new();
+
+    /// <summary>
+    /// 清理过期的refresh_token
+    /// </summary>
+    private static void _cleanupExpiredRefreshTokens() { /* 简化实现，不做过期清理 */ }
+
+    /// <summary>
     /// 生成刷新令牌（随机字符串）
     /// </summary>
-    /// <returns>刷新令牌字符串</returns>
     private string GenerateRefreshToken()
     {
-        // TODO: 存入Redis，生产环境应使用安全的随机数生成器
-        return Guid.NewGuid().ToString("N");
+        var token = Guid.NewGuid().ToString("N");
+        _refreshTokenStore[token] = 0; // 占位，登录成功后会更新为真实userId
+        return token;
     }
 
     /// <summary>

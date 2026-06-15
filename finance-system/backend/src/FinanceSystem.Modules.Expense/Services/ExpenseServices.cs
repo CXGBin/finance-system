@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Modules.Accounts.Entities;
 using FinanceSystem.Modules.Expense.DTOs;
 using FinanceSystem.Modules.Expense.Entities;
 using SqlSugar;
@@ -122,7 +123,80 @@ public class ExpenseClaimService : IExpenseClaimService
         if (claim.Status != 2) throw new BusinessException("非已通过状态");
         claim.Status = 4; claim.PaymentDate = DateTime.Now;
         await _db.Updateable(claim).UpdateColumns(c => new { c.Status, c.PaymentDate }).ExecuteCommandAsync();
-        // TODO: 自动生成费用凭证
+        // 付款后自动生成费用凭证：借记管理费用等，贷记银行存款/库存现金
+        var period = await _db.Queryable<AccountingPeriod>()
+            .Where(p => p.BeginDate <= DateTime.Now && p.EndDate >= DateTime.Now && p.IsClosed == 0)
+            .FirstAsync();
+        if (period != null && claim.TotalAmount > 0)
+        {
+            var lastVoucher = await _db.Queryable<Voucher>()
+                .Where(v => v.PeriodId == period.Id).OrderByDescending(v => v.Id).FirstAsync();
+            var nextNo = lastVoucher != null
+                ? (int.Parse(lastVoucher.VoucherNo.Split('-').Last()) + 1).ToString("D4") : "0001";
+
+            // 查找费用报销关联的科目（从报销明细中获取费用类型关联的科目）
+            var expenseItems = await _db.Queryable<ExpenseItem>().Where(i => i.ClaimId == claim.Id).ToListAsync();
+            var expenseTypeIds = expenseItems.Select(i => i.ExpenseTypeId).Distinct().ToList();
+            var expenseTypes = await _db.Queryable<ExpenseType>()
+                .Where(t => expenseTypeIds.Contains(t.Id)).ToListAsync();
+
+            var entries = new List<VoucherEntry>();
+            decimal totalDebit = 0;
+
+            // 按费用类型汇总，生成借方分录
+            var groupedByType = expenseItems.GroupBy(i => i.ExpenseTypeId);
+            foreach (var group in groupedByType)
+            {
+                var expType = expenseTypes.FirstOrDefault(t => t.Id == group.Key);
+                // 确定费用科目：优先使用费用类型关联的科目，否则默认管理费用（6602）
+                long subjectId;
+                if (expType?.SubjectId.HasValue == true && expType.SubjectId.Value > 0)
+                {
+                    subjectId = expType.SubjectId.Value;
+                }
+                else
+                {
+                    var defaultSubject = await _db.Queryable<AccountSubject>().FirstAsync(s => s.SubjectCode == "6602");
+                    subjectId = defaultSubject?.Id ?? 0;
+                }
+                var amount = group.Sum(i => i.Amount);
+                if (subjectId > 0 && amount > 0)
+                {
+                    entries.Add(new VoucherEntry
+                    {
+                        VoucherId = 0, SubjectId = subjectId,
+                        Summary = $"{expType?.TypeName ?? "费用报销"}-报销单{claim.ClaimNo}",
+                        DebitAmount = amount, CreditAmount = 0
+                    });
+                    totalDebit += amount;
+                }
+            }
+
+            // 贷记银行存款（1002）
+            var bankSubject = await _db.Queryable<AccountSubject>().FirstAsync(s => s.SubjectCode == "1002");
+            if (bankSubject != null && entries.Any())
+            {
+                entries.Add(new VoucherEntry
+                {
+                    VoucherId = 0, SubjectId = bankSubject.Id,
+                    Summary = $"报销付款-{claim.ClaimNo}",
+                    DebitAmount = 0, CreditAmount = totalDebit
+                });
+
+                var voucher = new Voucher
+                {
+                    VoucherNo = $"PZ-{period.PeriodYear}{period.PeriodMonth:D2}-{nextNo}",
+                    VoucherDate = DateTime.Now, PeriodId = period.Id, VoucherType = 1,
+                    AbstractText = $"费用报销付款-{claim.Title}",
+                    Status = 1, TotalDebit = totalDebit, TotalCredit = totalDebit,
+                    PreparedBy = 0, ReviewedBy = 0, ReviewedTime = DateTime.Now,
+                    Entries = entries
+                };
+                await _db.Insertable(voucher).ExecuteCommandAsync();
+                claim.VoucherId = voucher.Id;
+                await _db.Updateable(claim).UpdateColumns(c => c.VoucherId).ExecuteCommandAsync();
+            }
+        }
     }
 }
 

@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Modules.Accounts.Entities;
 using FinanceSystem.Modules.Tax.DTOs;
 using FinanceSystem.Modules.Tax.Entities;
 using SqlSugar;
@@ -67,8 +68,39 @@ public class TaxDeclarationService : ITaxDeclarationService
         var tax = await _db.Queryable<TaxCategory>().FirstAsync(t => t.Id == request.TaxCategoryId)
             ?? throw new NotFoundException("税种不存在");
 
-        // TODO: 根据税种类型从账务模块获取应纳税额基数
+        // 根据税种类型从账务模块获取应纳税额基数
         decimal taxAmount = 0;
+        if (tax.SubjectId.HasValue)
+        {
+            // 解析申报期间获取对应会计期间
+            var periodParts = request.DeclarePeriod.Split('-');
+            if (periodParts.Length == 2)
+            {
+                var periodYear = int.Parse(periodParts[0]);
+                var periodMonth = int.Parse(periodParts[1]);
+                var period = await _db.Queryable<AccountingPeriod>()
+                    .FirstAsync(p => p.PeriodYear == periodYear && p.PeriodMonth == periodMonth);
+                if (period != null)
+                {
+                    // 查询该科目在对应期间的余额（期末余额或本期发生额）
+                    var balance = await _db.Queryable<SubjectBalance>()
+                        .FirstAsync(b => b.SubjectId == tax.SubjectId.Value && b.PeriodId == period.Id);
+                    if (balance != null)
+                    {
+                        // 应纳税额基数 = 根据余额方向取期末余额
+                        decimal taxBase = balance.EndCredit - balance.EndDebit;
+                        if (taxBase < 0) taxBase = balance.EndDebit - balance.EndCredit;
+                        // 计算税额
+                        taxAmount = Math.Round(taxBase * (tax.TaxRate / 100), 2);
+                    }
+                }
+            }
+        }
+        else
+        {
+            // 无关联科目时使用请求中传入的税基
+            taxAmount = Math.Round((request.TaxBase ?? 0) * (tax.TaxRate / 100), 2);
+        }
         var hasExisting = await _db.Queryable<TaxDeclaration>()
             .AnyAsync(d => d.TaxCategoryId == request.TaxCategoryId && d.DeclarePeriod == request.DeclarePeriod);
         if (hasExisting) throw new BusinessException("该期间已存在申报记录");

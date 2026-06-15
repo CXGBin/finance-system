@@ -1,5 +1,4 @@
-using FinanceSystem.Core.Common;
-
+using System;
 using FinanceSystem.Core.Common;
 using FinanceSystem.Modules.Accounts.DTOs;
 using FinanceSystem.Modules.Accounts.Entities;
@@ -110,7 +109,117 @@ public class PeriodService : IPeriodService
             .AnyAsync(v => v.PeriodId == periodId && v.AbstractText == "期末损益结转");
         if (hasTransfer) throw new BusinessException("当期已执行损益结转");
 
-        // TODO: 根据科目余额表计算每个损益科目的余额，生成结转凭证
+        // 查询损益类科目（类型4收入、5费用、6成本）的当期余额
+        var balances = await _db.Queryable<SubjectBalance>()
+            .Where(b => b.PeriodId == periodId)
+            .ToListAsync();
+
+        var subjectIds = balances.Select(b => b.SubjectId).ToList();
+        var subjects = await _db.Queryable<AccountSubject>()
+            .Where(s => subjectIds.Contains(s.Id))
+            .ToListAsync();
+
+        var profitLossBalances = balances
+            .Join(subjects, b => b.SubjectId, s => s.Id, (b, s) => new { Balance = b, Subject = s })
+            .Where(x => x.Subject.SubjectType == 4 || x.Subject.SubjectType == 5 || x.Subject.SubjectType == 6)
+            .ToList();
+
+        if (!profitLossBalances.Any()) throw new BusinessException("当期无损益科目余额需要结转");
+
+        // 计算各损益科目的净额（收入类贷方余额=贷方-借方，费用类借方余额=借方-贷方）
+        var entries = new List<VoucherEntry>();
+        decimal totalDebit = 0;
+        decimal totalCredit = 0;
+
+        foreach (var item in profitLossBalances)
+        {
+            decimal netAmount;
+            if (item.Subject.SubjectType == 4)
+            {
+                // 收入类：贷方余额 = 贷方 - 借方，结转时借记收入、贷记本年利润
+                netAmount = item.Balance.EndCredit - item.Balance.EndDebit;
+                if (netAmount > 0)
+                {
+                    entries.Add(new VoucherEntry
+                    {
+                        VoucherId = 0,
+                        SubjectId = item.Subject.Id,
+                        Summary = $"期末损益结转-{item.Subject.SubjectName}",
+                        DebitAmount = netAmount,
+                        CreditAmount = 0
+                    });
+                    totalDebit += netAmount;
+                }
+            }
+            else
+            {
+                // 费用/成本类：借方余额 = 借方 - 贷方，结转时贷记费用、借记本年利润
+                netAmount = item.Balance.EndDebit - item.Balance.EndCredit;
+                if (netAmount > 0)
+                {
+                    entries.Add(new VoucherEntry
+                    {
+                        VoucherId = 0,
+                        SubjectId = item.Subject.Id,
+                        Summary = $"期末损益结转-{item.Subject.SubjectName}",
+                        CreditAmount = netAmount,
+                        DebitAmount = 0
+                    });
+                    totalCredit += netAmount;
+                }
+            }
+        }
+
+        // 找到本年利润科目（4103）
+        var profitSubject = await _db.Queryable<AccountSubject>()
+            .FirstAsync(s => s.SubjectCode == "4103")
+            ?? throw new BusinessException("本年利润科目（4103）不存在");
+
+        // 收入结转贷记本年利润
+        entries.Add(new VoucherEntry
+        {
+            VoucherId = 0,
+            SubjectId = profitSubject.Id,
+            Summary = "期末损益结转-本年利润（收入结转）",
+            CreditAmount = totalDebit,
+            DebitAmount = 0
+        });
+
+        // 费用结转借记本年利润
+        entries.Add(new VoucherEntry
+        {
+            VoucherId = 0,
+            SubjectId = profitSubject.Id,
+            Summary = "期末损益结转-本年利润（费用结转）",
+            DebitAmount = totalCredit,
+            CreditAmount = 0
+        });
+
+        // 生成凭证号
+        var lastVoucher = await _db.Queryable<Voucher>()
+            .Where(v => v.PeriodId == periodId)
+            .OrderByDescending(v => v.Id)
+            .FirstAsync();
+        var nextNo = lastVoucher != null ? ((int.Parse(lastVoucher.VoucherNo.Split('-').Last()) + 1).ToString("D4")) : "0001";
+
+        // 创建结转凭证
+        var voucher = new Voucher
+        {
+            VoucherNo = $"PZ-{period.PeriodYear}{period.PeriodMonth:D2}-{nextNo}",
+            VoucherDate = period.EndDate,
+            PeriodId = periodId,
+            VoucherType = 2,
+            AbstractText = "期末损益结转",
+            Status = 1,
+            TotalDebit = Math.Max(totalDebit, totalCredit),
+            TotalCredit = Math.Max(totalDebit, totalCredit),
+            PreparedBy = currentUserId,
+            ReviewedBy = currentUserId,
+            ReviewedTime = DateTime.Now,
+            Entries = entries
+        };
+
+        await _db.Insertable(voucher).ExecuteCommandAsync();
     }
 }
 

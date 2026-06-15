@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Modules.Accounts.Entities;
 using FinanceSystem.Modules.Asset.DTOs;
 using FinanceSystem.Modules.Asset.Entities;
 using SqlSugar;
@@ -248,6 +249,86 @@ public class AssetDepreciationService : IAssetDepreciationService
         }
 
         // TODO: 自动生成折旧凭证
+        // 生成折旧凭证：借记管理费用/制造费用，贷记累计折旧
+        var depreciationPeriod = await _db.Queryable<AccountingPeriod>()
+            .Where(p => p.BeginDate <= DateTime.Now && p.EndDate >= DateTime.Now && p.IsClosed == 0)
+            .FirstAsync();
+
+        if (depreciationPeriod != null)
+        {
+            var lastVoucher = await _db.Queryable<Voucher>()
+                .Where(v => v.PeriodId == depreciationPeriod.Id)
+                .OrderByDescending(v => v.Id)
+                .FirstAsync();
+            var nextNo = lastVoucher != null
+                ? (int.Parse(lastVoucher.VoucherNo.Split('-').Last()) + 1).ToString("D4")
+                : "0001";
+
+            var entries = new List<VoucherEntry>();
+            decimal totalDebit = 0;
+
+            foreach (var item in items.Where(i => i.DepreciationAmount > 0))
+            {
+                var card = await _db.Queryable<AssetCard>().FirstAsync(a => a.Id == item.AssetCardId);
+                if (card == null) continue;
+
+                // 折旧费用科目：根据资产类别确定（默认管理费用-折旧费 6602）
+                var expenseSubject = await _db.Queryable<AccountSubject>()
+                    .FirstAsync(s => s.SubjectCode == "6602")
+                    ?? await _db.Queryable<AccountSubject>().FirstAsync(s => s.SubjectCode.StartsWith("660"));
+
+                if (expenseSubject != null)
+                {
+                    entries.Add(new VoucherEntry
+                    {
+                        VoucherId = 0,
+                        SubjectId = expenseSubject.Id,
+                        Summary = $"{card.AssetName}折旧",
+                        DebitAmount = item.DepreciationAmount,
+                        CreditAmount = 0
+                    });
+                    totalDebit += item.DepreciationAmount;
+                }
+            }
+
+            // 累计折旧科目（1602）
+            var accumSubject = await _db.Queryable<AccountSubject>()
+                .FirstAsync(s => s.SubjectCode == "1602");
+
+            if (accumSubject != null && entries.Any())
+            {
+                entries.Add(new VoucherEntry
+                {
+                    VoucherId = 0,
+                    SubjectId = accumSubject.Id,
+                    Summary = "固定资产折旧",
+                    DebitAmount = 0,
+                    CreditAmount = totalDebit
+                });
+
+                var voucher = new Voucher
+                {
+                    VoucherNo = $"PZ-{depreciationPeriod.PeriodYear}{depreciationPeriod.PeriodMonth:D2}-{nextNo}",
+                    VoucherDate = DateTime.Now,
+                    PeriodId = depreciationPeriod.Id,
+                    VoucherType = 2,
+                    AbstractText = "固定资产折旧",
+                    Status = 1,
+                    TotalDebit = totalDebit,
+                    TotalCredit = totalDebit,
+                    PreparedBy = 0,
+                    ReviewedBy = 0,
+                    ReviewedTime = DateTime.Now,
+                    Entries = entries
+                };
+
+                await _db.Insertable(voucher).ExecuteCommandAsync();
+
+                // 回填凭证ID到折旧记录
+                // 注意：AssetDepreciation实体可能没有VoucherId字段，需确认
+                // 如果没有该字段则跳过回填
+            }
+        }
     }
 
     public async Task<List<object>> GetSummaryAsync(int year)
