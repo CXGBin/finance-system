@@ -45,3 +45,13 @@ export const expenseApi = {
   /** 新增分摊 */
   allocateAdd: (data: Partial<ExpenseAllocate>) => post('/expense/claim', data),
 };
+
+/** 借款申请 */
+export const loanApi = {
+  list: (params: any) => get<any>('/expense/loan', params),
+  getById: (id: number) => get<any>(`/expense/loan/${id}`),
+  create: (data: any) => post<number>('/expense/loan', data),
+  approve: (id: number) => post(`/expense/loan/${id}/approve`),
+  reject: (id: number) => post(`/expense/loan/${id}/reject`),
+  settle: (id: number, data: any) => post(`/expense/loan/${id}/settle`, data),
+};

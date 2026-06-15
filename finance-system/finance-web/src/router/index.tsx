@@ -81,6 +81,7 @@ const router = createBrowserRouter([
       { path: 'asset/depreciation', element: withGuard(wrapSuspense(() => import('@/modules/asset/depreciation'))) },
       { path: 'asset/change', element: withGuard(wrapSuspense(() => import('@/modules/asset/change'))) },
       { path: 'asset/inventory', element: withGuard(wrapSuspense(() => import('@/modules/asset/inventory'))) },
+      { path: 'asset/dispose', element: withGuard(wrapSuspense(() => import('@/modules/asset/dispose'))) },
       { path: 'asset/report', element: withGuard(wrapSuspense(() => import('@/modules/asset/report'))) },
       // 费用管理
       { path: 'expense/type', element: withGuard(wrapSuspense(() => import('@/modules/expense/type'))) },
@@ -89,12 +90,14 @@ const router = createBrowserRouter([
       { path: 'expense/claim/:id', element: withGuard(wrapSuspense(() => import('@/modules/expense/claim/detail'))) },
       { path: 'expense/payment', element: withGuard(wrapSuspense(() => import('@/modules/expense/payment'))) },
       { path: 'expense/allocate', element: withGuard(wrapSuspense(() => import('@/modules/expense/allocate'))) },
+      { path: 'expense/loan', element: withGuard(wrapSuspense(() => import('@/modules/expense/loan'))) },
       { path: 'expense/statistics', element: withGuard(wrapSuspense(() => import('@/modules/expense/statistics'))) },
       // 税务管理
       { path: 'tax/type', element: withGuard(wrapSuspense(() => import('@/modules/tax/type'))) },
       { path: 'tax/declaration', element: withGuard(wrapSuspense(() => import('@/modules/tax/declaration'))) },
       { path: 'tax/invoice', element: withGuard(wrapSuspense(() => import('@/modules/tax/invoice'))) },
       { path: 'tax/report', element: withGuard(wrapSuspense(() => import('@/modules/tax/report'))) },
+      { path: 'tax/burden', element: withGuard(wrapSuspense(() => import('@/modules/tax/burden'))) },
       { path: 'tax/calendar', element: withGuard(wrapSuspense(() => import('@/modules/tax/calendar'))) },
     ],
   },

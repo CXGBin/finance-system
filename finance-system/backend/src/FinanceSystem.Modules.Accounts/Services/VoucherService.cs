@@ -1,6 +1,4 @@
 using FinanceSystem.Core.Common;
-
-using FinanceSystem.Core.Common;
 using FinanceSystem.Modules.Accounts.DTOs;
 using FinanceSystem.Modules.Accounts.Entities;
 using SqlSugar;
@@ -14,9 +12,13 @@ public class VoucherService : IVoucherService
 {
     private readonly ISqlSugarClient _db;
 
+    /// <summary>
+    /// VoucherService方法</summary>
     public VoucherService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
+    /// <summary>
+    /// GetPageAsync方法</summary>
     public async Task<PageResult<Voucher>> GetPageAsync(VoucherQuery query)
     {
         RefAsync<int> total = 0;
@@ -54,6 +56,8 @@ public class VoucherService : IVoucherService
     }
 
     /// <inheritdoc/>
+    /// <summary>
+    /// GetByIdAsync方法</summary>
     public async Task<Voucher?> GetByIdAsync(long id)
     {
         var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id);
@@ -77,6 +81,8 @@ public class VoucherService : IVoucherService
     }
 
     /// <inheritdoc/>
+    /// <summary>
+    /// CreateAsync方法</summary>
     public async Task<long> CreateAsync(VoucherCreateRequest request, long currentUserId)
     {
         if (request.Entries == null || request.Entries.Count < 2)
@@ -124,6 +130,8 @@ public class VoucherService : IVoucherService
     }
 
     /// <inheritdoc/>
+    /// <summary>
+    /// UpdateAsync方法</summary>
     public async Task UpdateAsync(long id, VoucherCreateRequest request)
     {
         var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id)
@@ -159,6 +167,8 @@ public class VoucherService : IVoucherService
     }
 
     /// <inheritdoc/>
+    /// <summary>
+    /// AuditAsync方法</summary>
     public async Task AuditAsync(long id, long currentUserId)
     {
         var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id)
@@ -177,6 +187,8 @@ public class VoucherService : IVoucherService
     }
 
     /// <inheritdoc/>
+    /// <summary>
+    /// UnAuditAsync方法</summary>
     public async Task UnAuditAsync(long id)
     {
         var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id)
@@ -198,6 +210,8 @@ public class VoucherService : IVoucherService
     }
 
     /// <inheritdoc/>
+    /// <summary>
+    /// VoidAsync方法</summary>
     public async Task VoidAsync(long id)
     {
         var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id)
@@ -264,7 +278,7 @@ public class VoucherService : IVoucherService
         };
         await _db.Insertable(reversalVoucher).ExecuteCommandAsync();
 
-        var reversalEntries = original.Entries.Select(e => new VoucherEntry
+        var reversalEntries = (original.Entries ?? new List<VoucherEntry>()).Select(e => new VoucherEntry
         {
             VoucherId = reversalVoucher.Id,
             SubjectId = e.SubjectId,

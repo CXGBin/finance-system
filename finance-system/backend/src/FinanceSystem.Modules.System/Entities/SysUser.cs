@@ -19,7 +19,7 @@ public class SysUser : FullEntity
     /// 密码哈希（BCrypt）
     /// </summary>
     [SugarColumn(Length = 256)]
-    public string PasswordHash { get; set; } = string.Empty;
+    public string? PasswordHash { get; set; } = string.Empty;
 
     /// <summary>
     /// 真实姓名

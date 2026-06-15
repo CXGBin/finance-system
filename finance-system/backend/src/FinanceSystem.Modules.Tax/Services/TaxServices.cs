@@ -35,11 +35,17 @@ public interface ITaxCalendarService
 public class TaxCategoryService : ITaxCategoryService
 {
     private readonly ISqlSugarClient _db;
+    /// <summary>
+    /// TaxCategoryService方法</summary>
     public TaxCategoryService(ISqlSugarClient db) => _db = db;
 
+    /// <summary>
+    /// GetListAsync方法</summary>
     public async Task<List<TaxCategory>> GetListAsync()
         => await _db.Queryable<TaxCategory>().Where(c => c.IsEnabled == 1).OrderBy(c => c.TaxCode).ToListAsync();
 
+    /// <summary>
+    /// CreateAsync方法</summary>
     public async Task<long> CreateAsync(TaxCategoryRequest request)
     {
         var entity = new TaxCategory
@@ -52,6 +58,8 @@ public class TaxCategoryService : ITaxCategoryService
         return entity.Id;
     }
 
+    /// <summary>
+    /// UpdateAsync方法</summary>
     public async Task UpdateAsync(long id, TaxCategoryRequest request)
     {
         var entity = await _db.Queryable<TaxCategory>().FirstAsync(c => c.Id == id) ?? throw new NotFoundException("税种不存在");
@@ -60,6 +68,8 @@ public class TaxCategoryService : ITaxCategoryService
         await _db.Updateable(entity).ExecuteCommandAsync();
     }
 
+    /// <summary>
+    /// DeleteAsync方法</summary>
     public async Task DeleteAsync(long id) => await _db.Deleteable<TaxCategory>().Where(c => c.Id == id).ExecuteCommandAsync();
 }
 
@@ -67,8 +77,12 @@ public class TaxCategoryService : ITaxCategoryService
 public class TaxDeclarationService : ITaxDeclarationService
 {
     private readonly ISqlSugarClient _db;
+    /// <summary>
+    /// TaxDeclarationService方法</summary>
     public TaxDeclarationService(ISqlSugarClient db) => _db = db;
 
+    /// <summary>
+    /// GetListAsync方法</summary>
     public async Task<PageResult<TaxDeclaration>> GetListAsync(TaxDeclarationQuery query)
     {
         RefAsync<int> total = 0;
@@ -81,6 +95,8 @@ public class TaxDeclarationService : ITaxDeclarationService
         return new PageResult<TaxDeclaration>(total, list);
     }
 
+    /// <summary>
+    /// CalculateAsync方法</summary>
     public async Task<long> CalculateAsync(TaxCalculateRequest request, long currentUserId)
     {
         var tax = await _db.Queryable<TaxCategory>().FirstAsync(t => t.Id == request.TaxCategoryId)
@@ -132,6 +148,8 @@ public class TaxDeclarationService : ITaxDeclarationService
         return entity.Id;
     }
 
+    /// <summary>
+    /// DeclareAsync方法</summary>
     public async Task DeclareAsync(long id, long currentUserId)
     {
         var entity = await _db.Queryable<TaxDeclaration>().FirstAsync(d => d.Id == id) ?? throw new NotFoundException("申报记录不存在");
@@ -140,6 +158,8 @@ public class TaxDeclarationService : ITaxDeclarationService
         await _db.Updateable(entity).UpdateColumns(d => new { d.Status, d.DeclaredBy }).ExecuteCommandAsync();
     }
 
+    /// <summary>
+    /// ConfirmPayAsync方法</summary>
     public async Task ConfirmPayAsync(long id)
     {
         var entity = await _db.Queryable<TaxDeclaration>().FirstAsync(d => d.Id == id) ?? throw new NotFoundException("申报记录不存在");
@@ -201,8 +221,12 @@ public class TaxDeclarationService : ITaxDeclarationService
 public class TaxInvoiceService : ITaxInvoiceService
 {
     private readonly ISqlSugarClient _db;
+    /// <summary>
+    /// TaxInvoiceService方法</summary>
     public TaxInvoiceService(ISqlSugarClient db) => _db = db;
 
+    /// <summary>
+    /// GetListAsync方法</summary>
     public async Task<PageResult<TaxInvoice>> GetListAsync(TaxInvoiceQuery query)
     {
         RefAsync<int> total = 0;
@@ -216,6 +240,8 @@ public class TaxInvoiceService : ITaxInvoiceService
         return new PageResult<TaxInvoice>(total, list);
     }
 
+    /// <summary>
+    /// CreateAsync方法</summary>
     public async Task<long> CreateAsync(TaxInvoiceRequest request)
     {
         var entity = new TaxInvoice
@@ -230,6 +256,8 @@ public class TaxInvoiceService : ITaxInvoiceService
         return entity.Id;
     }
 
+    /// <summary>
+    /// VerifyAsync方法</summary>
     public async Task VerifyAsync(long id)
     {
         var entity = await _db.Queryable<TaxInvoice>().FirstAsync(i => i.Id == id) ?? throw new NotFoundException("发票不存在");
@@ -242,8 +270,12 @@ public class TaxInvoiceService : ITaxInvoiceService
 public class TaxReportService : ITaxReportService
 {
     private readonly ISqlSugarClient _db;
+    /// <summary>
+    /// TaxReportService方法</summary>
     public TaxReportService(ISqlSugarClient db) => _db = db;
 
+    /// <summary>
+    /// GetSummaryAsync方法</summary>
     public async Task<object> GetSummaryAsync(int year)
     {
         var declarations = await _db.Queryable<TaxDeclaration>()
@@ -262,6 +294,8 @@ public class TaxReportService : ITaxReportService
         return new { year, totalTaxAmount, totalPaid, unpaid, byCategory };
     }
 
+    /// <summary>
+    /// GetByCategoryAsync方法</summary>
     public async Task<List<object>> GetByCategoryAsync(int year, int? month)
     {
         var query = _db.Queryable<TaxDeclaration>().Where(d => d.DeclarePeriod.StartsWith(year.ToString()));
@@ -342,8 +376,12 @@ public class TaxReportService : ITaxReportService
 public class TaxCalendarService : ITaxCalendarService
 {
     private readonly ISqlSugarClient _db;
+    /// <summary>
+    /// TaxCalendarService方法</summary>
     public TaxCalendarService(ISqlSugarClient db) => _db = db;
 
+    /// <summary>
+    /// GetCalendarAsync方法</summary>
     public async Task<List<object>> GetCalendarAsync(int year, int month)
     {
         var categories = await _db.Queryable<TaxCategory>().Where(c => c.IsEnabled == 1).ToListAsync();

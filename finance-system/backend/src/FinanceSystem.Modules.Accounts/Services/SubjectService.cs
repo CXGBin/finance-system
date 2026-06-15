@@ -1,6 +1,4 @@
 using FinanceSystem.Core.Common;
-
-using FinanceSystem.Core.Common;
 using FinanceSystem.Modules.Accounts.DTOs;
 using FinanceSystem.Modules.Accounts.Entities;
 using SqlSugar;
@@ -14,9 +12,13 @@ public class SubjectService : ISubjectService
 {
     private readonly ISqlSugarClient _db;
 
+    /// <summary>
+    /// SubjectService方法</summary>
     public SubjectService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
+    /// <summary>
+    /// GetTreeAsync方法</summary>
     public async Task<List<AccountSubject>> GetTreeAsync(bool enabledOnly = true)
     {
         var all = await _db.Queryable<AccountSubject>()
@@ -27,12 +29,16 @@ public class SubjectService : ISubjectService
     }
 
     /// <inheritdoc/>
+    /// <summary>
+    /// GetByIdAsync方法</summary>
     public async Task<AccountSubject?> GetByIdAsync(long id)
     {
         return await _db.Queryable<AccountSubject>().FirstAsync(s => s.Id == id);
     }
 
     /// <inheritdoc/>
+    /// <summary>
+    /// CreateAsync方法</summary>
     public async Task<long> CreateAsync(SubjectCreateRequest request)
     {
         var exists = await _db.Queryable<AccountSubject>().AnyAsync(s => s.SubjectCode == request.SubjectCode);
@@ -69,6 +75,8 @@ public class SubjectService : ISubjectService
     }
 
     /// <inheritdoc/>
+    /// <summary>
+    /// UpdateAsync方法</summary>
     public async Task UpdateAsync(long id, SubjectCreateRequest request)
     {
         var subject = await _db.Queryable<AccountSubject>().FirstAsync(s => s.Id == id)
@@ -88,6 +96,8 @@ public class SubjectService : ISubjectService
     }
 
     /// <inheritdoc/>
+    /// <summary>
+    /// DeleteAsync方法</summary>
     public async Task DeleteAsync(long id)
     {
         var subject = await _db.Queryable<AccountSubject>().FirstAsync(s => s.Id == id)
@@ -103,6 +113,8 @@ public class SubjectService : ISubjectService
     }
 
     /// <inheritdoc/>
+    /// <summary>
+    /// ToggleStatusAsync方法</summary>
     public async Task ToggleStatusAsync(long id, int isEnabled)
     {
         var subject = await _db.Queryable<AccountSubject>().FirstAsync(s => s.Id == id)

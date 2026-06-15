@@ -73,7 +73,7 @@ public class ModuleRegistry : IModuleRegistry
         if (module.IsCore)
             return true; // 核心模块始终启用
 
-        if (_switches.TryGetValue(moduleId, out var enabled))
+        if (_switches.TryGetValue(moduleId, out var enabled) && enabled.HasValue)
             return enabled.Value; // 显式配置
 
         return true; // 非核心模块默认启用

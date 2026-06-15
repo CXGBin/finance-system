@@ -28,7 +28,7 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<ApiResult<LoginResponse>> Login([FromBody] LoginRequest request)
     {
-        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
         var result = await _authService.LoginAsync(request, ip);
         return ApiResult<LoginResponse>.Success(result);
     }

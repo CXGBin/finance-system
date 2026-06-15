@@ -40,7 +40,7 @@ public class GlobalExceptionMiddleware
         {
             await HandleException(context, ex.Message, 401);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             await HandleException(context, "服务器内部错误", 500);
         }

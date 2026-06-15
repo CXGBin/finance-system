@@ -13,6 +13,7 @@ const VoucherList: React.FC = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [searchParams, setSearchParams] = useState<any>({});
+  const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => { loadData(); }, [page, pageSize]);
@@ -36,6 +37,23 @@ const VoucherList: React.FC = () => {
     await voucherApi.void(id);
     message.success('已作废');
     loadData();
+  };
+
+  const handleBatchAudit = async () => {
+    try {
+      await fetch('/api/voucher/batch-audit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(selectedRowKeys) });
+      message.success('批量审核成功');
+      setSelectedRowKeys([]);
+      loadData();
+    } catch { message.error('批量审核失败'); }
+  };
+
+  const handleReverse = async (id: number) => {
+    try {
+      await fetch('/api/voucher/' + id + '/reverse', { method: 'POST' });
+      message.success('红字冲销凭证已生成');
+      loadData();
+    } catch { message.error('冲销失败'); }
   };
 
   const columns = [
@@ -62,18 +80,25 @@ const VoucherList: React.FC = () => {
           {record.status === 0 && <a onClick={() => navigate(`/account/voucher/add`, { state: record })}>编辑</a>}
           {record.status === 1 && <Popconfirm title="确认审核?" onConfirm={() => handleAudit(record.id)}><a>审核</a></Popconfirm>}
           {(record.status === 0 || record.status === 1) && <Popconfirm title="确认作废?" onConfirm={() => handleVoid(record.id)}><a style={{ color: '#ff4d4f' }}>作废</a></Popconfirm>}
+          {record.status === 2 && <Popconfirm title="确认红字冲销该凭证?" onConfirm={() => handleReverse(record.id)}><a style={{ color: '#faad14' }}>冲销</a></Popconfirm>}
         </Space>
       ),
     },
   ];
 
   return (
-    <Card title="凭证管理" extra={<Button type="primary" onClick={() => navigate('/account/voucher/add')}>新增凭证</Button>}>
+    <Card title="凭证管理" extra={(
+      <Space>
+        <Button type="primary" onClick={() => navigate('/account/voucher/add')}>新增凭证</Button>
+        {selectedRowKeys.length > 0 && <Button onClick={handleBatchAudit}>批量审核({selectedRowKeys.length})</Button>}
+      </Space>
+    )}>
       <Space style={{ marginBottom: 16 }}>
         <Input placeholder="凭证字号" value={searchParams.voucherNo} onChange={(e) => setSearchParams({ ...searchParams, voucherNo: e.target.value })} allowClear style={{ width: 150 }} />
         <Button type="primary" onClick={() => { setPage(1); loadData(); }}>查询</Button>
       </Space>
       <Table columns={columns} dataSource={data} rowKey="id" loading={loading}
+        rowSelection={{ selectedRowKeys, onChange: (keys) => setSelectedRowKeys(keys as number[]) }}
         pagination={{ current: page, pageSize, total, showSizeChanger: true, onChange: (p, ps) => { setPage(p); setPageSize(ps); }, showTotal: (t) => `共 ${t} 条` }}
       />
     </Card>
