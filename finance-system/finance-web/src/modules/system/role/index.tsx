@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Modal, Form, Input, TreeSelect, message } from 'antd';
+import { Modal, Form, Input, TreeSelect, message, Popconfirm, Space } from 'antd';
 import type { SysRole } from '@/types/system.d';
-import { roleApi } from '@/api/system';
+import { roleApi, menuApi } from '@/api/system';
 import ProTable from '@/components/ProTable';
 
 /** 角色管理页面 */
@@ -28,10 +28,13 @@ const RoleList: React.FC = () => {
     {
       title: '操作', key: 'action',
       render: (_: any, record: SysRole) => (
-        <>
+        <Space>
           <a className="table-action" onClick={() => handleEdit(record as SysRole)}>编辑</a>
-          <a className="table-action" style={{ marginLeft: 8 }} onClick={() => handlePerm(record as SysRole)}>权限</a>
-        </>
+          <a className="table-action" onClick={() => handlePerm(record as SysRole)}>权限</a>
+          <Popconfirm title="确认删除该角色?" onConfirm={() => handleDelete(record)}>
+            <a className="table-action" style={{ color: '#ff4d4f' }}>删除</a>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
@@ -66,12 +69,26 @@ const RoleList: React.FC = () => {
   const handlePerm = async (record: SysRole) => {
     setCurrentRole(record);
     // 获取菜单树
-    const menuRes = await roleApi.all();
-    // 获取角色已有菜单权限
-    const menusRes = await roleApi.detail(record.id);
-    setMenuTree(menuRes.data || []);
-    setCheckedKeys((menusRes.data as any)?.menuIds || []);
+    const menuRes = await menuApi.tree();
+    // 获取角色已有菜单权限ID列表
+    const menusRes = await roleApi.menus(record.id);
+ setMenuTree(menuRes.data || []);
+    setCheckedKeys(menusRes.data || []);
     setPermModalOpen(true);
+  };
+
+  /** 保存权限配置 */
+  const handleSavePerm = async () => {
+    if (!currentRole) return;
+    await roleApi.update({ ...currentRole, menuIds: checkedKeys } as any);
+    message.success('权限配置已保存');
+    setPermModalOpen(false);
+  };
+
+  /** 删除角色 */
+  const handleDelete = async (record: SysRole) => {
+    await roleApi.remove(record.id);
+    message.success('删除成功');
   };
 
   return (
@@ -97,7 +114,7 @@ const RoleList: React.FC = () => {
           </Form.Item>
         </Form>
       </Modal>
-      <Modal title={`权限配置 - ${currentRole?.roleName}`} open={permModalOpen} onOk={() => setPermModalOpen(false)} onCancel={() => setPermModalOpen(false)} width={500}>
+      <Modal title={`权限配置 - ${currentRole?.roleName}`} open={permModalOpen} onOk={handleSavePerm} onCancel={() => setPermModalOpen(false)} width={500}>
         <TreeSelect
           treeData={menuTree}
           value={checkedKeys}

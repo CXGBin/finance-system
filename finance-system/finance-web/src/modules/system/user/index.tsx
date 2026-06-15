@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Form, Input, Select, Switch, message, Popconfirm } from 'antd';
+import { Modal, Form, Input, Select, Switch, message, Popconfirm, Space } from 'antd';
 import type { User } from '@/types/system.d';
 import { userApi } from '@/api/system';
 import ProTable from '@/components/ProTable';
@@ -18,15 +18,21 @@ const UserList: React.FC = () => {
     { title: '邮箱', dataIndex: 'email', key: 'email' },
     {
       title: '状态', dataIndex: 'status', key: 'status',
-      render: (val: number) => (
-        <span style={{ color: val === 1 ? '#52c41a' : '#ff4d4f' }}>{val === 1 ? '启用' : '禁用'}</span>
+      render: (val: number, record: User) => (
+        <Switch checked={val === 1} checkedChildren="启用" unCheckedChildren="禁用" onChange={() => handleToggleStatus(record)} />
       ),
     },
     { title: '创建时间', dataIndex: 'createdTime', key: 'createdTime', sorter: true },
     {
       title: '操作', key: 'action',
       render: (_: any, record: User) => (
-        <a className="table-action" onClick={() => handleEdit(record as User)}>编辑</a>
+        <Space>
+          <a className="table-action" onClick={() => handleEdit(record as User)}>编辑</a>
+          <a className="table-action" onClick={() => handleResetPassword(record)}>重置密码</a>
+          <Popconfirm title="确认删除该用户?" onConfirm={() => handleDelete(record)}>
+            <a className="table-action" style={{ color: '#ff4d4f' }}>删除</a>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
@@ -60,6 +66,25 @@ const UserList: React.FC = () => {
     } catch {
       // 表单校验失败
     }
+  };
+
+  /** 切换用户启停状态 */
+  const handleToggleStatus = async (record: User) => {
+    const newStatus = record.status === 1 ? 0 : 1;
+    await userApi.toggleStatus(record.id, newStatus);
+    message.success(newStatus === 1 ? '已启用' : '已禁用');
+  };
+
+  /** 重置用户密码 */
+  const handleResetPassword = async (record: User) => {
+    await userApi.resetPassword(record.id);
+    message.success('密码已重置');
+  };
+
+  /** 删除用户 */
+  const handleDelete = async (record: User) => {
+    await userApi.remove(record.id);
+    message.success('删除成功');
   };
 
   return (

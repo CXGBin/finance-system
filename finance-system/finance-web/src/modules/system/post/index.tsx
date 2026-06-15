@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Form, Input, InputNumber, message } from 'antd';
+import { Modal, Form, Input, InputNumber, message, Popconfirm, Space } from 'antd';
 import type { Post } from '@/types/system.d';
 import { postApi } from '@/api/system';
 import ProTable from '@/components/ProTable';
@@ -23,7 +23,12 @@ const PostList: React.FC = () => {
     {
       title: '操作', key: 'action',
       render: (_: any, record: Post) => (
-        <a className="table-action" onClick={() => handleEdit(record as Post)}>编辑</a>
+        <Space>
+          <a className="table-action" onClick={() => handleEdit(record as Post)}>编辑</a>
+          <Popconfirm title="确认删除该岗位?" onConfirm={() => handleDelete(record)}>
+            <a className="table-action" style={{ color: '#ff4d4f' }}>删除</a>
+          </Popconfirm>
+        </Space>
       ),
     },
   ];
@@ -52,6 +57,12 @@ const PostList: React.FC = () => {
       }
       setModalOpen(false);
     } catch {}
+  };
+
+  /** 删除岗位 */
+  const handleDelete = async (record: Post) => {
+    await postApi.remove(record.id);
+    message.success('删除成功');
   };
 
   return (
