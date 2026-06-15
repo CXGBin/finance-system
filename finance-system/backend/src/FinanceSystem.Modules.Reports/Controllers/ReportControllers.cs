@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.Reports.DTOs;
 using FinanceSystem.Modules.Reports.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -115,7 +116,7 @@ public class CustomReportController : ControllerBase
     [HttpPost("template")]
     public async Task<ApiResult<long>> Create([FromBody] ReportTemplateRequest request)
     {
-        return ApiResult<long>.Success(await _service.CreateTemplateAsync(request, 0));
+        return ApiResult<long>.Success(await _service.CreateTemplateAsync(request, HttpContext.GetCurrentUserId()));
     }
 
     /// <summary>

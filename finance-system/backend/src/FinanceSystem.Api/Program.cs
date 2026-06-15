@@ -146,6 +146,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseMiddleware<ModuleSwitchMiddleware>();
+app.UseMiddleware<OperationLogMiddleware>();
 
 // ========== 种子数据初始化 ==========
 using (var scope = app.Services.CreateScope())

@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.Asset.DTOs;
 using FinanceSystem.Modules.Asset.Entities;
 using FinanceSystem.Modules.Asset.Services;
@@ -46,7 +47,7 @@ public class AssetCardController : ControllerBase
     public async Task<ApiResult<bool>> Update(long id, [FromBody] AssetCardRequest request) { await _service.UpdateAsync(id, request); return ApiResult<bool>.Success(true); }
 
     [HttpPost("{id}/change")]
-    public async Task<ApiResult<bool>> ChangeStatus(long id, [FromQuery] int changeType, [FromBody] AssetChangeRequest request) { await _service.ChangeStatusAsync(id, changeType, request, 0); return ApiResult<bool>.Success(true); }
+    public async Task<ApiResult<bool>> ChangeStatus(long id, [FromQuery] int changeType, [FromBody] AssetChangeRequest request) { await _service.ChangeStatusAsync(id, changeType, request, HttpContext.GetCurrentUserId()); return ApiResult<bool>.Success(true); }
 }
 
 [ApiController]
@@ -60,8 +61,44 @@ public class AssetDepreciationController : ControllerBase
     public async Task<ApiResult<List<AssetDepreciation>>> Calculate([FromQuery] int year, [FromQuery] int month) => ApiResult<List<AssetDepreciation>>.Success(await _service.CalculateAsync(year, month));
 
     [HttpPost("confirm")]
-    public async Task<ApiResult<bool>> Confirm([FromQuery] int year, [FromQuery] int month) { await _service.ConfirmDepreciationAsync(year, month, 0); return ApiResult<bool>.Success(true); }
+    public async Task<ApiResult<bool>> Confirm([FromQuery] int year, [FromQuery] int month) { await _service.ConfirmDepreciationAsync(year, month, HttpContext.GetCurrentUserId()); return ApiResult<bool>.Success(true); }
 
     [HttpGet("summary")]
     public async Task<ApiResult<List<object>>> GetSummary([FromQuery] int year) => ApiResult<List<object>>.Success(await _service.GetSummaryAsync(year));
+}
+
+/// <summary>资产盘点控制器</summary>
+[ApiController]
+[Route("api/asset/inventory")]
+public class AssetInventoryController : ControllerBase
+{
+    private readonly IAssetInventoryService _service;
+    public AssetInventoryController(IAssetInventoryService service) => _service = service;
+
+    [HttpGet("list")]
+    public async Task<ApiResult<PageResult<AssetInventory>>> GetList([FromQuery] PageRequest query) => ApiResult<PageResult<AssetInventory>>.Success(await _service.GetListAsync(query));
+
+    [HttpPost]
+    public async Task<ApiResult<long>> Create([FromBody] AssetInventoryRequest request) => ApiResult<long>.Success(await _service.CreateAsync(request));
+
+    [HttpPost("{id}/complete")]
+    public async Task<ApiResult<bool>> Complete(long id) { await _service.CompleteAsync(id); return ApiResult<bool>.Success(true); }
+}
+
+/// <summary>资产报表控制器</summary>
+[ApiController]
+[Route("api/asset/report")]
+public class AssetReportController : ControllerBase
+{
+    private readonly IAssetReportService _service;
+    public AssetReportController(IAssetReportService service) => _service = service;
+
+    [HttpGet("ledger")]
+    public async Task<ApiResult<PageResult<object>>> Ledger([FromQuery] AssetReportQuery query) => ApiResult<PageResult<object>>.Success(await _service.GetLedgerAsync(query));
+
+    [HttpGet("depreciation-summary")]
+    public async Task<ApiResult<List<object>>> DepreciationSummary([FromQuery] int year) => ApiResult<List<object>>.Success(await _service.GetDepreciationSummaryAsync(year));
+
+    [HttpGet("value-stats")]
+    public async Task<ApiResult<object>> ValueStats() => ApiResult<object>.Success(await _service.GetValueStatsAsync());
 }

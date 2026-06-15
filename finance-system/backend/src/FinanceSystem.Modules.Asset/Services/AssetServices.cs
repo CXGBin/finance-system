@@ -34,6 +34,28 @@ public interface IAssetDepreciationService
     Task<List<object>> GetSummaryAsync(int year);
 }
 
+/// <summary>资产盘点服务接口</summary>
+public interface IAssetInventoryService
+{
+    /// <summary>创建盘点单</summary>
+    Task<long> CreateAsync(AssetInventoryRequest request);
+    /// <summary>分页查询盘点单</summary>
+    Task<PageResult<AssetInventory>> GetListAsync(PageRequest query);
+    /// <summary>完成盘点</summary>
+    Task CompleteAsync(long id);
+}
+
+/// <summary>资产报表服务接口</summary>
+public interface IAssetReportService
+{
+    /// <summary>资产台账</summary>
+    Task<PageResult<object>> GetLedgerAsync(AssetReportQuery query);
+    /// <summary>折旧汇总表</summary>
+    Task<List<object>> GetDepreciationSummaryAsync(int year);
+    /// <summary>资产价值统计</summary>
+    Task<object> GetValueStatsAsync();
+}
+
 /// <summary>资产分类服务实现</summary>
 public class AssetCategoryService : IAssetCategoryService
 {
@@ -375,5 +397,87 @@ public class AssetDepreciationService : IAssetDepreciationService
         var depreciation = Math.Round(depreciable * remainingMonths / totalMonths, 2);
         var remaining = depreciable - asset.AccumulatedDepreciation;
         return Math.Min(depreciation, remaining);
+    }
+}
+
+/// <summary>资产盘点服务实现</summary>
+public class AssetInventoryService : IAssetInventoryService
+{
+    private readonly ISqlSugarClient _db;
+    public AssetInventoryService(ISqlSugarClient db) => _db = db;
+
+    public async Task<long> CreateAsync(AssetInventoryRequest request)
+    {
+        var entity = new AssetInventory
+        {
+            InventoryNo = request.InventoryNo,
+            InventoryDate = request.InventoryDate,
+            OperatorId = request.OperatorId,
+            ItemsJson = System.Text.Json.JsonSerializer.Serialize(request.Items)
+        };
+        await _db.Insertable(entity).ExecuteCommandAsync();
+        return entity.Id;
+    }
+
+    public async Task<PageResult<AssetInventory>> GetListAsync(PageRequest query)
+    {
+        RefAsync<int> total = 0;
+        var list = await _db.Queryable<AssetInventory>()
+            .OrderBy(i => i.InventoryDate, OrderByType.Desc)
+            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+        return new PageResult<AssetInventory>(total, list);
+    }
+
+    public async Task CompleteAsync(long id)
+    {
+        var entity = await _db.Queryable<AssetInventory>().FirstAsync(i => i.Id == id) ?? throw new NotFoundException("盘点单不存在");
+        entity.Status = 1;
+        await _db.Updateable(entity).UpdateColumns(i => i.Status).ExecuteCommandAsync();
+    }
+}
+
+/// <summary>资产报表服务实现</summary>
+public class AssetReportService : IAssetReportService
+{
+    private readonly ISqlSugarClient _db;
+    public AssetReportService(ISqlSugarClient db) => _db = db;
+
+    public async Task<PageResult<object>> GetLedgerAsync(AssetReportQuery query)
+    {
+        RefAsync<int> total = 0;
+        var q = _db.Queryable<AssetCard>()
+            .WhereIF(!string.IsNullOrEmpty(query.AssetCode), c => c.AssetCode.Contains(query.AssetCode!))
+            .WhereIF(!string.IsNullOrEmpty(query.AssetName), c => c.AssetName.Contains(query.AssetName!))
+            .WhereIF(query.CategoryId.HasValue, c => c.CategoryId == query.CategoryId)
+            .WhereIF(query.Status.HasValue, c => c.Status == query.Status);
+        var list = await q.Select(c => new { c.Id, c.AssetCode, c.AssetName, c.CategoryId, c.OriginalValue, c.AccumulatedDepreciation, c.NetValue, c.Status, c.Location })
+            .OrderBy(c => c.AssetCode)
+            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+        return new PageResult<object>(total, list.Cast<object>().ToList());
+    }
+
+    public async Task<List<object>> GetDepreciationSummaryAsync(int year)
+    {
+        var cards = await _db.Queryable<AssetCard>().Where(c => c.Status != 5).ToListAsync();
+        return cards.Select(c => new
+        {
+            assetCode = c.AssetCode,
+            assetName = c.AssetName,
+            originalValue = c.OriginalValue,
+            accumulatedDepreciation = c.AccumulatedDepreciation,
+            netValue = c.NetValue,
+            rate = c.OriginalValue > 0 ? Math.Round(c.AccumulatedDepreciation / c.OriginalValue * 100, 2) : 0m
+        }).Cast<object>().ToList();
+    }
+
+    public async Task<object> GetValueStatsAsync()
+    {
+        var cards = await _db.Queryable<AssetCard>().ToListAsync();
+        var totalOriginal = cards.Sum(c => c.OriginalValue);
+        var totalDepreciation = cards.Sum(c => c.AccumulatedDepreciation);
+        var totalNet = cards.Sum(c => c.NetValue);
+        var inUse = cards.Count(c => c.Status == 1);
+        var idle = cards.Count(c => c.Status == 2);
+        return new { totalOriginal, totalDepreciation, totalNet, totalCount = cards.Count, inUse, idle };
     }
 }

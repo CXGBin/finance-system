@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.Budget.Services;
 using FinanceSystem.Modules.Budget.DTOs;
 using FinanceSystem.Modules.Budget.Entities;
@@ -32,7 +33,7 @@ public class BudgetYearController : ControllerBase
     [HttpPost("year")]
     public async Task<ApiResult<long>> CreateYear([FromBody] BudgetYearRequest request)
     {
-        return ApiResult<long>.Success(await _yearService.CreateAsync(request, 0));
+        return ApiResult<long>.Success(await _yearService.CreateAsync(request, HttpContext.GetCurrentUserId()));
     }
 
     /// <summary>
@@ -175,7 +176,7 @@ public class BudgetAdjustmentController : ControllerBase
     [HttpPost]
     public async Task<ApiResult<long>> CreateAdjust([FromBody] BudgetAdjustRequest request)
     {
-        return ApiResult<long>.Success(await _adjustService.CreateAdjustAsync(request, 0));
+        return ApiResult<long>.Success(await _adjustService.CreateAdjustAsync(request, HttpContext.GetCurrentUserId()));
     }
 
     /// <summary>
@@ -184,7 +185,7 @@ public class BudgetAdjustmentController : ControllerBase
     [HttpPost("{id}/approve")]
     public async Task<ApiResult<bool>> ApproveAdjust(long id, [FromQuery] int action)
     {
-        await _adjustService.ApproveAdjustAsync(id, action, 0);
+        await _adjustService.ApproveAdjustAsync(id, action, HttpContext.GetCurrentUserId());
         return ApiResult<bool>.Success(true);
     }
 }
@@ -227,4 +228,35 @@ public class BudgetAlertController : ControllerBase
     {
         return ApiResult<List<BudgetExecutionItem>>.Success(await _alertService.CheckAlertsAsync(budgetYearId));
     }
+}
+
+/// <summary>
+/// 预算分析控制器
+/// </summary>
+[ApiController]
+[Route("api/budget/analysis")]
+public class BudgetAnalysisController : ControllerBase
+{
+    private readonly IBudgetAnalysisService _analysisService;
+    public BudgetAnalysisController(IBudgetAnalysisService analysisService) => _analysisService = analysisService;
+
+    /// <summary>科目对比分析（预算vs实际）</summary>
+    [HttpGet("subject-compare")]
+    public async Task<ApiResult<List<object>>> SubjectCompare([FromQuery] int year)
+        => ApiResult<List<object>>.Success(await _analysisService.GetSubjectCompareAsync(year));
+
+    /// <summary>月度执行趋势</summary>
+    [HttpGet("monthly-trend")]
+    public async Task<ApiResult<List<object>>> MonthlyTrend([FromQuery] int year)
+        => ApiResult<List<object>>.Success(await _analysisService.GetMonthlyTrendAsync(year));
+
+    /// <summary>费用TOP10排名</summary>
+    [HttpGet("expense-top10")]
+    public async Task<ApiResult<List<object>>> ExpenseTop10([FromQuery] int year)
+        => ApiResult<List<object>>.Success(await _analysisService.GetExpenseTop10Async(year));
+
+    /// <summary>综合分析概览</summary>
+    [HttpGet("overview")]
+    public async Task<ApiResult<object>> Overview([FromQuery] int year)
+        => ApiResult<object>.Success(await _analysisService.GetOverviewAsync(year));
 }

@@ -182,3 +182,30 @@ public class AssetChange : FullEntity
     [SugarColumn(IsNullable = false, ColumnDescription = "操作人ID")]
     public long OperatorId { get; set; }
 }
+
+/// <summary>
+/// 资产盘点单
+/// </summary>
+[SugarTable("fm_asset_inventory", "资产盘点单表")]
+public class AssetInventory : FullEntity
+{
+    /// <summary>盘点编号</summary>
+    [SugarColumn(Length = 50, IsNullable = false, ColumnDescription = "盘点编号")]
+    public string InventoryNo { get; set; } = string.Empty;
+
+    /// <summary>盘点日期</summary>
+    [SugarColumn(IsNullable = false, ColumnDescription = "盘点日期")]
+    public DateTime InventoryDate { get; set; }
+
+    /// <summary>盘点人ID</summary>
+    [SugarColumn(IsNullable = false, ColumnDescription = "盘点人ID")]
+    public long OperatorId { get; set; }
+
+    /// <summary>盘点结果JSON</summary>
+    [SugarColumn(Length = 4000, IsNullable = true, ColumnDescription = "盘点明细JSON")]
+    public string? ItemsJson { get; set; }
+
+    /// <summary>状态：0未完成 1已完成</summary>
+    [SugarColumn(IsNullable = false, ColumnDescription = "状态")]
+    public int Status { get; set; } = 0;
+}

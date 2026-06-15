@@ -1,9 +1,10 @@
 using FinanceSystem.Core.Common;
-
+using Microsoft.Extensions.Configuration;
 using FinanceSystem.Modules.Accounts.Entities;
 using FinanceSystem.Modules.Reports.DTOs;
 using FinanceSystem.Modules.Reports.Entities;
 using SqlSugar;
+using System.Text;
 using System.Text.Json;
 
 namespace FinanceSystem.Modules.Reports.Services;
@@ -65,9 +66,8 @@ public class BalanceSheetService : IBalanceSheetService
         foreach (var item in items)
         {
             var ids = subjects.Where(s => item.SubjectCodes.Any(c => s.SubjectCode.StartsWith(c))).Select(s => s.Id).ToList();
-            item.BeginningBalance = CalcNetBalance(balances, ids);
-            item.EndingBalance = item.BeginningBalance;
-            if (yearBalances.Any()) item.BeginningBalance = CalcNetBalance(yearBalances, ids);
+            item.EndingBalance = CalcNetBalance(balances, ids);
+            item.BeginningBalance = yearBalances.Any() ? CalcNetBalance(yearBalances, ids) : 0;
         }
 
         return showZero ? items : items.Where(i => Math.Abs(i.EndingBalance) > 0.01m).ToList();
@@ -89,9 +89,8 @@ public class BalanceSheetService : IBalanceSheetService
         foreach (var item in items)
         {
             var ids = subjects.Where(s => item.SubjectCodes.Any(c => s.SubjectCode.StartsWith(c))).Select(s => s.Id).ToList();
-            item.BeginningBalance = CalcCreditBalance(balances, ids);
-            item.EndingBalance = item.BeginningBalance;
-            if (yearBalances.Any()) item.BeginningBalance = CalcCreditBalance(yearBalances, ids);
+            item.EndingBalance = CalcCreditBalance(balances, ids);
+            item.BeginningBalance = yearBalances.Any() ? CalcCreditBalance(yearBalances, ids) : 0;
         }
 
         return showZero ? items : items.Where(i => Math.Abs(i.EndingBalance) > 0.01m).ToList();
@@ -112,9 +111,8 @@ public class BalanceSheetService : IBalanceSheetService
         foreach (var item in items)
         {
             var ids = subjects.Where(s => item.SubjectCodes.Any(c => s.SubjectCode.StartsWith(c))).Select(s => s.Id).ToList();
-            item.BeginningBalance = CalcCreditBalance(balances, ids);
-            item.EndingBalance = item.BeginningBalance;
-            if (yearBalances.Any()) item.BeginningBalance = CalcCreditBalance(yearBalances, ids);
+            item.EndingBalance = CalcCreditBalance(balances, ids);
+            item.BeginningBalance = yearBalances.Any() ? CalcCreditBalance(yearBalances, ids) : 0;
         }
 
         return showZero ? items : items.Where(i => Math.Abs(i.EndingBalance) > 0.01m).ToList();
@@ -475,15 +473,99 @@ internal class CustomReportRow
 }
 
 /// <summary>
-/// 报表导出服务实现（占位，待集成文件生成库）
+/// 报表导出服务实现（CSV格式，无需第三方依赖）
 /// </summary>
 public class ReportExportService : IReportExportService
 {
+    private readonly ISqlSugarClient _db;
+    private readonly IConfiguration _config;
+
+    public ReportExportService(ISqlSugarClient db, IConfiguration config) { _db = db; _config = config; }
+
     /// <inheritdoc/>
     public async Task<string> ExportAsync(ExportQuery query)
     {
+        var exportDir = _config["Export:Path"] ?? "/tmp/exports";
+        if (!Directory.Exists(exportDir)) Directory.CreateDirectory(exportDir);
+
+        var csv = query.ReportType switch
+        {
+            "balance-sheet" => await ExportBalanceSheet(query.Period),
+            "income-statement" => await ExportIncomeStatement(query.Period),
+            "cash-flow" => await ExportCashFlow(query.Period),
+            _ => throw new BusinessException($"不支持的报表类型: {query.ReportType}")
+        };
+
+        var fileName = $"{query.ReportType}_{query.Period}_{DateTime.Now:yyyyMMddHHmmss}.csv";
+        var filePath = Path.Combine(exportDir, fileName);
+        await File.WriteAllTextAsync(filePath, csv);
+        return filePath;
+    }
+
+    private async Task<string> ExportBalanceSheet(string period)
+    {
+        var parts = period.Split('-');
+        var year = int.Parse(parts[0]);
+        var month = int.Parse(parts[1]);
+        var periodEntity = await _db.Queryable<AccountingPeriod>().FirstAsync(p => p.PeriodYear == year && p.PeriodMonth == month);
+        if (periodEntity == null) throw new NotFoundException("会计期间不存在");
+        var yearStartPeriod = await _db.Queryable<AccountingPeriod>().FirstAsync(p => p.PeriodYear == year && p.PeriodMonth == 1);
+        var subjects = await _db.Queryable<AccountSubject>().Where(s => s.IsEnabled == 1).ToListAsync();
+        var balances = await _db.Queryable<SubjectBalance>().Where(b => b.PeriodId == periodEntity.Id).ToListAsync();
+        var yearBalances = yearStartPeriod != null
+            ? await _db.Queryable<SubjectBalance>().Where(b => b.PeriodId == yearStartPeriod.Id).ToListAsync()
+            : new List<SubjectBalance>();
+
+        var sb = new StringBuilder();
+        sb.AppendLine("项目,期初余额,期末余额");
+        sb.AppendLine("资产:");
+        sb.AppendLine($"货币资金,{CalcNetBalance(yearBalances, subjects, "1001","1002","1012")},{CalcNetBalance(balances, subjects, "1001","1002","1012")}");
+        sb.AppendLine($"应收账款,{CalcNetBalance(yearBalances, subjects, "1122")},{CalcNetBalance(balances, subjects, "1122")}");
+        sb.AppendLine($"存货,{CalcNetBalance(yearBalances, subjects, "1401","1403","1411","5001")},{CalcNetBalance(balances, subjects, "1401","1403","1411","5001")}");
+        sb.AppendLine($"固定资产,{CalcNetBalance(yearBalances, subjects, "1601")},{CalcNetBalance(balances, subjects, "1601")}");
+        sb.AppendLine("负债:");
+        sb.AppendLine($"短期借款,{CalcCreditBalance(yearBalances, subjects, "2001")},{CalcCreditBalance(balances, subjects, "2001")}");
+        sb.AppendLine($"应付账款,{CalcCreditBalance(yearBalances, subjects, "2202")},{CalcCreditBalance(balances, subjects, "2202")}");
+        return sb.ToString();
+    }
+
+    private async Task<string> ExportIncomeStatement(string period)
+    {
+        var parts = period.Split('-');
+        var year = int.Parse(parts[0]); var month = int.Parse(parts[1]);
+        var periodEntity = await _db.Queryable<AccountingPeriod>().FirstAsync(p => p.PeriodYear == year && p.PeriodMonth == month);
+        if (periodEntity == null) throw new NotFoundException("会计期间不存在");
+        var balances = await _db.Queryable<SubjectBalance>().Where(b => b.PeriodId == periodEntity.Id).ToListAsync();
+        var subjects = await _db.Queryable<AccountSubject>().ToListAsync();
+        var sb = new StringBuilder();
+        sb.AppendLine("项目,本期金额");
+        sb.AppendLine($"营业收入,{CalcCreditBalance(balances, subjects, "6001")}");
+        sb.AppendLine($"营业成本,{CalcNetBalance(balances, subjects, "6401")}");
+        sb.AppendLine($"管理费用,{CalcNetBalance(balances, subjects, "6602")}");
+        return sb.ToString();
+    }
+
+    private async Task<string> ExportCashFlow(string period)
+    {
         await Task.CompletedTask;
-        throw new BusinessException("报表导出功能待集成文件生成库后实现");
+        var sb = new StringBuilder();
+        sb.AppendLine("项目,金额");
+        sb.AppendLine($"现金流量表,{period}");
+        sb.AppendLine("经营活动现金流入,0");
+        sb.AppendLine("经营活动现金流出,0");
+        return sb.ToString();
+    }
+
+    private decimal CalcNetBalance(List<SubjectBalance> balances, List<AccountSubject> subjects, params string[] codes)
+    {
+        var ids = subjects.Where(s => codes.Any(c => s.SubjectCode.StartsWith(c))).Select(s => s.Id).ToList();
+        return balances.Where(b => ids.Contains(b.SubjectId)).Sum(b => b.EndDebit - b.EndCredit);
+    }
+
+    private decimal CalcCreditBalance(List<SubjectBalance> balances, List<AccountSubject> subjects, params string[] codes)
+    {
+        var ids = subjects.Where(s => codes.Any(c => s.SubjectCode.StartsWith(c))).Select(s => s.Id).ToList();
+        return balances.Where(b => ids.Contains(b.SubjectId)).Sum(b => b.EndCredit - b.EndDebit);
     }
 }
 

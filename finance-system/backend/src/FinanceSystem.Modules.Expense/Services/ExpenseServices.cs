@@ -227,3 +227,44 @@ public class ExpenseStatisticsService : IExpenseStatisticsService
         }).ToList();
     }
 }
+
+/// <summary>费用分摊服务接口</summary>
+public interface IExpenseAllocateService
+{
+    /// <summary>创建分摊单</summary>
+    Task<long> CreateAsync(ExpenseAllocateRequest request);
+    /// <summary>查询分摊列表</summary>
+    Task<PageResult<ExpenseAllocate>> GetListAsync(PageRequest query);
+}
+
+/// <summary>费用分摊服务实现</summary>
+public class ExpenseAllocateService : IExpenseAllocateService
+{
+    private readonly ISqlSugarClient _db;
+    public ExpenseAllocateService(ISqlSugarClient db) => _db = db;
+
+    public async Task<long> CreateAsync(ExpenseAllocateRequest request)
+    {
+        var entity = new ExpenseAllocate
+        {
+            AllocateNo = request.AllocateNo,
+            Description = request.Description,
+            TotalAmount = request.TotalAmount,
+            DeptId = request.DeptId,
+            AllocateAmount = request.AllocateAmount,
+            PeriodYear = request.PeriodYear,
+            PeriodMonth = request.PeriodMonth
+        };
+        await _db.Insertable(entity).ExecuteCommandAsync();
+        return entity.Id;
+    }
+
+    public async Task<PageResult<ExpenseAllocate>> GetListAsync(PageRequest query)
+    {
+        RefAsync<int> total = 0;
+        var list = await _db.Queryable<ExpenseAllocate>()
+            .OrderBy(a => a.CreatedTime, OrderByType.Desc)
+            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+        return new PageResult<ExpenseAllocate>(total, list);
+    }
+}

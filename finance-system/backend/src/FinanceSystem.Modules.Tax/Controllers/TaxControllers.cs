@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.Tax.DTOs;
 using FinanceSystem.Modules.Tax.Entities;
 using FinanceSystem.Modules.Tax.Services;
@@ -40,7 +41,7 @@ public class TaxDeclarationController : ControllerBase
     public async Task<ApiResult<long>> Calculate([FromBody] TaxCalculateRequest request) => ApiResult<long>.Success(await _service.CalculateAsync(request));
 
     [HttpPost("{id}/declare")]
-    public async Task<ApiResult<bool>> Declare(long id) { await _service.DeclareAsync(id, 0); return ApiResult<bool>.Success(true); }
+    public async Task<ApiResult<bool>> Declare(long id) { await _service.DeclareAsync(id, HttpContext.GetCurrentUserId()); return ApiResult<bool>.Success(true); }
 
     [HttpPost("{id}/pay")]
     public async Task<ApiResult<bool>> Pay(long id) { await _service.ConfirmPayAsync(id); return ApiResult<bool>.Success(true); }

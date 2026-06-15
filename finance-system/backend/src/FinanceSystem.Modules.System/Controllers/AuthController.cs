@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.System.DTOs;
 using FinanceSystem.Modules.System.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -36,10 +37,9 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public async Task<ApiResult<bool>> Logout()
     {
-        // TODO: 从JWT中获取当前用户ID和Token
-        // var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        // var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-        await _authService.LogoutAsync(0, "");
+        var userId = HttpContext.GetCurrentUserId();
+        var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+        await _authService.LogoutAsync(userId, token);
         return ApiResult<bool>.Success(true);
     }
 
@@ -59,8 +59,7 @@ public class AuthController : ControllerBase
     [HttpPut("password")]
     public async Task<ApiResult<bool>> ChangePassword([FromBody] ChangePasswordRequest request)
     {
-        // TODO: 从JWT中获取当前用户ID
-        await _authService.ChangePasswordAsync(0, request);
+        await _authService.ChangePasswordAsync(HttpContext.GetCurrentUserId(), request);
         return ApiResult<bool>.Success(true);
     }
 }

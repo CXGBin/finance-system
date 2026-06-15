@@ -61,7 +61,7 @@ public interface IUserService
     /// </summary>
     /// <param name="userId">当前用户ID</param>
     /// <returns>用户详情</returns>
-    Task<SysUser?> GetProfileAsync(long userId);
+    Task<UserProfile?> GetProfileAsync(long userId);
 
     /// <summary>
     /// 修改个人信息

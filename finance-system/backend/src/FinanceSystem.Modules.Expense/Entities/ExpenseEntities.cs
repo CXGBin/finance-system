@@ -115,3 +115,31 @@ public class ExpenseItem : FullEntity
     [SugarColumn(Length = 50, IsNullable = true, ColumnDescription = "发票号")]
     public string? InvoiceNo { get; set; }
 }
+
+/// <summary>
+/// 费用分摊记录
+/// </summary>
+[SugarTable("fm_expense_allocate", "费用分摊表")]
+public class ExpenseAllocate : FullEntity
+{
+    [SugarColumn(Length = 50, IsNullable = false, ColumnDescription = "分摊单号")]
+    public string AllocateNo { get; set; } = string.Empty;
+
+    [SugarColumn(Length = 500, IsNullable = true, ColumnDescription = "说明")]
+    public string? Description { get; set; }
+
+    [SugarColumn(DecimalDigits = 2, IsNullable = false, ColumnDescription = "分摊总额")]
+    public decimal TotalAmount { get; set; }
+
+    [SugarColumn(IsNullable = true, ColumnDescription = "分摊部门ID")]
+    public long? DeptId { get; set; }
+
+    [SugarColumn(DecimalDigits = 2, IsNullable = false, ColumnDescription = "分摊金额")]
+    public decimal AllocateAmount { get; set; }
+
+    [SugarColumn(IsNullable = false, ColumnDescription = "期间年")]
+    public int PeriodYear { get; set; }
+
+    [SugarColumn(IsNullable = false, ColumnDescription = "期间月")]
+    public int PeriodMonth { get; set; }
+}

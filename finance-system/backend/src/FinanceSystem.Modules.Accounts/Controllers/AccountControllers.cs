@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.Accounts.DTOs;
 using FinanceSystem.Modules.Accounts.Entities;
 using FinanceSystem.Modules.Accounts.Services;
@@ -122,8 +123,7 @@ public class VoucherController : ControllerBase
     [HttpPost]
     public async Task<ApiResult<long>> Create([FromBody] VoucherCreateRequest request)
     {
-        // TODO: 从JWT获取当前用户ID
-        return ApiResult<long>.Success(await _voucherService.CreateAsync(request, 0));
+        return ApiResult<long>.Success(await _voucherService.CreateAsync(request, HttpContext.GetCurrentUserId()));
     }
 
     /// <summary>
@@ -142,7 +142,7 @@ public class VoucherController : ControllerBase
     [HttpPost("{id}/audit")]
     public async Task<ApiResult<bool>> Audit(long id)
     {
-        await _voucherService.AuditAsync(id, 0);
+        await _voucherService.AuditAsync(id, HttpContext.GetCurrentUserId());
         return ApiResult<bool>.Success(true);
     }
 
@@ -218,7 +218,7 @@ public class PeriodController : ControllerBase
     [HttpPost("close")]
     public async Task<ApiResult<bool>> Close([FromQuery] long periodId)
     {
-        await _periodService.CloseAsync(periodId, 0);
+        await _periodService.CloseAsync(periodId, HttpContext.GetCurrentUserId());
         return ApiResult<bool>.Success(true);
     }
 
@@ -238,7 +238,7 @@ public class PeriodController : ControllerBase
     [HttpPost("profit-transfer")]
     public async Task<ApiResult<bool>> ProfitTransfer([FromQuery] long periodId)
     {
-        await _periodService.ProfitTransferAsync(periodId, 0);
+        await _periodService.ProfitTransferAsync(periodId, HttpContext.GetCurrentUserId());
         return ApiResult<bool>.Success(true);
     }
 }

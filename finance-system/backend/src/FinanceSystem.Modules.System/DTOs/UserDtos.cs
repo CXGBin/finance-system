@@ -110,6 +110,25 @@ public class UserCreateRequest
 }
 
 /// <summary>
+/// 用户个人信息（不含敏感字段）
+/// </summary>
+public class UserProfile
+{
+    public long Id { get; set; }
+    public string Username { get; set; } = string.Empty;
+    public string RealName { get; set; } = string.Empty;
+    public string? Email { get; set; }
+    public string? Phone { get; set; }
+    public string? Avatar { get; set; }
+    public long? DeptId { get; set; }
+    public string? DeptName { get; set; }
+    public List<long> RoleIds { get; set; } = new();
+    public List<string> RoleNames { get; set; } = new();
+    public int Status { get; set; }
+    public DateTime CreatedTime { get; set; }
+}
+
+/// <summary>
 /// 修改个人信息请求
 /// </summary>
 public class ProfileUpdateRequest

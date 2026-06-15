@@ -53,3 +53,30 @@ public class AssetChangeRequest
     public long? ToDeptId { get; set; }
     public decimal? DisposalIncome { get; set; }
 }
+
+/// <summary>资产盘点请求</summary>
+public class AssetInventoryRequest
+{
+    public string InventoryNo { get; set; } = string.Empty;
+    public DateTime InventoryDate { get; set; }
+    public long OperatorId { get; set; }
+    public List<AssetInventoryItem> Items { get; set; } = new();
+}
+
+/// <summary>盘点项</summary>
+public class AssetInventoryItem
+{
+    public long AssetCardId { get; set; }
+    public int Result { get; set; } // 1正常 2盘亏 3盘盈
+    public decimal? ActualQuantity { get; set; }
+    public string? Remark { get; set; }
+}
+
+/// <summary>资产报表查询</summary>
+public class AssetReportQuery : PageRequest
+{
+    public string? AssetCode { get; set; }
+    public string? AssetName { get; set; }
+    public long? CategoryId { get; set; }
+    public int? Status { get; set; }
+}

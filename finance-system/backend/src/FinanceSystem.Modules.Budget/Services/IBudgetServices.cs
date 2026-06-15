@@ -78,3 +78,18 @@ public interface IBudgetAlertService
     /// <summary>检查并返回超预警列表</summary>
     Task<List<BudgetExecutionItem>> CheckAlertsAsync(long budgetYearId);
 }
+
+/// <summary>
+/// 预算分析服务接口
+/// </summary>
+public interface IBudgetAnalysisService
+{
+    /// <summary>科目对比分析（预算vs实际）</summary>
+    Task<List<object>> GetSubjectCompareAsync(int year);
+    /// <summary>月度执行趋势</summary>
+    Task<List<object>> GetMonthlyTrendAsync(int year);
+    /// <summary>费用TOP10排名</summary>
+    Task<List<object>> GetExpenseTop10Async(int year);
+    /// <summary>综合分析概览</summary>
+    Task<object> GetOverviewAsync(int year);
+}

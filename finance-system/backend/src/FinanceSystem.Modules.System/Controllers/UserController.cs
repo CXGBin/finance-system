@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.System.DTOs;
 using FinanceSystem.Modules.System.Entities;
 using FinanceSystem.Modules.System.Services;
@@ -94,13 +95,12 @@ public class UserController : ControllerBase
     /// 获取个人信息
     /// </summary>
     [HttpGet("profile")]
-    public async Task<ApiResult<SysUser>> GetProfile()
+    public async Task<ApiResult<UserProfile>> GetProfile()
     {
-        // TODO: 从JWT获取当前用户ID
-        var user = await _userService.GetProfileAsync(0);
+        var user = await _userService.GetProfileAsync(HttpContext.GetCurrentUserId());
         return user == null
-            ? ApiResult<SysUser>.Fail("用户不存在")
-            : ApiResult<SysUser>.Success(user);
+            ? ApiResult<UserProfile>.Fail("用户不存在")
+            : ApiResult<UserProfile>.Success(user);
     }
 
     /// <summary>
@@ -109,8 +109,7 @@ public class UserController : ControllerBase
     [HttpPut("profile")]
     public async Task<ApiResult<bool>> UpdateProfile([FromBody] ProfileUpdateRequest request)
     {
-        // TODO: 从JWT获取当前用户ID
-        await _userService.UpdateProfileAsync(0, request);
+        await _userService.UpdateProfileAsync(HttpContext.GetCurrentUserId(), request);
         return ApiResult<bool>.Success(true);
     }
 }

@@ -1,5 +1,5 @@
 using FinanceSystem.Core.Common;
-using FinanceSystem.Modules.Approval.Services;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.Approval.DTOs;
 using FinanceSystem.Modules.Approval.Entities;
 using FinanceSystem.Modules.Approval.Services;
@@ -83,7 +83,7 @@ public class ApprovalInstanceController : ControllerBase
     [HttpPost("start")]
     public async Task<ApiResult<long>> Start([FromBody] ApprovalStartRequest request)
     {
-        return ApiResult<long>.Success(await _instanceService.StartAsync(request, 0));
+        return ApiResult<long>.Success(await _instanceService.StartAsync(request, HttpContext.GetCurrentUserId()));
     }
 
     /// <summary>
@@ -92,7 +92,7 @@ public class ApprovalInstanceController : ControllerBase
     [HttpPost("action")]
     public async Task<ApiResult<bool>> Action([FromBody] ApprovalActionRequest request)
     {
-        await _instanceService.ActionAsync(request, 0);
+        await _instanceService.ActionAsync(request, HttpContext.GetCurrentUserId());
         return ApiResult<bool>.Success(true);
     }
 
@@ -102,7 +102,7 @@ public class ApprovalInstanceController : ControllerBase
     [HttpPost("{instanceId}/withdraw")]
     public async Task<ApiResult<bool>> Withdraw(long instanceId)
     {
-        await _instanceService.WithdrawAsync(instanceId, 0);
+        await _instanceService.WithdrawAsync(instanceId, HttpContext.GetCurrentUserId());
         return ApiResult<bool>.Success(true);
     }
 
@@ -113,5 +113,45 @@ public class ApprovalInstanceController : ControllerBase
     public async Task<ApiResult<List<ApprovalRecord>>> GetRecords(long instanceId)
     {
         return ApiResult<List<ApprovalRecord>>.Success(await _instanceService.GetRecordsAsync(instanceId));
+    }
+
+    /// <summary>
+    /// 我的待办（我需要审批的）
+    /// </summary>
+    [HttpGet("my-pending")]
+    public async Task<ApiResult<List<ApprovalInstance>>> MyPending([FromQuery] string? moduleType = null)
+    {
+        var userId = HttpContext.GetCurrentUserId();
+        return ApiResult<List<ApprovalInstance>>.Success(await _instanceService.GetMyPendingAsync(userId, moduleType));
+    }
+
+    /// <summary>
+    /// 我的已办（我已经审批过的）
+    /// </summary>
+    [HttpGet("my-done")]
+    public async Task<ApiResult<List<ApprovalInstance>>> MyDone([FromQuery] string? moduleType = null)
+    {
+        var userId = HttpContext.GetCurrentUserId();
+        return ApiResult<List<ApprovalInstance>>.Success(await _instanceService.GetMyDoneAsync(userId, moduleType));
+    }
+
+    /// <summary>
+    /// 我的申请（我发起的）
+    /// </summary>
+    [HttpGet("my-initiated")]
+    public async Task<ApiResult<PageResult<ApprovalInstance>>> MyInitiated([FromQuery] ApprovalInstanceQuery query)
+    {
+        var userId = HttpContext.GetCurrentUserId();
+        return ApiResult<PageResult<ApprovalInstance>>.Success(await _instanceService.GetMyInitiatedAsync(userId, query));
+    }
+
+    /// <summary>
+    /// 审批统计
+    /// </summary>
+    [HttpGet("statistics")]
+    public async Task<ApiResult<object>> Statistics()
+    {
+        var userId = HttpContext.GetCurrentUserId();
+        return ApiResult<object>.Success(await _instanceService.GetStatisticsAsync(userId));
     }
 }

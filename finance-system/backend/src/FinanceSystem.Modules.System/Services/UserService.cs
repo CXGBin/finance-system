@@ -195,9 +195,35 @@ public class UserService : IUserService
     }
 
     /// <inheritdoc/>
-    public async Task<SysUser?> GetProfileAsync(long userId)
+    public async Task<UserProfile?> GetProfileAsync(long userId)
     {
-        return await _db.Queryable<SysUser>().FirstAsync(u => u.Id == userId);
+        var user = await _db.Queryable<SysUser>().FirstAsync(u => u.Id == userId);
+        if (user == null) return null;
+
+        // 查询角色信息
+        var roleIds = await _db.Queryable<SysUserRole>()
+            .Where(ur => ur.UserId == userId)
+            .Select(ur => ur.RoleId)
+            .ToListAsync();
+        var roleNames = await _db.Queryable<SysRole>()
+            .Where(r => roleIds.Contains(r.Id))
+            .Select(r => r.RoleName)
+            .ToListAsync();
+
+        return new UserProfile
+        {
+            Id = user.Id,
+            Username = user.Username,
+            RealName = user.RealName,
+            Email = user.Email,
+            Phone = user.Phone,
+            Avatar = user.Avatar,
+            DeptId = user.DeptId,
+            Status = user.Status,
+            CreatedTime = user.CreatedTime,
+            RoleIds = roleIds,
+            RoleNames = roleNames
+        };
     }
 
     /// <inheritdoc/>

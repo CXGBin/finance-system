@@ -36,6 +36,14 @@ public interface IApprovalInstanceService
     Task WithdrawAsync(long instanceId, long currentUserId);
     /// <summary>获取审批记录</summary>
     Task<List<ApprovalRecord>> GetRecordsAsync(long instanceId);
+    /// <summary>我的待办</summary>
+    Task<List<ApprovalInstance>> GetMyPendingAsync(long userId, string? moduleType = null);
+    /// <summary>我的已办</summary>
+    Task<List<ApprovalInstance>> GetMyDoneAsync(long userId, string? moduleType = null);
+    /// <summary>我的申请</summary>
+    Task<PageResult<ApprovalInstance>> GetMyInitiatedAsync(long userId, ApprovalInstanceQuery query);
+    /// <summary>审批统计</summary>
+    Task<object> GetStatisticsAsync(long userId);
 }
 
 /// <summary>
@@ -216,5 +224,82 @@ public class ApprovalInstanceService : IApprovalInstanceService
             .Where(r => r.InstanceId == instanceId)
             .OrderBy(r => r.NodeIndex)
             .ToListAsync();
+    }
+
+    /// <inheritdoc/>
+    public async Task<List<ApprovalInstance>> GetMyPendingAsync(long userId, string? moduleType = null)
+    {
+        // 查询已审批记录的实例ID，排除已处理的
+        var approvedInstanceIds = await _db.Queryable<ApprovalRecord>()
+            .Where(r => r.ApproverId == userId)
+            .Select(r => r.InstanceId)
+            .Distinct()
+            .ToListAsync();
+
+        var query = _db.Queryable<ApprovalInstance>()
+            .Where(i => i.Status == 0 && !approvedInstanceIds.Contains(i.Id));
+
+        if (!string.IsNullOrEmpty(moduleType))
+            query = query.Where(i => i.ModuleType == moduleType);
+
+        return await query
+            .OrderBy(i => i.CreatedTime, OrderByType.Desc)
+            .ToListAsync();
+    }
+
+    /// <inheritdoc/>
+    public async Task<List<ApprovalInstance>> GetMyDoneAsync(long userId, string? moduleType = null)
+    {
+        var instanceIds = await _db.Queryable<ApprovalRecord>()
+            .Where(r => r.ApproverId == userId)
+            .Select(r => r.InstanceId)
+            .Distinct()
+            .ToListAsync();
+
+        var query = _db.Queryable<ApprovalInstance>()
+            .Where(i => instanceIds.Contains(i.Id) && i.Status != 0);
+
+        if (!string.IsNullOrEmpty(moduleType))
+            query = query.Where(i => i.ModuleType == moduleType);
+
+        return await query
+            .OrderBy(i => i.CreatedTime, OrderByType.Desc)
+            .ToListAsync();
+    }
+
+    /// <inheritdoc/>
+    public async Task<PageResult<ApprovalInstance>> GetMyInitiatedAsync(long userId, ApprovalInstanceQuery query)
+    {
+        RefAsync<int> total = 0;
+        var list = await _db.Queryable<ApprovalInstance>()
+            .Where(i => i.InitiatorId == userId)
+            .WhereIF(!string.IsNullOrEmpty(query.ModuleType), i => i.ModuleType == query.ModuleType)
+            .WhereIF(query.Status.HasValue, i => i.Status == query.Status)
+            .OrderBy(i => i.CreatedTime, OrderByType.Desc)
+            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+        return new PageResult<ApprovalInstance>(total, list);
+    }
+
+    /// <inheritdoc/>
+    public async Task<object> GetStatisticsAsync(long userId)
+    {
+        var pendingCount = await _db.Queryable<ApprovalRecord>()
+            .Where(r => r.ApproverId == userId && r.Action == 0).CountAsync();
+
+        var approvedInstanceIds = await _db.Queryable<ApprovalRecord>()
+            .Where(r => r.ApproverId == userId)
+            .Select(r => r.InstanceId)
+            .Distinct()
+            .ToListAsync();
+
+        var doneCount = await _db.Queryable<ApprovalInstance>()
+            .Where(i => approvedInstanceIds.Contains(i.Id) && i.Status != 0)
+            .CountAsync();
+
+        var initiatedCount = await _db.Queryable<ApprovalInstance>()
+            .Where(i => i.InitiatorId == userId)
+            .CountAsync();
+
+        return new { pendingCount, doneCount, initiatedCount };
     }
 }

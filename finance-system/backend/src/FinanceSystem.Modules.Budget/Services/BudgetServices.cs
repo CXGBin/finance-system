@@ -359,3 +359,61 @@ public class BudgetAlertService : IBudgetAlertService
         return all.Where(e => e.ExecutionRate >= config.AlertThreshold).ToList();
     }
 }
+
+/// <summary>
+/// 预算分析服务实现
+/// </summary>
+public class BudgetAnalysisService : IBudgetAnalysisService
+{
+    private readonly ISqlSugarClient _db;
+    public BudgetAnalysisService(ISqlSugarClient db) => _db = db;
+
+    public async Task<List<object>> GetSubjectCompareAsync(int year)
+    {
+        var budgetYear = await _db.Queryable<BudgetYear>().FirstAsync(y => y.Year == year);
+        if (budgetYear == null) return new List<object>();
+        var subjects = await _db.Queryable<BudgetSubject>().Where(s => s.BudgetYearId == budgetYear.Id).ToListAsync();
+        var result = new List<object>();
+        foreach (var s in subjects)
+        {
+            var monthlyBudgets = await _db.Queryable<BudgetMonthly>().Where(m => m.BudgetSubjectId == s.Id).ToListAsync();
+            decimal totalBudget = monthlyBudgets.Sum(m => m.Amount);
+            decimal annualBudget = s.AnnualAmount;
+            decimal rate = annualBudget > 0 ? Math.Round(totalBudget / annualBudget * 100, 2) : 0m;
+            result.Add(new { budgetSubjectId = s.Id, subjectId = s.SubjectId, annualBudget, monthlyTotal = totalBudget, remaining = annualBudget - totalBudget, allocateRate = rate });
+        }
+        return result;
+    }
+
+    public async Task<List<object>> GetMonthlyTrendAsync(int year)
+    {
+        var budgetYear = await _db.Queryable<BudgetYear>().FirstAsync(y => y.Year == year);
+        if (budgetYear == null) return new List<object>();
+        var subjectIds = await _db.Queryable<BudgetSubject>().Where(s => s.BudgetYearId == budgetYear.Id).Select(s => s.Id).ToListAsync();
+        var monthlyData = await _db.Queryable<BudgetMonthly>().Where(m => subjectIds.Contains(m.BudgetSubjectId)).ToListAsync();
+        return monthlyData.GroupBy(m => m.Month)
+            .Select(g => new { month = g.Key, budget = g.Sum(x => x.Amount) })
+            .OrderBy(x => x.month)
+            .Cast<object>().ToList();
+    }
+
+    public async Task<List<object>> GetExpenseTop10Async(int year)
+    {
+        var budgetYear = await _db.Queryable<BudgetYear>().FirstAsync(y => y.Year == year);
+        if (budgetYear == null) return new List<object>();
+        var subjects = await _db.Queryable<BudgetSubject>().Where(s => s.BudgetYearId == budgetYear.Id).ToListAsync();
+        return subjects.OrderByDescending(s => s.AnnualAmount).Take(10)
+            .Select(s => (object)new { subjectId = s.SubjectId, annualAmount = s.AnnualAmount }).ToList();
+    }
+
+    public async Task<object> GetOverviewAsync(int year)
+    {
+        var budgetYear = await _db.Queryable<BudgetYear>().FirstAsync(y => y.Year == year);
+        if (budgetYear == null) return new { message = "该年度无预算数据" };
+        var subjects = await _db.Queryable<BudgetSubject>().Where(s => s.BudgetYearId == budgetYear.Id).ToListAsync();
+        var totalAnnual = subjects.Sum(s => s.AnnualAmount);
+        var monthlyData = await _db.Queryable<BudgetMonthly>().Where(m => subjects.Select(s => s.Id).Contains(m.BudgetSubjectId)).ToListAsync();
+        var totalMonthly = monthlyData.Sum(m => m.Amount);
+        return new { year, totalAnnual, totalAllocatedMonthly = totalMonthly, subjectCount = subjects.Count, averageAllocateRate = totalAnnual > 0 ? Math.Round(totalMonthly / totalAnnual * 100, 2) : 0m };
+    }
+}

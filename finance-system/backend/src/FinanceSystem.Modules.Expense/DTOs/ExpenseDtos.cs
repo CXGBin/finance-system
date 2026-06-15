@@ -46,3 +46,15 @@ public class ExpenseStatisticsQuery
     public long? DeptId { get; set; }
     public long? ExpenseTypeId { get; set; }
 }
+
+/// <summary>费用分摊请求</summary>
+public class ExpenseAllocateRequest
+{
+    public string AllocateNo { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public decimal TotalAmount { get; set; }
+    public long? DeptId { get; set; }
+    public decimal AllocateAmount { get; set; }
+    public int PeriodYear { get; set; }
+    public int PeriodMonth { get; set; }
+}
