@@ -64,9 +64,24 @@ public class PeriodService : IPeriodService
 
         if (period.IsClosed == 1) throw new BusinessException("该期间已结账");
 
+        // 结账前检查：当期所有凭证必须已审核
         var hasDraft = await _db.Queryable<Voucher>()
             .AnyAsync(v => v.PeriodId == periodId && v.Status == 0);
         if (hasDraft) throw new BusinessException("当期存在未审核的凭证，请先审核所有凭证");
+
+        // 结账前检查：试算平衡
+        var balances = await _db.Queryable<SubjectBalance>()
+            .Where(b => b.PeriodId == periodId).ToListAsync();
+        var totalDebit = balances.Sum(b => b.EndDebit);
+        var totalCredit = balances.Sum(b => b.EndCredit);
+        if (Math.Abs(totalDebit - totalCredit) > 0.01m)
+            throw new BusinessException($"试算不平衡：借方合计{totalDebit}，贷方合计{totalCredit}，差额{Math.Abs(totalDebit - totalCredit)}");
+
+        // 年末结账（12月）：自动结转本年利润到利润分配
+        if (period.PeriodMonth == 12)
+        {
+            await YearEndCloseAsync(period, currentUserId);
+        }
 
         period.IsClosed = 1;
         period.ClosedTime = DateTime.Now;
@@ -75,6 +90,105 @@ public class PeriodService : IPeriodService
         await _db.Updateable(period)
             .UpdateColumns(p => new { p.IsClosed, p.ClosedTime, p.ClosedBy })
             .ExecuteCommandAsync();
+    }
+
+    /// <summary>
+    /// 年末结转：将本年利润结转到利润分配-未分配利润
+    /// </summary>
+    private async Task YearEndCloseAsync(AccountingPeriod period, long currentUserId)
+    {
+        var profitSubject = await _db.Queryable<AccountSubject>()
+            .FirstAsync(s => s.SubjectCode == "4103")
+            ?? throw new BusinessException("本年利润科目（4103）不存在");
+
+        var retainedSubject = await _db.Queryable<AccountSubject>()
+            .FirstAsync(s => s.SubjectCode == "4104")
+            ?? throw new BusinessException("利润分配科目（4104）不存在");
+
+        // 查询本年利润科目在12月的余额
+        var profitBalance = await _db.Queryable<SubjectBalance>()
+            .FirstAsync(b => b.SubjectId == profitSubject.Id && b.PeriodId == period.Id);
+
+        if (profitBalance == null || (Math.Abs(profitBalance.EndDebit) < 0.01m && Math.Abs(profitBalance.EndCredit) < 0.01m))
+        {
+            // 本年利润为零，无需结转
+            return;
+        }
+
+        // 计算净利润：本年利润贷方余额=盈利，借方余额=亏损
+        decimal netProfit = profitBalance.EndCredit - profitBalance.EndDebit;
+
+        // 生成凭证号
+        var lastVoucher = await _db.Queryable<Voucher>()
+            .Where(v => v.PeriodId == period.Id).OrderByDescending(v => v.Id).FirstAsync();
+        var nextNo = lastVoucher != null
+            ? (int.Parse(lastVoucher.VoucherNo.Split('-').Last()) + 1).ToString("D4")
+            : "0001";
+
+        var entries = new List<VoucherEntry>();
+        decimal debitAmt = 0, creditAmt = 0;
+
+        if (netProfit > 0)
+        {
+            // 盈利：借记本年利润，贷记利润分配
+            entries.Add(new VoucherEntry
+            {
+                VoucherId = 0, SubjectId = profitSubject.Id,
+                Summary = "年末结转-本年利润", DebitAmount = netProfit, CreditAmount = 0
+            });
+            entries.Add(new VoucherEntry
+            {
+                VoucherId = 0, SubjectId = retainedSubject.Id,
+                Summary = "年末结转-利润分配", DebitAmount = 0, CreditAmount = netProfit
+            });
+            debitAmt = netProfit;
+            creditAmt = netProfit;
+        }
+        else if (netProfit < 0)
+        {
+            // 亏损：借记利润分配，贷记本年利润
+            var lossAmt = Math.Abs(netProfit);
+            entries.Add(new VoucherEntry
+            {
+                VoucherId = 0, SubjectId = retainedSubject.Id,
+                Summary = "年末结转-利润分配（亏损）", DebitAmount = lossAmt, CreditAmount = 0
+            });
+            entries.Add(new VoucherEntry
+            {
+                VoucherId = 0, SubjectId = profitSubject.Id,
+                Summary = "年末结转-本年利润（亏损）", DebitAmount = 0, CreditAmount = lossAmt
+            });
+            debitAmt = lossAmt;
+            creditAmt = lossAmt;
+        }
+
+        if (entries.Any())
+        {
+            var voucher = new Voucher
+            {
+                VoucherNo = $"PZ-{period.PeriodYear}{period.PeriodMonth:D2}-{nextNo}",
+                VoucherDate = period.EndDate,
+                PeriodId = period.Id,
+                VoucherType = 2,
+                AbstractText = "年末结转本年利润",
+                Status = 1,
+                TotalDebit = debitAmt,
+                TotalCredit = creditAmt,
+                PreparedBy = currentUserId,
+                ReviewedBy = currentUserId,
+                ReviewedTime = DateTime.Now,
+                Entries = entries
+            };
+            await _db.Insertable(voucher).ExecuteCommandAsync();
+
+            // 自动初始化下一年度会计期间
+            var nextYear = await _db.Queryable<AccountingPeriod>()
+                .FirstAsync(p => p.PeriodYear == period.PeriodYear + 1);
+            if (nextYear == null)
+            {
+                await InitYearAsync(period.PeriodYear + 1);
+            }
+        }
     }
 
     /// <inheritdoc/>

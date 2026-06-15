@@ -80,6 +80,42 @@ public class SubjectController : ControllerBase
         await _subjectService.ToggleStatusAsync(id, isEnabled);
         return ApiResult<bool>.Success(true);
     }
+
+    /// <summary>
+    /// 批量导入科目（接收JSON数组格式的科目列表）
+    /// </summary>
+    [HttpPost("import")]
+    public async Task<ApiResult<int>> Import([FromBody] List<SubjectCreateRequest> subjects)
+    {
+        if (subjects == null || !subjects.Any()) throw new BusinessException("导入数据为空");
+        var count = 0;
+        foreach (var item in subjects)
+        {
+            try
+            {
+                await _subjectService.CreateAsync(item);
+                count++;
+            }
+            catch
+            {
+                // 跳过已存在的科目，继续导入
+            }
+        }
+        return ApiResult<int>.Success(count);
+    }
+
+    /// <summary>
+    /// 导出全部科目（返回JSON数组，供前端下载）
+    /// </summary>
+    [HttpGet("export")]
+    public async Task<ApiResult<List<object>>> Export()
+    {
+        var tree = await _subjectService.GetTreeAsync(false);
+        // 扁平化树结构方便导出
+        var result = new List<object>();
+        foreach (var item in tree) result.Add(new { item.SubjectCode, item.SubjectName, item.SubjectType, item.BalanceDirection, item.IsEnabled });
+        return ApiResult<List<object>>.Success(result);
+    }
 }
 
 /// <summary>
@@ -164,6 +200,17 @@ public class VoucherController : ControllerBase
     {
         await _voucherService.VoidAsync(id);
         return ApiResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// 获取凭证打印数据（返回凭证详情+分录，供前端渲染PDF/打印）
+    /// </summary>
+    [HttpGet("{id}/print-data")]
+    public async Task<ApiResult<object>> GetPrintData(long id)
+    {
+        var voucher = await _voucherService.GetByIdAsync(id)
+            ?? throw new BusinessException("凭证不存在");
+        return ApiResult<object>.Success(voucher);
     }
 }
 

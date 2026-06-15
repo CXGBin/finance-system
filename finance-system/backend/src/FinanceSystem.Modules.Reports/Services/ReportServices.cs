@@ -237,30 +237,83 @@ public class CashFlowService : ICashFlowService
         var period = await ParsePeriodAsync(query.Period);
         if (period == null) throw new NotFoundException("会计期间不存在");
 
-        var cashSubjectIds = await _db.Queryable<AccountSubject>()
-            .Where(s => (s.IsCash == 1 || s.IsBank == 1) && s.IsEnabled == 1)
-            .Select(s => s.Id).ToListAsync();
+        var allSubjects = await _db.Queryable<AccountSubject>().Where(s => s.IsEnabled == 1).ToListAsync();
+        var cashSubjectIds = allSubjects.Where(s => s.IsCash == 1 || s.IsBank == 1).Select(s => s.Id).ToList();
 
+        // 查询所有已审核凭证分录（含VoucherId用于关联对方科目）
         var entries = await _db.Queryable<VoucherEntry>()
             .LeftJoin<Voucher>((e, v) => e.VoucherId == v.Id)
-            .Where((e, v) => v.PeriodId == period.Id && v.Status == 1 && cashSubjectIds.Contains(e.SubjectId))
-            .Select((e, v) => new { e.DebitAmount, e.CreditAmount })
+            .Where((e, v) => v.PeriodId == period.Id && v.Status == 1)
+            .Select((e, v) => new { e.VoucherId, e.SubjectId, e.DebitAmount, e.CreditAmount, e.Summary })
             .ToListAsync();
 
-        decimal totalInflow = entries.Sum(e => e.DebitAmount);
-        decimal totalOutflow = entries.Sum(e => e.CreditAmount);
+        // 经营活动：主营业务收入(6001)/成本(6401)/税金(6403)/管理费用(6602)/销售费用(6601)
+        var operatingSubjectCodes = new[] { "6001", "6051", "6401", "6402", "6403", "6601", "6602", "6603", "6101", "6111", "6701", "6711" };
+        // 投资活动：投资收益(6111)/长期股权投资(1511)/固定资产(1601)/无形资产(1701)
+        var investingSubjectCodes = new[] { "1511", "1601", "1602", "1604", "1701", "1702" };
+        // 筹资活动：短期借款(2001)/长期借款(2501)/应付利息(2231)/应付股利(2232)
+        var financingSubjectCodes = new[] { "2001", "2501", "2502", "2231", "2232", "4001" };
+
+        // 简化实现：通过摘要关键字和对方科目推断现金流分类
+        decimal operatingInflow = 0, operatingOutflow = 0;
+        decimal investingInflow = 0, investingOutflow = 0;
+        decimal financingInflow = 0, financingOutflow = 0;
+
+        foreach (var entry in entries)
+        {
+            // 现金流出（贷方为现金科目）：凭证有借方→分析借方科目类型
+            if (entry.CreditAmount > 0 && cashSubjectIds.Contains(entry.SubjectId))
+            {
+                // 查找该凭证的借方科目来确定流出类型
+                var counterpartEntries = entries.Where(e => e.VoucherId == entry.VoucherId && e.SubjectId != entry.SubjectId);
+                foreach (var cp in counterpartEntries.Where(e => e.DebitAmount > 0))
+                {
+                    var cpCode = allSubjects.FirstOrDefault(s => s.Id == cp.SubjectId)?.SubjectCode ?? "";
+                    if (investingSubjectCodes.Any(c => cpCode.StartsWith(c)))
+                        investingOutflow += entry.CreditAmount;
+                    else if (financingSubjectCodes.Any(c => cpCode.StartsWith(c)))
+                        financingOutflow += entry.CreditAmount;
+                    else
+                        operatingOutflow += entry.CreditAmount;
+                }
+            }
+            // 现金流入（借方为现金科目）
+            if (entry.DebitAmount > 0 && cashSubjectIds.Contains(entry.SubjectId))
+            {
+                var counterpartEntries = entries.Where(e => e.VoucherId == entry.VoucherId && e.SubjectId != entry.SubjectId);
+                foreach (var cp in counterpartEntries.Where(e => e.CreditAmount > 0))
+                {
+                    var cpCode = allSubjects.FirstOrDefault(s => s.Id == cp.SubjectId)?.SubjectCode ?? "";
+                    if (investingSubjectCodes.Any(c => cpCode.StartsWith(c)))
+                        investingInflow += entry.DebitAmount;
+                    else if (financingSubjectCodes.Any(c => cpCode.StartsWith(c)))
+                        financingInflow += entry.DebitAmount;
+                    else
+                        operatingInflow += entry.DebitAmount;
+                }
+            }
+        }
 
         return new CashFlowResult
         {
             Period = query.Period,
             OperatingActivities = new List<CashFlowItem>
             {
-                new() { LineNo = 1, ItemName = "经营活动现金流入小计", InflowAmount = totalInflow },
-                new() { LineNo = 2, ItemName = "经营活动现金流出小计", OutflowAmount = totalOutflow }
+                new() { LineNo = 1, ItemName = "销售商品、提供劳务收到的现金", InflowAmount = operatingInflow },
+                new() { LineNo = 2, ItemName = "经营活动现金流出小计", OutflowAmount = operatingOutflow }
             },
-            InvestingActivities = new List<CashFlowItem>(),
-            FinancingActivities = new List<CashFlowItem>(),
-            NetCashIncrease = totalInflow - totalOutflow
+            InvestingActivities = new List<CashFlowItem>
+            {
+                new() { LineNo = 1, ItemName = "收回投资收到的现金", InflowAmount = investingInflow },
+                new() { LineNo = 2, ItemName = "投资活动现金流出小计", OutflowAmount = investingOutflow }
+            },
+            FinancingActivities = new List<CashFlowItem>
+            {
+                new() { LineNo = 1, ItemName = "取得借款收到的现金", InflowAmount = financingInflow },
+                new() { LineNo = 2, ItemName = "筹资活动现金流出小计", OutflowAmount = financingOutflow }
+            },
+            NetCashIncrease = (operatingInflow + investingInflow + financingInflow)
+                               - (operatingOutflow + investingOutflow + financingOutflow)
         };
     }
 
