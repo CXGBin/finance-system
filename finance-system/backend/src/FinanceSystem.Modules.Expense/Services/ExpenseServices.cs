@@ -9,7 +9,7 @@ namespace FinanceSystem.Modules.Expense.Services;
 /// <summary>费用类型服务接口</summary>
 public interface IExpenseTypeService { Task<List<ExpenseType>> GetListAsync(); Task<long> CreateAsync(ExpenseTypeRequest request); Task UpdateAsync(long id, ExpenseTypeRequest request); Task DeleteAsync(long id); }
 /// <summary>费用报销服务接口</summary>
-public interface IExpenseClaimService { Task<PageResult<ExpenseClaim>> GetListAsync(ExpenseClaimQuery query); Task<ExpenseClaim?> GetByIdAsync(long id); Task<long> CreateAsync(ExpenseClaimRequest request, long currentUserId); Task SubmitAsync(long id, long currentUserId); Task ApproveAsync(long id); Task RejectAsync(long id); Task ConfirmPaymentAsync(long id, long currentUserId); }
+public interface IExpenseClaimService { Task<PageResult<ExpenseClaim>> GetListAsync(ExpenseClaimQuery query); Task<ExpenseClaim?> GetByIdAsync(long id); Task<long> CreateAsync(ExpenseClaimRequest request, long currentUserId); Task UpdateAsync(long id, ExpenseClaimRequest request); Task SubmitAsync(long id, long currentUserId); Task ApproveAsync(long id); Task RejectAsync(long id); Task ConfirmPaymentAsync(long id, long currentUserId); }
 /// <summary>费用统计服务接口</summary>
 public interface IExpenseStatisticsService { Task<List<object>> GetStatisticsAsync(ExpenseStatisticsQuery query); }
 
@@ -109,6 +109,31 @@ public class ExpenseClaimService : IExpenseClaimService
         await _db.Insertable(items).ExecuteCommandAsync();
 
         return claim.Id;
+    }
+
+    /// <summary>
+    /// UpdateAsync方法
+    /// </summary>
+    public async Task UpdateAsync(long id, ExpenseClaimRequest request)
+    {
+        var claim = await _db.Queryable<ExpenseClaim>().FirstAsync(c => c.Id == id) ?? throw new NotFoundException("报销单不存在");
+        if (claim.Status != 0) throw new BusinessException("仅草稿状态可修改");
+        claim.Title = request.Title;
+        claim.Remark = request.Remark;
+        claim.TotalAmount = request.Items.Sum(i => i.Amount);
+        await _db.Updateable(claim).ExecuteCommandAsync();
+        // 更新明细
+        await _db.Deleteable<ExpenseItem>().Where(i => i.ClaimId == id).ExecuteCommandAsync();
+        var newItems = request.Items.Select(i => new ExpenseItem
+        {
+            ClaimId = id,
+            ExpenseDate = i.ExpenseDate,
+            Description = i.Description,
+            Amount = i.Amount,
+            InvoiceNo = i.InvoiceNo,
+            ExpenseTypeId = i.ExpenseTypeId
+        }).ToList();
+        await _db.Insertable(newItems).ExecuteCommandAsync();
     }
 
     /// <summary>

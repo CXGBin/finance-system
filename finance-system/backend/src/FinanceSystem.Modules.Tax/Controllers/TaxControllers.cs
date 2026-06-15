@@ -9,6 +9,9 @@ namespace FinanceSystem.Modules.Tax.Controllers;
 
 [ApiController]
 [Route("api/tax/category")]
+/// <summary>
+/// 税种配置控制器
+/// </summary>
 public class TaxCategoryController : ControllerBase
 {
     private readonly ITaxCategoryService _service;
@@ -29,6 +32,9 @@ public class TaxCategoryController : ControllerBase
 
 [ApiController]
 [Route("api/tax/declaration")]
+/// <summary>
+/// 纳税申报控制器
+/// </summary>
 public class TaxDeclarationController : ControllerBase
 {
     private readonly ITaxDeclarationService _service;
@@ -58,6 +64,9 @@ public class TaxDeclarationController : ControllerBase
 
 [ApiController]
 [Route("api/tax/invoice")]
+/// <summary>
+/// 发票管理控制器
+/// </summary>
 public class TaxInvoiceController : ControllerBase
 {
     private readonly ITaxInvoiceService _service;
@@ -69,6 +78,12 @@ public class TaxInvoiceController : ControllerBase
     [HttpPost]
     public async Task<ApiResult<long>> Create([FromBody] TaxInvoiceRequest request) => ApiResult<long>.Success(await _service.CreateAsync(request));
 
+    /// <summary>
+    /// 删除发票
+    /// </summary>
+    [HttpDelete("{id}")]
+    public async Task<ApiResult<bool>> Delete(long id) { await _service.DeleteAsync(id); return ApiResult<bool>.Success(true); }
+
     [HttpPost("{id}/verify")]
     public async Task<ApiResult<bool>> Verify(long id) { await _service.VerifyAsync(id); return ApiResult<bool>.Success(true); }
 }
@@ -76,6 +91,9 @@ public class TaxInvoiceController : ControllerBase
 /// <summary>税务报表控制器</summary>
 [ApiController]
 [Route("api/tax/report")]
+/// <summary>
+/// 税务报表控制器
+/// </summary>
 public class TaxReportController : ControllerBase
 {
     private readonly ITaxReportService _service;
@@ -95,6 +113,9 @@ public class TaxReportController : ControllerBase
 /// <summary>税务日历控制器</summary>
 [ApiController]
 [Route("api/tax/calendar")]
+/// <summary>
+/// 税务日历控制器
+/// </summary>
 public class TaxCalendarController : ControllerBase
 {
     private readonly ITaxCalendarService _service;

@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.Asset;
 /// <summary>
 /// 资产管理模块定义
 /// </summary>
+/// <summary>
+/// AssetModuleDefinition
+/// </summary>
 public class AssetModuleDefinition : IModuleDefinition
 {
     public string ModuleId => "asset";

@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.Budget;
 /// <summary>
 /// 预算管理模块定义
 /// </summary>
+/// <summary>
+/// BudgetModuleDefinition
+/// </summary>
 public class BudgetModuleDefinition : IModuleDefinition
 {
     public string ModuleId => "budget";

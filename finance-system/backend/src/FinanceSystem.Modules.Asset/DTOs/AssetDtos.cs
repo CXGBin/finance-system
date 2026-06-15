@@ -17,13 +17,34 @@ public class AssetCardQuery : PageRequest
 /// <summary>资产卡片创建/修改</summary>
 public class AssetCardRequest
 {
+    /// <summary>
+    /// 资产名称
+    /// </summary>
     public string AssetName { get; set; } = string.Empty;
+    /// <summary>
+    /// 分类ID
+    /// </summary>
     public long CategoryId { get; set; }
     public string? Specification { get; set; }
+    /// <summary>
+    /// 原值
+    /// </summary>
     public decimal OriginalValue { get; set; }
+    /// <summary>
+    /// 残值率（%）
+    /// </summary>
     public decimal ResidualRate { get; set; } = 5m;
+    /// <summary>
+    /// 折旧方法（1直线法 2双倍余额递减法 3年数总和法）
+    /// </summary>
     public int DepreciationMethod { get; set; } = 1;
+    /// <summary>
+    /// 使用月数
+    /// </summary>
     public int UsefulLifeMonths { get; set; }
+    /// <summary>
+    /// 购入日期
+    /// </summary>
     public DateTime AcquisitionDate { get; set; }
     public long? DeptId { get; set; }
     public string? Keeper { get; set; }
@@ -37,9 +58,21 @@ public class AssetCategoryRequest
     public long? ParentId { get; set; }
     public string CategoryCode { get; set; } = string.Empty;
     public string CategoryName { get; set; } = string.Empty;
+    /// <summary>
+    /// 折旧方法（1直线法 2双倍余额递减法 3年数总和法）
+    /// </summary>
     public int DepreciationMethod { get; set; } = 1;
+    /// <summary>
+    /// 使用月数
+    /// </summary>
     public int UsefulLifeMonths { get; set; }
+    /// <summary>
+    /// 残值率（%）
+    /// </summary>
     public decimal ResidualRate { get; set; } = 5m;
+    /// <summary>
+    /// 排序号
+    /// </summary>
     public int SortOrder { get; set; }
 }
 
@@ -48,6 +81,9 @@ public class AssetChangeRequest
 {
     public long AssetCardId { get; set; }
     public int ChangeType { get; set; }
+    /// <summary>
+    /// 原因
+    /// </summary>
     public string Reason { get; set; } = string.Empty;
     public long? FromDeptId { get; set; }
     public long? ToDeptId { get; set; }
@@ -57,9 +93,22 @@ public class AssetChangeRequest
 /// <summary>资产盘点请求</summary>
 public class AssetInventoryRequest
 {
+    /// <summary>
+    /// 盘点单号
+    /// </summary>
     public string InventoryNo { get; set; } = string.Empty;
+    /// <summary>
+    /// 盘点日期
+    /// </summary>
     public DateTime InventoryDate { get; set; }
+    /// <summary>
+    /// 操作人ID
+    /// </summary>
     public long OperatorId { get; set; }
+
+    /// <summary>
+    /// 盘点明细项列表
+    /// </summary>
     public List<AssetInventoryItem> Items { get; set; } = new();
 }
 

@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.System.Entities;
 /// 岗位实体
 /// </summary>
 [SugarTable("sys_post", "系统岗位表")]
+/// <summary>
+/// SysPost
+/// </summary>
 public class SysPost : FullEntity
 {
     /// <summary>
@@ -18,12 +21,18 @@ public class SysPost : FullEntity
     /// 岗位编码（唯一）
     /// </summary>
     [SugarColumn(Length = 50)]
+    /// <summary>
+    /// 岗位编码
+    /// </summary>
     public string PostCode { get; set; } = string.Empty;
 
     /// <summary>
     /// 岗位名称
     /// </summary>
     [SugarColumn(Length = 100)]
+    /// <summary>
+    /// 岗位名称
+    /// </summary>
     public string PostName { get; set; } = string.Empty;
 
     /// <summary>

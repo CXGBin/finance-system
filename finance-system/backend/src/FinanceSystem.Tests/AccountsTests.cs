@@ -8,6 +8,9 @@ namespace FinanceSystem.Tests.Accounts;
 /// <summary>
 /// 会计科目服务单元测试
 /// </summary>
+/// <summary>
+/// Subject服务测试
+/// </summary>
 public class SubjectServiceTests
 {
     /// <summary>
@@ -86,6 +89,9 @@ public class SubjectServiceTests
 
 /// <summary>
 /// 凭证管理服务单元测试
+/// </summary>
+/// <summary>
+/// Voucher服务测试
 /// </summary>
 public class VoucherServiceTests
 {

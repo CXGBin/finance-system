@@ -12,6 +12,9 @@ namespace FinanceSystem.Modules.Budget.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/budget/setting")]
+/// <summary>
+/// 预算年度控制器
+/// </summary>
 public class BudgetYearController : ControllerBase
 {
     private readonly IBudgetYearService _yearService;
@@ -52,6 +55,9 @@ public class BudgetYearController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/budget/setting/subject")]
+/// <summary>
+/// 预算科目控制器
+/// </summary>
 public class BudgetSubjectController : ControllerBase
 {
     private readonly IBudgetSubjectService _subjectService;
@@ -102,6 +108,9 @@ public class BudgetSubjectController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/budget/plan")]
+/// <summary>
+/// 月度预算控制器
+/// </summary>
 public class BudgetMonthlyController : ControllerBase
 {
     private readonly IBudgetMonthlyService _monthlyService;
@@ -143,6 +152,9 @@ public class BudgetMonthlyController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/budget/execution")]
+/// <summary>
+/// 预算执行控制器
+/// </summary>
 public class BudgetExecutionController : ControllerBase
 {
     private readonly IBudgetExecutionService _executionService;
@@ -164,6 +176,9 @@ public class BudgetExecutionController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/budget/adjustment")]
+/// <summary>
+/// 预算调整控制器
+/// </summary>
 public class BudgetAdjustmentController : ControllerBase
 {
     private readonly IBudgetAdjustService _adjustService;
@@ -195,6 +210,9 @@ public class BudgetAdjustmentController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/budget/alert")]
+/// <summary>
+/// 预算预警控制器
+/// </summary>
 public class BudgetAlertController : ControllerBase
 {
     private readonly IBudgetAlertService _alertService;
@@ -235,6 +253,9 @@ public class BudgetAlertController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/budget/analysis")]
+/// <summary>
+/// 预算分析控制器
+/// </summary>
 public class BudgetAnalysisController : ControllerBase
 {
     private readonly IBudgetAnalysisService _analysisService;

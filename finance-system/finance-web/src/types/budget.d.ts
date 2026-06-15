@@ -22,6 +22,20 @@ export interface BudgetExecution {
   alertLevel?: 'normal' | 'warning' | 'danger';
 }
 
+/** 预算月度数据 */
+export interface BudgetMonthly {
+  id: number;
+  budgetSubjectId: number;
+  month: number;
+  amount: number;
+}
+
+/** 预算月度保存请求 */
+export interface BudgetMonthlySaveRequest {
+  budgetSubjectId: number;
+  items: BudgetMonthly[];
+}
+
 /** 预算调整 */
 export interface BudgetAdjust {
   id: number;

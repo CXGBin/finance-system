@@ -16,9 +16,9 @@ export const budgetApi = {
   subjectList: (params: { yearId: number; pageIndex?: number; pageSize?: number }) =>
     get<PagedResult<any>>('/budget/setting/subject/list', params as any),
   /** 新增预算科目 */
-  subjectAdd: (data: any) => post('/budget/setting/subject', data),
+  subjectAdd: (data: Omit<BudgetItem, 'id'>) => post('/budget/setting/subject', data),
   /** 修改预算科目 */
-  subjectUpdate: (data: any) => put(`/budget/setting/subject/${data.id}`, data),
+  subjectUpdate: (data: Partial<BudgetItem> & { id: number }) => put(`/budget/setting/subject/${data.id}`, data),
   /** 删除预算科目 */
   subjectRemove: (id: number) => del(`/budget/setting/subject/${id}`),
 
@@ -26,7 +26,7 @@ export const budgetApi = {
   /** 获取月度预算 */
   planMonthly: (budgetSubjectId: number) => get<any[]>(`/budget/plan/${budgetSubjectId}`),
   /** 保存月度预算 */
-  planSave: (data: any) => post('/budget/plan/monthly', data),
+  planSave: (data: BudgetMonthlySaveRequest) => post('/budget/plan/monthly', data),
   /** 自动平均拆分年度预算到月度 */
   planAutoSplit: (budgetSubjectId: number) => post('/budget/plan/auto-split', null, { params: { budgetSubjectId } }),
 
@@ -37,7 +37,7 @@ export const budgetApi = {
 
   // ========== 预算调整（后端: api/budget/adjustment）==========
   /** 发起预算调整 */
-  adjustAdd: (data: any) => post('/budget/adjustment', data),
+  adjustAdd: (data: Omit<BudgetAdjust, 'id'>) => post('/budget/adjustment', data),
   /** 审批预算调整 */
   adjustApprove: (id: number, action: number) => post(`/budget/adjustment/${id}/approve`, null, { params: { action } }),
 
@@ -45,7 +45,7 @@ export const budgetApi = {
   /** 获取预警配置 */
   alertConfig: (budgetYearId: number) => get<any>('/budget/alert/config', { budgetYearId }),
   /** 保存预警配置 */
-  alertSaveConfig: (data: any) => post('/budget/alert/config', data),
+  alertSaveConfig: (data: { budgetYearId: number; thresholdRate: number; alertEnabled: boolean }) => post('/budget/alert/config', data),
   /** 检查超预警科目 */
   alertCheck: (budgetYearId: number) => get<any[]>('/budget/alert/check', { budgetYearId }),
 

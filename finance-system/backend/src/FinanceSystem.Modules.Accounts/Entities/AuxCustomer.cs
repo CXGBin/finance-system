@@ -7,18 +7,27 @@ namespace FinanceSystem.Modules.Accounts.Entities;
 /// 辅助核算-客户实体
 /// </summary>
 [SugarTable("fm_aux_customer", "辅助核算客户表")]
+/// <summary>
+/// AuxCustomer
+/// </summary>
 public class AuxCustomer : BaseEntity
 {
     /// <summary>
     /// 客户编码
     /// </summary>
     [SugarColumn(Length = 50)]
+    /// <summary>
+    /// 客户编码
+    /// </summary>
     public string CustomerCode { get; set; } = string.Empty;
 
     /// <summary>
     /// 客户名称
     /// </summary>
     [SugarColumn(Length = 100)]
+    /// <summary>
+    /// 客户名称
+    /// </summary>
     public string CustomerName { get; set; } = string.Empty;
 
     /// <summary>

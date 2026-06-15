@@ -8,6 +8,9 @@ namespace FinanceSystem.Modules.System.Services;
 /// <summary>
 /// 角色管理服务实现
 /// </summary>
+/// <summary>
+/// 角色管理服务实现
+/// </summary>
 public class RoleService : IRoleService
 {
     private readonly ISqlSugarClient _db;

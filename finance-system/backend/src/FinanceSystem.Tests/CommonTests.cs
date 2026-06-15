@@ -6,6 +6,9 @@ namespace FinanceSystem.Tests;
 /// <summary>
 /// PageModel 和分页相关测试
 /// </summary>
+/// <summary>
+/// PageModel测试
+/// </summary>
 public class PageModelTests
 {
     [Fact]
@@ -35,6 +38,9 @@ public class PageModelTests
 
 /// <summary>
 /// 异常类型测试
+/// </summary>
+/// <summary>
+/// Exception测试
 /// </summary>
 public class ExceptionTests
 {

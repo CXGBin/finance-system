@@ -37,7 +37,7 @@ const ApprovalDetail: React.FC = () => {
             <Descriptions.Item label="发起时间">{data.createdTime}</Descriptions.Item>
           </Descriptions>
           <h4>审批记录</h4>
-          <Timeline items={(data as any).records?.map((r: any) => ({ children: `${r.operatorName} - ${r.action} - ${r.comment || '无备注'} (${r.handleTime})` })) || []} />
+          <Timeline items={((data as { records?: Array<{ operatorName: string; action: string; comment?: string; handleTime: string }> }).records || []).map((r) => ({ children: `${r.operatorName} - ${r.action} - ${r.comment || '无备注'} (${r.handleTime})` }))} />
         </>
       )}
     </Card>

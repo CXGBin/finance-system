@@ -11,6 +11,9 @@ namespace FinanceSystem.Modules.System.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/auth")]
+/// <summary>
+/// 认证控制器
+/// </summary>
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;

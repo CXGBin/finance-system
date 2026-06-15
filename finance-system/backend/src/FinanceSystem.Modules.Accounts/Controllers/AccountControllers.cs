@@ -12,6 +12,9 @@ namespace FinanceSystem.Modules.Accounts.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/account/subject")]
+/// <summary>
+/// 会计科目控制器
+/// </summary>
 public class SubjectController : ControllerBase
 {
     private readonly ISubjectService _subjectService;
@@ -123,6 +126,9 @@ public class SubjectController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/account/voucher")]
+/// <summary>
+/// 凭证控制器
+/// </summary>
 public class VoucherController : ControllerBase
 {
     private readonly IVoucherService _voucherService;
@@ -160,6 +166,16 @@ public class VoucherController : ControllerBase
     public async Task<ApiResult<long>> Create([FromBody] VoucherCreateRequest request)
     {
         return ApiResult<long>.Success(await _voucherService.CreateAsync(request, HttpContext.GetCurrentUserId()));
+    }
+
+    /// <summary>
+    /// 删除凭证（仅草稿状态）
+    /// </summary>
+    [HttpDelete("{id}")]
+    public async Task<ApiResult<bool>> Delete(long id)
+    {
+        await _voucherService.DeleteAsync(id);
+        return ApiResult<bool>.Success(true);
     }
 
     /// <summary>
@@ -248,7 +264,8 @@ public class VoucherController : ControllerBase
     [HttpPost("{id}/copy")]
     public async Task<ApiResult<long>> Copy(long id)
     {
-        var newId = await _voucherService.CopyAsync(id);
+        var currentUserId = HttpContext.GetCurrentUserId();
+        var newId = await _voucherService.CopyAsync(id, currentUserId);
         return ApiResult<long>.Success(newId);
     }
 }
@@ -258,6 +275,9 @@ public class VoucherController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/account/period")]
+/// <summary>
+/// 会计期间控制器
+/// </summary>
 public class PeriodController : ControllerBase
 {
     private readonly IPeriodService _periodService;
@@ -334,6 +354,9 @@ public class PeriodController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/account/subject/balance")]
+/// <summary>
+/// 科目余额控制器
+/// </summary>
 public class SubjectBalanceController : ControllerBase
 {
     private readonly ISubjectBalanceService _balanceService;
@@ -383,6 +406,9 @@ public class SubjectBalanceController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/account/ledger")]
+/// <summary>
+/// 账簿查询控制器
+/// </summary>
 public class LedgerController : ControllerBase
 {
     private readonly ILedgerService _ledgerService;
@@ -434,6 +460,9 @@ public class LedgerController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/account/auxiliary/{type}")]
+/// <summary>
+/// 辅助核算控制器
+/// </summary>
 public class AuxiliaryController : ControllerBase
 {
     private readonly IAuxiliaryService _auxiliaryService;

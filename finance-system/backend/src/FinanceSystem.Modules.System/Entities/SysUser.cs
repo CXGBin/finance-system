@@ -7,12 +7,18 @@ namespace FinanceSystem.Modules.System.Entities;
 /// 系统用户实体
 /// </summary>
 [SugarTable("sys_user", "系统用户表")]
+/// <summary>
+/// SysUser
+/// </summary>
 public class SysUser : FullEntity
 {
     /// <summary>
     /// 用户名（唯一）
     /// </summary>
     [SugarColumn(Length = 50)]
+    /// <summary>
+    /// 用户名
+    /// </summary>
     public string Username { get; set; } = string.Empty;
 
     /// <summary>
@@ -25,6 +31,9 @@ public class SysUser : FullEntity
     /// 真实姓名
     /// </summary>
     [SugarColumn(Length = 50)]
+    /// <summary>
+    /// 真实姓名
+    /// </summary>
     public string RealName { get; set; } = string.Empty;
 
     /// <summary>

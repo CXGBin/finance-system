@@ -8,6 +8,9 @@ namespace FinanceSystem.Tests.Reports;
 /// <summary>
 /// 资产负债表报表取数逻辑单元测试
 /// </summary>
+/// <summary>
+/// BalanceSheet测试
+/// </summary>
 public class BalanceSheetTests
 {
     /// <summary>
@@ -93,6 +96,9 @@ public class BalanceSheetTests
 
 /// <summary>
 /// 利润表取数逻辑单元测试
+/// </summary>
+/// <summary>
+/// IncomeStatement测试
 /// </summary>
 public class IncomeStatementTests
 {
@@ -192,6 +198,9 @@ public class IncomeStatementTests
 /// <summary>
 /// 现金流量表取数逻辑单元测试
 /// </summary>
+/// <summary>
+/// CashFlow测试
+/// </summary>
 public class CashFlowTests
 {
     /// <summary>
@@ -209,6 +218,9 @@ public class CashFlowTests
 
 /// <summary>
 /// 多期对比逻辑单元测试
+/// </summary>
+/// <summary>
+/// Compare测试
 /// </summary>
 public class CompareTests
 {

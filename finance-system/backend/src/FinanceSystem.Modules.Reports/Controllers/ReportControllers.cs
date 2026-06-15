@@ -11,6 +11,9 @@ namespace FinanceSystem.Modules.Reports.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/report/balance-sheet")]
+/// <summary>
+/// 资产负债表控制器
+/// </summary>
 public class BalanceSheetController : ControllerBase
 {
     private readonly IBalanceSheetService _service;
@@ -32,6 +35,9 @@ public class BalanceSheetController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/report/income-statement")]
+/// <summary>
+/// 利润表控制器
+/// </summary>
 public class IncomeStatementController : ControllerBase
 {
     private readonly IIncomeStatementService _service;
@@ -53,6 +59,9 @@ public class IncomeStatementController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/report/cash-flow")]
+/// <summary>
+/// 现金流量表控制器
+/// </summary>
 public class CashFlowController : ControllerBase
 {
     private readonly ICashFlowService _service;
@@ -74,6 +83,9 @@ public class CashFlowController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/report/subject-balance")]
+/// <summary>
+/// 科目余额表控制器
+/// </summary>
 public class SubjectBalanceReportController : ControllerBase
 {
     private readonly ISubjectBalanceReportService _service;
@@ -95,6 +107,9 @@ public class SubjectBalanceReportController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/report/custom")]
+/// <summary>
+/// 自定义报表控制器
+/// </summary>
 public class CustomReportController : ControllerBase
 {
     private readonly ICustomReportService _service;
@@ -154,6 +169,9 @@ public class CustomReportController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/report/export")]
+/// <summary>
+/// 报表导出控制器
+/// </summary>
 public class ReportExportController : ControllerBase
 {
     private readonly IReportExportService _service;
@@ -186,6 +204,9 @@ public class ReportExportController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/report/compare")]
+/// <summary>
+/// 多期对比控制器
+/// </summary>
 public class CompareController : ControllerBase
 {
     private readonly ICompareService _service;

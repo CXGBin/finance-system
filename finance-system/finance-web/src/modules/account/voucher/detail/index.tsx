@@ -58,11 +58,11 @@ const VoucherDetail: React.FC = () => {
             <Descriptions.Item label="状态"><Tag color={statusMap[voucher.status]?.color}>{statusMap[voucher.status]?.text}</Tag></Descriptions.Item>
             <Descriptions.Item label="制单人">{voucher.createBy}</Descriptions.Item>
           </Descriptions>
-          <Table columns={entryColumns} dataSource={(voucher as any).entries || []} rowKey="id" pagination={false}
+          <Table columns={entryColumns} dataSource={voucher.entries || []} rowKey="id" pagination={false}
             footer={() => (
               <Space style={{ float: 'right' }}>
-                <span>借方合计: {(voucher as any).totalDebit?.toFixed(2)}</span>
-                <span>贷方合计: {(voucher as any).totalCredit?.toFixed(2)}</span>
+                <span>借方合计: {voucher.totalDebit?.toFixed(2)}</span>
+                <span>贷方合计: {voucher.totalCredit?.toFixed(2)}</span>
               </Space>
             )}
           />

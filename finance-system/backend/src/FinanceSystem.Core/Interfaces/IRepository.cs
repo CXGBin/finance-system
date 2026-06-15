@@ -4,6 +4,9 @@ namespace FinanceSystem.Core.Interfaces;
 /// 泛型仓储接口
 /// </summary>
 /// <typeparam name="T">实体类型</typeparam>
+/// <summary>
+/// IRepository
+/// </summary>
 public interface IRepository<T> where T : class, new()
 {
     /// <summary>

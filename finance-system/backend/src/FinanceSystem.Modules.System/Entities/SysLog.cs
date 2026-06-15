@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.System.Entities;
 /// 操作日志实体
 /// </summary>
 [SugarTable("sys_log", "系统操作日志表")]
+/// <summary>
+/// SysLog
+/// </summary>
 public class SysLog : BaseEntity
 {
     /// <summary>

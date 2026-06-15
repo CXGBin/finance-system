@@ -8,6 +8,9 @@ namespace FinanceSystem.Tests.System;
 /// <summary>
 /// 用户管理服务单元测试
 /// </summary>
+/// <summary>
+/// User服务测试
+/// </summary>
 public class UserServiceTests
 {
     /// <summary>
@@ -99,6 +102,9 @@ public class UserServiceTests
 /// <summary>
 /// 认证服务单元测试（纯逻辑验证）
 /// </summary>
+/// <summary>
+/// Auth服务测试
+/// </summary>
 public class AuthServiceTests
 {
     /// <summary>
@@ -175,6 +181,9 @@ public class AuthServiceTests
 
 /// <summary>
 /// 角色管理服务单元测试
+/// </summary>
+/// <summary>
+/// Role服务测试
 /// </summary>
 public class RoleServiceTests
 {

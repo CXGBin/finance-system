@@ -7,12 +7,18 @@ namespace FinanceSystem.Modules.Accounts.Entities;
 /// 会计凭证实体
 /// </summary>
 [SugarTable("fm_voucher", "会计凭证表")]
+/// <summary>
+/// Voucher
+/// </summary>
 public class Voucher : BaseEntity
 {
     /// <summary>
     /// 凭证编号
     /// </summary>
     [SugarColumn(Length = 20)]
+    /// <summary>
+    /// 凭证号
+    /// </summary>
     public string VoucherNo { get; set; } = string.Empty;
 
     /// <summary>

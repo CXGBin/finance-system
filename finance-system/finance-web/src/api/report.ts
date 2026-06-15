@@ -18,9 +18,9 @@ export const reportApi = {
   /** 获取模板列表 */
   templateList: (params?: PageParams) => get<PagedResult<any>>('/report/custom/template/list', params as any),
   /** 创建模板 */
-  templateAdd: (data: any) => post('/report/custom/template', data),
+  templateAdd: (data: { templateName: string; reportType: string; config: Record<string, unknown> }) => post('/report/custom/template', data),
   /** 修改模板 */
-  templateUpdate: (data: any) => put(`/report/custom/template/${data.id}`, data),
+  templateUpdate: (data: { id: number; templateName?: string; config?: Record<string, unknown> }) => put(`/report/custom/template/${data.id}`, data),
   /** 删除模板 */
   templateRemove: (id: number) => del(`/report/custom/template/${id}`),
   /** 按模板生成报表 */

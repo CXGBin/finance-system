@@ -12,6 +12,9 @@ namespace FinanceSystem.Modules.Approval.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/approval/flow")]
+/// <summary>
+/// 审批流程定义控制器
+/// </summary>
 public class ApprovalFlowController : ControllerBase
 {
     private readonly IApprovalFlowService _flowService;
@@ -62,6 +65,9 @@ public class ApprovalFlowController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/approval/instance")]
+/// <summary>
+/// 审批实例控制器
+/// </summary>
 public class ApprovalInstanceController : ControllerBase
 {
     private readonly IApprovalInstanceService _instanceService;
@@ -75,6 +81,16 @@ public class ApprovalInstanceController : ControllerBase
     public async Task<ApiResult<PageResult<ApprovalInstance>>> GetList([FromQuery] ApprovalInstanceQuery query)
     {
         return ApiResult<PageResult<ApprovalInstance>>.Success(await _instanceService.GetListAsync(query));
+    }
+
+    /// <summary>
+    /// 查询审批实例详情
+    /// </summary>
+    [HttpGet("{instanceId}")]
+    public async Task<ApiResult<ApprovalInstance>> GetById(long instanceId)
+    {
+        var instance = await _instanceService.GetByIdAsync(instanceId);
+        return instance == null ? ApiResult<ApprovalInstance>.Fail("审批实例不存在") : ApiResult<ApprovalInstance>.Success(instance);
     }
 
     /// <summary>

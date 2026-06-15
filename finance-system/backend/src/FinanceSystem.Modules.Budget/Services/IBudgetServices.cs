@@ -8,6 +8,9 @@ namespace FinanceSystem.Modules.Budget.Services;
 /// <summary>
 /// 预算服务接口
 /// </summary>
+/// <summary>
+/// 预算年度服务接口
+/// </summary>
 public interface IBudgetYearService
 {
     /// <summary>获取预算年度列表</summary>
@@ -18,6 +21,9 @@ public interface IBudgetYearService
     Task UpdateStatusAsync(long id, int status);
 }
 
+/// <summary>
+/// 预算科目服务接口
+/// </summary>
 /// <summary>
 /// 预算科目服务接口
 /// </summary>
@@ -36,6 +42,9 @@ public interface IBudgetSubjectService
 /// <summary>
 /// 月度预算服务接口
 /// </summary>
+/// <summary>
+/// 月度预算服务接口
+/// </summary>
 public interface IBudgetMonthlyService
 {
     /// <summary>获取月度预算</summary>
@@ -49,12 +58,18 @@ public interface IBudgetMonthlyService
 /// <summary>
 /// 预算执行跟踪服务接口
 /// </summary>
+/// <summary>
+/// 预算执行跟踪服务接口
+/// </summary>
 public interface IBudgetExecutionService
 {
     /// <summary>查询预算执行情况</summary>
     Task<List<BudgetExecutionItem>> GetExecutionAsync(BudgetExecutionQuery query);
 }
 
+/// <summary>
+/// 预算调整服务接口
+/// </summary>
 /// <summary>
 /// 预算调整服务接口
 /// </summary>
@@ -69,6 +84,9 @@ public interface IBudgetAdjustService
 /// <summary>
 /// 预算预警服务接口
 /// </summary>
+/// <summary>
+/// 预算预警服务接口
+/// </summary>
 public interface IBudgetAlertService
 {
     /// <summary>获取预警配置</summary>
@@ -79,6 +97,9 @@ public interface IBudgetAlertService
     Task<List<BudgetExecutionItem>> CheckAlertsAsync(long budgetYearId);
 }
 
+/// <summary>
+/// 预算分析服务接口
+/// </summary>
 /// <summary>
 /// 预算分析服务接口
 /// </summary>

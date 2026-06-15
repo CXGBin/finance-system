@@ -80,7 +80,7 @@ const RoleList: React.FC = () => {
   /** 保存权限配置 */
   const handleSavePerm = async () => {
     if (!currentRole) return;
-    await roleApi.update({ ...currentRole, menuIds: checkedKeys } as any);
+    await roleApi.update({ ...currentRole, menuIds: checkedKeys } as Partial<SysRole>);
     message.success('权限配置已保存');
     setPermModalOpen(false);
   };

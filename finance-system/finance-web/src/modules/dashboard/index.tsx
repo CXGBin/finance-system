@@ -43,16 +43,16 @@ const DashboardPage: React.FC = () => {
         noticeApi.list(2),
       ]);
 
-      const voucherData = voucherRes.status === 'fulfilled' ? (voucherRes.value.data as any) : null;
-      const approvalData = approvalRes.status === 'fulfilled' ? (approvalRes.value.data as any) : null;
-      const expenseData = expenseRes.status === 'fulfilled' ? (expenseRes.value.data as any) : null;
-      const noticeData = noticeRes.status === 'fulfilled' ? (noticeRes.value.data as any) : null;
+      const voucherData = voucherRes.status === 'fulfilled' ? (voucherRes.value.data as { total?: number }) : null;
+      const approvalData = approvalRes.status === 'fulfilled' ? (approvalRes.value.data as { total?: number }) : null;
+      const expenseData = expenseRes.status === 'fulfilled' ? (expenseRes.value.data as number[] | { totalAmount?: number }) : null;
+      const noticeData = noticeRes.status === 'fulfilled' ? (noticeRes.value.data as number[]) : null;
 
       setStats({
         voucherCount: voucherData?.total || 0,
         pendingApproval: approvalData?.total || 0,
-        monthlyExpense: expenseData ? (Array.isArray(expenseData) ? expenseData.reduce((s: number, d: any) => s + (d.totalAmount || 0), 0) : (expenseData.totalAmount || 0)) : 0,
-        todoCount: voucherData?.total || 0,
+        monthlyExpense: expenseData ? (Array.isArray(expenseData) ? expenseData.reduce((s, d) => s + (d.totalAmount || 0), 0) : (expenseData.totalAmount || 0)) : 0,
+        todoCount: approvalData?.total || 0,
       });
       if (noticeData) setNotices(noticeData.slice(0, 5));
     } catch {

@@ -8,6 +8,9 @@ namespace FinanceSystem.Modules.System.Services;
 /// <summary>
 /// 菜单管理服务实现
 /// </summary>
+/// <summary>
+/// 菜单管理服务实现
+/// </summary>
 public class MenuService : IMenuService
 {
     private readonly ISqlSugarClient _db;
@@ -22,6 +25,9 @@ public class MenuService : IMenuService
             .ToListAsync();
         return BuildTree(allMenus, 0);
     }
+
+    /// <inheritdoc/>
+    public async Task<SysMenu?> GetByIdAsync(long id) => await _db.Queryable<SysMenu>().FirstAsync(m => m.Id == id);
 
     /// <inheritdoc/>
     public async Task<long> CreateAsync(MenuCreateRequest request)
@@ -116,6 +122,9 @@ public class MenuService : IMenuService
     }
 }
 
+/// <summary>
+/// 部门管理服务实现
+/// </summary>
 /// <summary>
 /// 部门管理服务实现
 /// </summary>
@@ -221,6 +230,9 @@ public class DeptService : IDeptService
 /// <summary>
 /// 岗位管理服务实现
 /// </summary>
+/// <summary>
+/// 岗位管理服务实现
+/// </summary>
 public class PostService : IPostService
 {
     private readonly ISqlSugarClient _db;
@@ -286,6 +298,9 @@ public class PostService : IPostService
 
 /// <summary>
 /// 数据字典服务实现
+/// </summary>
+/// <summary>
+/// 字典管理服务实现
 /// </summary>
 public class DictService : IDictService
 {
@@ -388,6 +403,9 @@ public class DictService : IDictService
 /// <summary>
 /// 操作日志服务实现
 /// </summary>
+/// <summary>
+/// 操作日志服务实现
+/// </summary>
 public class LogService : ILogService
 {
     private readonly ISqlSugarClient _db;
@@ -416,6 +434,9 @@ public class LogService : ILogService
     }
 }
 
+/// <summary>
+/// 模块管理服务实现
+/// </summary>
 /// <summary>
 /// 模块管理服务实现
 /// </summary>
@@ -476,6 +497,9 @@ public class ModuleService : IModuleService
 /// <summary>
 /// 系统配置服务实现
 /// </summary>
+/// <summary>
+/// 系统配置服务实现
+/// </summary>
 public class ConfigService : IConfigService
 {
     private readonly ISqlSugarClient _db;
@@ -500,8 +524,21 @@ public class ConfigService : IConfigService
                 .ExecuteCommandAsync();
         }
     }
+
+    /// <inheritdoc/>
+    public async Task UpdateByKeyAsync(string key, ConfigUpdateRequest request)
+    {
+        await _db.Updateable<SysConfig>()
+            .SetColumns(c => c.ConfigValue == request.ConfigValue)
+            .SetColumns(c => c.CreatedTime == DateTime.Now)
+            .Where(c => c.ConfigKey == key)
+            .ExecuteCommandAsync();
+    }
 }
 
+/// <summary>
+/// 系统公告服务实现
+/// </summary>
 /// <summary>
 /// 系统公告服务实现
 /// </summary>

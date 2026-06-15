@@ -7,30 +7,45 @@ namespace FinanceSystem.Modules.System.Entities;
 /// 系统配置实体
 /// </summary>
 [SugarTable("sys_config", "系统配置表")]
+/// <summary>
+/// SysConfig
+/// </summary>
 public class SysConfig : BaseEntity
 {
     /// <summary>
     /// 配置分组（如 basic/accounting/log）
     /// </summary>
     [SugarColumn(Length = 50)]
+    /// <summary>
+    /// 配置分组
+    /// </summary>
     public string ConfigGroup { get; set; } = string.Empty;
 
     /// <summary>
     /// 配置键（唯一）
     /// </summary>
     [SugarColumn(Length = 100)]
+    /// <summary>
+    /// 配置键
+    /// </summary>
     public string ConfigKey { get; set; } = string.Empty;
 
     /// <summary>
     /// 配置值
     /// </summary>
     [SugarColumn(Length = 500)]
+    /// <summary>
+    /// 配置值
+    /// </summary>
     public string ConfigValue { get; set; } = string.Empty;
 
     /// <summary>
     /// 配置名称（中文）
     /// </summary>
     [SugarColumn(Length = 100)]
+    /// <summary>
+    /// 配置名称
+    /// </summary>
     public string ConfigName { get; set; } = string.Empty;
 
     /// <summary>

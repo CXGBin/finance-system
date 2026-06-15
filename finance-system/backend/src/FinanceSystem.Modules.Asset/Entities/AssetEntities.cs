@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.Asset.Entities;
 /// 资产分类
 /// </summary>
 [SugarTable("fm_asset_category", "资产分类表")]
+/// <summary>
+/// AssetCategory
+/// </summary>
 public class AssetCategory : FullEntity
 {
     /// <summary>父级ID</summary>
@@ -70,6 +73,9 @@ public class AssetCategory : FullEntity
 /// 资产卡片（固定资产）
 /// </summary>
 [SugarTable("fm_asset_card", "资产卡片表")]
+/// <summary>
+/// AssetCard
+/// </summary>
 public class AssetCard : FullEntity
 {
     /// <summary>资产编号（自动生成）</summary>
@@ -196,6 +202,9 @@ public class AssetCard : FullEntity
 /// 资产折旧明细
 /// </summary>
 [SugarTable("fm_asset_depreciation", "资产折旧明细表")]
+/// <summary>
+/// AssetDepreciation
+/// </summary>
 public class AssetDepreciation : FullEntity
 {
     /// <summary>资产卡片ID</summary>
@@ -245,6 +254,9 @@ public class AssetDepreciation : FullEntity
 /// 资产变动记录
 /// </summary>
 [SugarTable("fm_asset_change", "资产变动记录表")]
+/// <summary>
+/// AssetChange
+/// </summary>
 public class AssetChange : FullEntity
 {
     /// <summary>资产卡片ID</summary>
@@ -301,6 +313,9 @@ public class AssetChange : FullEntity
 /// 资产盘点单
 /// </summary>
 [SugarTable("fm_asset_inventory", "资产盘点单表")]
+/// <summary>
+/// AssetInventory
+/// </summary>
 public class AssetInventory : FullEntity
 {
     /// <summary>盘点编号</summary>

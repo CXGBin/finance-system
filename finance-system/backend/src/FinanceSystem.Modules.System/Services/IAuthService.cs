@@ -8,6 +8,9 @@ namespace FinanceSystem.Modules.System.Services;
 /// <summary>
 /// 认证服务（登录/登出/刷新Token/修改密码）
 /// </summary>
+/// <summary>
+/// 认证服务接口
+/// </summary>
 public interface IAuthService
 {
     /// <summary>

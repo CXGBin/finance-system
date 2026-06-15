@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.Accounts.Entities;
 /// 科目期初余额实体
 /// </summary>
 [SugarTable("fm_subject_balance", "科目期初余额表")]
+/// <summary>
+/// SubjectBalance
+/// </summary>
 public class SubjectBalance : BaseEntity
 {
     /// <summary>

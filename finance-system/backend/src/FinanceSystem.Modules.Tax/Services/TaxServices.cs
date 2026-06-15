@@ -11,7 +11,7 @@ public interface ITaxCategoryService { Task<List<TaxCategory>> GetListAsync(); T
 /// <summary>纳税申报服务接口</summary>
 public interface ITaxDeclarationService { Task<PageResult<TaxDeclaration>> GetListAsync(TaxDeclarationQuery query); Task<long> CalculateAsync(TaxCalculateRequest request, long currentUserId); Task DeclareAsync(long id, long currentUserId); Task ConfirmPayAsync(long id); Task<List<TaxDeclaration>> CalculateSurchargesAsync(string declarePeriod, long vatDeclarationId, long currentUserId); }
 /// <summary>发票服务接口</summary>
-public interface ITaxInvoiceService { Task<PageResult<TaxInvoice>> GetListAsync(TaxInvoiceQuery query); Task<long> CreateAsync(TaxInvoiceRequest request); Task VerifyAsync(long id); }
+public interface ITaxInvoiceService { Task<PageResult<TaxInvoice>> GetListAsync(TaxInvoiceQuery query); Task<long> CreateAsync(TaxInvoiceRequest request); Task DeleteAsync(long id); Task VerifyAsync(long id); }
 
 /// <summary>税务报表服务接口</summary>
 public interface ITaxReportService
@@ -254,6 +254,18 @@ public class TaxInvoiceService : ITaxInvoiceService
         };
         await _db.Insertable(entity).ExecuteCommandAsync();
         return entity.Id;
+    }
+
+    /// <summary>
+    /// 删除发票
+    /// </summary>
+    public async Task DeleteAsync(long id)
+    {
+        var entity = await _db.Queryable<TaxInvoice>().FirstAsync(i => i.Id == id)
+            ?? throw new NotFoundException("发票不存在");
+        if (entity.IsVerified == 1)
+            throw new InvalidOperationException("已验真的发票不可删除");
+        await _db.Deleteable<TaxInvoice>().Where(i => i.Id == id).ExecuteCommandAsync();
     }
 
     /// <summary>

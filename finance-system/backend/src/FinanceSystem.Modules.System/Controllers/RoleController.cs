@@ -11,6 +11,9 @@ namespace FinanceSystem.Modules.System.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/system/role")]
+/// <summary>
+/// 角色管理控制器
+/// </summary>
 public class RoleController : ControllerBase
 {
     private readonly IRoleService _roleService;

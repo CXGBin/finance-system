@@ -5,8 +5,8 @@ import { reportApi } from '@/api/report';
 /** 自定义报表页面 */
 const CustomReport: React.FC = () => {
   const [reportId, setReportId] = useState<string>('');
-  const [reportIds, setReportIds] = useState<any[]>([]);
-  const [data, setData] = useState<any[]>([]);
+  const [reportIds, setReportIds] = useState<{ label: string; value: string }[]>([]);
+  const [data, setData] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => { loadIds(); }, []);
@@ -14,8 +14,9 @@ const CustomReport: React.FC = () => {
   const loadIds = async () => {
     try {
       const res = await reportApi.templateList({ pageIndex: 1, pageSize: 100 });
-      const list = (res.data as any)?.list || res.data || [];
-      setReportIds(list.map((t: any) => ({ label: t.templateName || t.name, value: String(t.id) })));
+      const pageData = res.data as { list?: Array<{ templateName?: string; name?: string; id: number }> } | Array<{ templateName?: string; name?: string; id: number }>;
+      const list = Array.isArray(pageData) ? pageData : (pageData as { list?: Array<{ templateName?: string; name?: string; id: number }> }).list || [];
+      setReportIds(list.map((t) => ({ label: t.templateName || t.name || '', value: String(t.id) })));
     } catch {
       setReportIds([]);
     }
@@ -24,7 +25,7 @@ const CustomReport: React.FC = () => {
   const loadData = async () => {
     if (!reportId) return;
     setLoading(true);
-    try { const res = await reportApi.custom({ reportId }); setData((res.data as any) || []); } finally { setLoading(false); }
+    try { const res = await reportApi.custom({ reportId }); setData((res.data as Record<string, unknown>[]) || []); } finally { setLoading(false); }
   };
 
   const columns = [

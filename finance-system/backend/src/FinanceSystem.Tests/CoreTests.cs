@@ -9,6 +9,9 @@ namespace FinanceSystem.Tests.Core;
 /// <summary>
 /// 模块注册器单元测试
 /// </summary>
+/// <summary>
+/// ModuleRegistry测试
+/// </summary>
 public class ModuleRegistryTests
 {
     /// <summary>测试注册模块</summary>
@@ -117,6 +120,9 @@ public class ModuleRegistryTests
 
 /// <summary>
 /// ApiResult 单元测试
+/// </summary>
+/// <summary>
+/// ApiResult测试
 /// </summary>
 public class ApiResultTests
 {

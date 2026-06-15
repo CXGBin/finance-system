@@ -5,6 +5,9 @@ namespace FinanceSystem.Infrastructure.Configuration;
 /// <summary>
 /// 数据库配置选项
 /// </summary>
+/// <summary>
+/// DbSettings
+/// </summary>
 public class DbSettings
 {
     /// <summary>
@@ -25,6 +28,9 @@ public class DbSettings
 
 /// <summary>
 /// JWT 配置选项
+/// </summary>
+/// <summary>
+/// JwtSettings
 /// </summary>
 public class JwtSettings
 {
@@ -56,6 +62,9 @@ public class JwtSettings
 
 /// <summary>
 /// Redis 配置选项
+/// </summary>
+/// <summary>
+/// RedisSettings
 /// </summary>
 public class RedisSettings
 {

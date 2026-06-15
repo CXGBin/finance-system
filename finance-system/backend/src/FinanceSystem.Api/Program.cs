@@ -62,7 +62,7 @@ builder.Services.AddSwaggerGen(c =>
 
 // ========== JWT认证 ==========
 var jwtConfig = builder.Configuration.GetSection("JwtConfig");
-var secretKey = jwtConfig["Secret"] ?? "FinanceSystem@2026SecretKeyForJwtToken!";
+var secretKey = jwtConfig["Secret"] ?? throw new InvalidOperationException("缺少 JwtConfig:Secret 配置项，请在 appsettings.json 中配置JWT密钥");
 var issuer = jwtConfig["Issuer"] ?? "FinanceSystem";
 var audience = jwtConfig["Audience"] ?? "FinanceSystemClient";
 

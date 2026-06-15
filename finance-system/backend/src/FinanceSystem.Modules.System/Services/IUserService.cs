@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.System.Services;
 /// <summary>
 /// 用户管理服务接口
 /// </summary>
+/// <summary>
+/// 用户管理服务接口
+/// </summary>
 public interface IUserService
 {
     /// <summary>

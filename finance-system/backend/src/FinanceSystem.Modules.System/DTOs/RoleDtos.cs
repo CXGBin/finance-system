@@ -5,6 +5,9 @@ namespace FinanceSystem.Modules.System.DTOs;
 /// <summary>
 /// 角色查询条件
 /// </summary>
+/// <summary>
+/// RoleQuery
+/// </summary>
 public class RoleQuery : PageRequest
 {
     /// <summary>
@@ -25,6 +28,9 @@ public class RoleQuery : PageRequest
 
 /// <summary>
 /// 新增/编辑角色请求
+/// </summary>
+/// <summary>
+/// RoleCreateRequest
 /// </summary>
 public class RoleCreateRequest
 {
@@ -61,6 +67,9 @@ public class RoleCreateRequest
 
 /// <summary>
 /// 公告创建/修改请求
+/// </summary>
+/// <summary>
+/// NoticeCreateRequest
 /// </summary>
 public class NoticeCreateRequest
 {

@@ -7,6 +7,9 @@ namespace FinanceSystem.Tests.Budget;
 /// <summary>
 /// 预算执行率计算单元测试
 /// </summary>
+/// <summary>
+/// BudgetExecution测试
+/// </summary>
 public class BudgetExecutionTests
 {
     /// <summary>
@@ -167,6 +170,9 @@ public class BudgetExecutionTests
 
 /// <summary>
 /// 预算月度保存验证单元测试
+/// </summary>
+/// <summary>
+/// BudgetMonthlySave测试
 /// </summary>
 public class BudgetMonthlySaveTests
 {

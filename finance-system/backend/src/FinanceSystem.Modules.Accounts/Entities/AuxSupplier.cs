@@ -7,18 +7,27 @@ namespace FinanceSystem.Modules.Accounts.Entities;
 /// 辅助核算-供应商实体
 /// </summary>
 [SugarTable("fm_aux_supplier", "辅助核算供应商表")]
+/// <summary>
+/// AuxSupplier
+/// </summary>
 public class AuxSupplier : BaseEntity
 {
     /// <summary>
     /// 供应商编码
     /// </summary>
     [SugarColumn(Length = 50)]
+    /// <summary>
+    /// 供应商编码
+    /// </summary>
     public string SupplierCode { get; set; } = string.Empty;
 
     /// <summary>
     /// 供应商名称
     /// </summary>
     [SugarColumn(Length = 100)]
+    /// <summary>
+    /// 供应商名称
+    /// </summary>
     public string SupplierName { get; set; } = string.Empty;
 
     /// <summary>

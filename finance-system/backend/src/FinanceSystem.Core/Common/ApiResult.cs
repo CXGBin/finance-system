@@ -4,6 +4,9 @@ namespace FinanceSystem.Core.Common;
 /// 统一响应结果
 /// </summary>
 /// <typeparam name="T">响应数据类型</typeparam>
+/// <summary>
+/// ApiResult
+/// </summary>
 public class ApiResult<T>
 {
     /// <summary>
@@ -51,6 +54,9 @@ public class ApiResult<T>
 
 /// <summary>
 /// 无数据的统一响应结果
+/// </summary>
+/// <summary>
+/// ApiResult
 /// </summary>
 public class ApiResult : ApiResult<object>
 {

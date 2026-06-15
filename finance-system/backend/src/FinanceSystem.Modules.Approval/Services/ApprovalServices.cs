@@ -9,6 +9,9 @@ namespace FinanceSystem.Modules.Approval.Services;
 /// <summary>
 /// 审批流程服务接口
 /// </summary>
+/// <summary>
+/// 审批流程定义服务接口
+/// </summary>
 public interface IApprovalFlowService
 {
     /// <summary>获取流程列表</summary>
@@ -24,10 +27,15 @@ public interface IApprovalFlowService
 /// <summary>
 /// 审批实例服务接口
 /// </summary>
+/// <summary>
+/// 审批实例服务接口
+/// </summary>
 public interface IApprovalInstanceService
 {
     /// <summary>分页查询审批实例</summary>
     Task<PageResult<ApprovalInstance>> GetListAsync(ApprovalInstanceQuery query);
+    /// <summary>查询审批实例详情</summary>
+    Task<ApprovalInstance?> GetByIdAsync(long instanceId);
     /// <summary>发起审批</summary>
     Task<long> StartAsync(ApprovalStartRequest request, long currentUserId);
     /// <summary>审批操作（通过/驳回）</summary>
@@ -52,6 +60,9 @@ public interface IApprovalInstanceService
 
 /// <summary>
 /// 审批流程服务实现
+/// </summary>
+/// <summary>
+/// 审批流程定义服务实现
 /// </summary>
 public class ApprovalFlowService : IApprovalFlowService
 {
@@ -125,6 +136,9 @@ public class ApprovalFlowService : IApprovalFlowService
 /// <summary>
 /// 审批实例服务实现
 /// </summary>
+/// <summary>
+/// 审批实例服务实现
+/// </summary>
 public class ApprovalInstanceService : IApprovalInstanceService
 {
     private readonly ISqlSugarClient _db;
@@ -145,6 +159,15 @@ public class ApprovalInstanceService : IApprovalInstanceService
             .OrderBy(i => i.CreatedTime, OrderByType.Desc)
             .ToPageListAsync(query.PageIndex, query.PageSize, total);
         return new PageResult<ApprovalInstance>(total, list);
+    }
+
+    /// <inheritdoc/>
+    /// <summary>
+    /// GetByIdAsync方法
+    /// </summary>
+    public async Task<ApprovalInstance?> GetByIdAsync(long instanceId)
+    {
+        return await _db.Queryable<ApprovalInstance>().FirstAsync(i => i.Id == instanceId);
     }
 
     /// <inheritdoc/>

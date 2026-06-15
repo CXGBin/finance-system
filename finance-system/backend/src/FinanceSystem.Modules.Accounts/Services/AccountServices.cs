@@ -9,6 +9,9 @@ namespace FinanceSystem.Modules.Accounts.Services;
 /// <summary>
 /// 会计期间服务实现
 /// </summary>
+/// <summary>
+/// 会计期间服务实现
+/// </summary>
 public class PeriodService : IPeriodService
 {
     private readonly ISqlSugarClient _db;
@@ -410,6 +413,9 @@ public class PeriodService : IPeriodService
 /// <summary>
 /// 科目期初余额服务实现
 /// </summary>
+/// <summary>
+/// 科目余额服务实现
+/// </summary>
 public class SubjectBalanceService : ISubjectBalanceService
 {
     private readonly ISqlSugarClient _db;
@@ -451,6 +457,9 @@ public class SubjectBalanceService : ISubjectBalanceService
     }
 }
 
+/// <summary>
+/// 账簿查询服务实现
+/// </summary>
 /// <summary>
 /// 账簿查询服务实现
 /// </summary>
@@ -586,6 +595,9 @@ public class LedgerService : ILedgerService
     }
 }
 
+/// <summary>
+/// 辅助核算服务实现
+/// </summary>
 /// <summary>
 /// 辅助核算服务实现
 /// </summary>

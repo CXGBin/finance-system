@@ -7,6 +7,9 @@ namespace FinanceSystem.Infrastructure.Services;
 /// SqlSugar 泛型仓储实现
 /// </summary>
 /// <typeparam name="T">实体类型</typeparam>
+/// <summary>
+/// Repository
+/// </summary>
 public class Repository<T> : IRepository<T> where T : class, new()
 {
     /// <summary>

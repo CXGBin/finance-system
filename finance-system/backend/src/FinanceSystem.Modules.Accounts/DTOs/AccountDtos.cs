@@ -5,6 +5,9 @@ namespace FinanceSystem.Modules.Accounts.DTOs;
 /// <summary>
 /// 会计科目查询条件
 /// </summary>
+/// <summary>
+/// SubjectQuery
+/// </summary>
 public class SubjectQuery
 {
     /// <summary>
@@ -30,6 +33,9 @@ public class SubjectQuery
 
 /// <summary>
 /// 新增/编辑科目请求
+/// </summary>
+/// <summary>
+/// SubjectCreateRequest
 /// </summary>
 public class SubjectCreateRequest
 {
@@ -87,6 +93,9 @@ public class SubjectCreateRequest
 /// <summary>
 /// 凭证查询条件
 /// </summary>
+/// <summary>
+/// VoucherQuery
+/// </summary>
 public class VoucherQuery : PageRequest
 {
     /// <summary>
@@ -128,6 +137,9 @@ public class VoucherQuery : PageRequest
 /// <summary>
 /// 新增/编辑凭证请求
 /// </summary>
+/// <summary>
+/// VoucherCreateRequest
+/// </summary>
 public class VoucherCreateRequest
 {
     /// <summary>
@@ -153,6 +165,9 @@ public class VoucherCreateRequest
 
 /// <summary>
 /// 凭证分录请求
+/// </summary>
+/// <summary>
+/// VoucherEntryRequest
 /// </summary>
 public class VoucherEntryRequest
 {
@@ -190,6 +205,9 @@ public class VoucherEntryRequest
 /// <summary>
 /// 期初余额保存请求
 /// </summary>
+/// <summary>
+/// SubjectBalanceRequest
+/// </summary>
 public class SubjectBalanceRequest
 {
     /// <summary>
@@ -215,6 +233,9 @@ public class SubjectBalanceRequest
 
 /// <summary>
 /// 账簿查询条件（总账/明细账/日记账通用）
+/// </summary>
+/// <summary>
+/// LedgerQuery
 /// </summary>
 public class LedgerQuery : PageRequest
 {
@@ -257,6 +278,9 @@ public class LedgerQuery : PageRequest
 /// <summary>
 /// 辅助核算项通用查询条件
 /// </summary>
+/// <summary>
+/// AuxiliaryQuery
+/// </summary>
 public class AuxiliaryQuery : PageRequest
 {
     /// <summary>
@@ -277,6 +301,9 @@ public class AuxiliaryQuery : PageRequest
 
 /// <summary>
 /// 新增/编辑项目辅助核算请求
+/// </summary>
+/// <summary>
+/// AuxProjectRequest
 /// </summary>
 public class AuxProjectRequest
 {
@@ -313,6 +340,9 @@ public class AuxProjectRequest
 
 /// <summary>
 /// 新增/编辑客户辅助核算请求
+/// </summary>
+/// <summary>
+/// AuxCustomerRequest
 /// </summary>
 public class AuxCustomerRequest
 {
@@ -354,6 +384,9 @@ public class AuxCustomerRequest
 
 /// <summary>
 /// 新增/编辑供应商辅助核算请求
+/// </summary>
+/// <summary>
+/// AuxSupplierRequest
 /// </summary>
 public class AuxSupplierRequest
 {

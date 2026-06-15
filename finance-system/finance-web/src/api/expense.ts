@@ -48,10 +48,16 @@ export const expenseApi = {
 
 /** 借款申请 */
 export const loanApi = {
-  list: (params: any) => get<any>('/expense/loan', params),
-  getById: (id: number) => get<any>(`/expense/loan/${id}`),
-  create: (data: any) => post<number>('/expense/loan', data),
+  /** 借款列表 */
+  list: (params: PageParams) => get<PagedResult<ExpenseLoan>>('/expense/loan', params as any),
+  /** 借款详情 */
+  getById: (id: number) => get<ExpenseLoan>(`/expense/loan/${id}`),
+  /** 创建借款 */
+  create: (data: Omit<ExpenseLoan, 'id'>) => post<number>('/expense/loan', data),
+  /** 审批通过 */
   approve: (id: number) => post(`/expense/loan/${id}/approve`),
+  /** 审批驳回 */
   reject: (id: number) => post(`/expense/loan/${id}/reject`),
-  settle: (id: number, data: any) => post(`/expense/loan/${id}/settle`, data),
+  /** 还款确认 */
+  settle: (id: number, data: { settleAmount: number; settleDate: string }) => post(`/expense/loan/${id}/settle`, data),
 };

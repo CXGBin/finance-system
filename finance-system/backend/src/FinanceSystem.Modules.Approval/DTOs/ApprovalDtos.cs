@@ -3,6 +3,9 @@ namespace FinanceSystem.Modules.Approval.DTOs;
 /// <summary>
 /// 审批流程创建/修改
 /// </summary>
+/// <summary>
+/// ApprovalFlowRequest
+/// </summary>
 public class ApprovalFlowRequest
 {
     /// <summary>
@@ -39,6 +42,9 @@ public class ApprovalFlowRequest
 /// <summary>
 /// 审批发起请求
 /// </summary>
+/// <summary>
+/// ApprovalStartRequest
+/// </summary>
 public class ApprovalStartRequest
 {
     /// <summary>
@@ -65,6 +71,9 @@ public class ApprovalStartRequest
 /// <summary>
 /// 审批操作请求
 /// </summary>
+/// <summary>
+/// ApprovalActionRequest
+/// </summary>
 public class ApprovalActionRequest
 {
     /// <summary>
@@ -85,6 +94,9 @@ public class ApprovalActionRequest
 
 /// <summary>
 /// 审批实例查询
+/// </summary>
+/// <summary>
+/// ApprovalInstanceQuery
 /// </summary>
 public class ApprovalInstanceQuery
 {
@@ -111,6 +123,9 @@ public class ApprovalInstanceQuery
 
 /// <summary>
 /// 审批节点定义
+/// </summary>
+/// <summary>
+/// ApprovalNodeDef
 /// </summary>
 public class ApprovalNodeDef
 {

@@ -7,18 +7,27 @@ namespace FinanceSystem.Modules.Accounts.Entities;
 /// 辅助核算-项目实体
 /// </summary>
 [SugarTable("fm_aux_project", "辅助核算项目表")]
+/// <summary>
+/// AuxProject
+/// </summary>
 public class AuxProject : BaseEntity
 {
     /// <summary>
     /// 项目编码
     /// </summary>
     [SugarColumn(Length = 50)]
+    /// <summary>
+    /// 项目编码
+    /// </summary>
     public string ProjectCode { get; set; } = string.Empty;
 
     /// <summary>
     /// 项目名称
     /// </summary>
     [SugarColumn(Length = 100)]
+    /// <summary>
+    /// 项目名称
+    /// </summary>
     public string ProjectName { get; set; } = string.Empty;
 
     /// <summary>

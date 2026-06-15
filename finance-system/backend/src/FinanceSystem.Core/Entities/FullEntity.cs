@@ -3,6 +3,9 @@ namespace FinanceSystem.Core.Entities;
 /// <summary>
 /// 带更新时间的实体基类
 /// </summary>
+/// <summary>
+/// FullEntity
+/// </summary>
 public class FullEntity : BaseEntity
 {
     /// <summary>

@@ -3,6 +3,9 @@ namespace FinanceSystem.Modules.Budget.DTOs;
 /// <summary>
 /// 预算年度列表查询
 /// </summary>
+/// <summary>
+/// BudgetYearQuery
+/// </summary>
 public class BudgetYearQuery
 {
     /// <summary>
@@ -19,6 +22,9 @@ public class BudgetYearQuery
 /// <summary>
 /// 预算年度创建/修改
 /// </summary>
+/// <summary>
+/// BudgetYearRequest
+/// </summary>
 public class BudgetYearRequest
 {
     /// <summary>
@@ -34,6 +40,9 @@ public class BudgetYearRequest
 
 /// <summary>
 /// 预算科目创建/修改
+/// </summary>
+/// <summary>
+/// BudgetSubjectRequest
 /// </summary>
 public class BudgetSubjectRequest
 {
@@ -66,6 +75,9 @@ public class BudgetSubjectRequest
 /// <summary>
 /// 月度预算保存请求
 /// </summary>
+/// <summary>
+/// BudgetMonthlySaveRequest
+/// </summary>
 public class BudgetMonthlySaveRequest
 {
     /// <summary>
@@ -82,6 +94,9 @@ public class BudgetMonthlySaveRequest
 /// <summary>
 /// 月度预算项
 /// </summary>
+/// <summary>
+/// BudgetMonthlyItem
+/// </summary>
 public class BudgetMonthlyItem
 {
     /// <summary>
@@ -97,6 +112,9 @@ public class BudgetMonthlyItem
 
 /// <summary>
 /// 预算执行跟踪查询
+/// </summary>
+/// <summary>
+/// BudgetExecutionQuery
 /// </summary>
 public class BudgetExecutionQuery
 {
@@ -123,6 +141,9 @@ public class BudgetExecutionQuery
 
 /// <summary>
 /// 预算执行跟踪结果行
+/// </summary>
+/// <summary>
+/// BudgetExecutionItem
 /// </summary>
 public class BudgetExecutionItem
 {
@@ -170,6 +191,9 @@ public class BudgetExecutionItem
 /// <summary>
 /// 预算调整请求
 /// </summary>
+/// <summary>
+/// BudgetAdjustRequest
+/// </summary>
 public class BudgetAdjustRequest
 {
     /// <summary>
@@ -195,6 +219,9 @@ public class BudgetAdjustRequest
 
 /// <summary>
 /// 预算预警配置请求
+/// </summary>
+/// <summary>
+/// BudgetAlertConfigRequest
 /// </summary>
 public class BudgetAlertConfigRequest
 {

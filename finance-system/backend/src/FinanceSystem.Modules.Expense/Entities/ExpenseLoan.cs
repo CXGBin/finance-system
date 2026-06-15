@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.Expense.Entities;
 /// <summary>
 /// 借款申请实体
 /// </summary>
+/// <summary>
+/// ExpenseLoan
+/// </summary>
 public class ExpenseLoan : FullEntity
 {
     /// <summary>借款编号</summary>

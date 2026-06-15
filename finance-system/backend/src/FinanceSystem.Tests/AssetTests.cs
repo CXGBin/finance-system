@@ -7,6 +7,9 @@ namespace FinanceSystem.Tests.Asset;
 /// <summary>
 /// 资产折旧算法单元测试（纯计算，不依赖数据库）
 /// </summary>
+/// <summary>
+/// DepreciationCalculation测试
+/// </summary>
 public class DepreciationCalculationTests
 {
     /// <summary>直线法：月折旧额应恒定</summary>

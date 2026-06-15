@@ -3,6 +3,9 @@ namespace FinanceSystem.Modules.Reports.DTOs;
 /// <summary>
 /// 报表查询基础参数
 /// </summary>
+/// <summary>
+/// ReportQuery
+/// </summary>
 public class ReportQuery
 {
     /// <summary>
@@ -19,6 +22,9 @@ public class ReportQuery
 /// <summary>
 /// 利润表查询参数
 /// </summary>
+/// <summary>
+/// IncomeStatementQuery
+/// </summary>
 public class IncomeStatementQuery : ReportQuery
 {
     /// <summary>
@@ -34,6 +40,9 @@ public class IncomeStatementQuery : ReportQuery
 
 /// <summary>
 /// 科目余额表查询参数
+/// </summary>
+/// <summary>
+/// SubjectBalanceReportQuery
 /// </summary>
 public class SubjectBalanceReportQuery : ReportQuery
 {
@@ -55,6 +64,9 @@ public class SubjectBalanceReportQuery : ReportQuery
 
 /// <summary>
 /// 资产负债表行项目
+/// </summary>
+/// <summary>
+/// BalanceSheetItem
 /// </summary>
 public class BalanceSheetItem
 {
@@ -86,6 +98,9 @@ public class BalanceSheetItem
 
 /// <summary>
 /// 资产负债表结果
+/// </summary>
+/// <summary>
+/// BalanceSheetResult
 /// </summary>
 public class BalanceSheetResult
 {
@@ -138,6 +153,9 @@ public class BalanceSheetResult
 /// <summary>
 /// 利润表行项目
 /// </summary>
+/// <summary>
+/// IncomeStatementItem
+/// </summary>
 public class IncomeStatementItem
 {
     /// <summary>
@@ -169,6 +187,9 @@ public class IncomeStatementItem
 /// <summary>
 /// 利润表结果
 /// </summary>
+/// <summary>
+/// IncomeStatementResult
+/// </summary>
 public class IncomeStatementResult
 {
     /// <summary>
@@ -189,6 +210,9 @@ public class IncomeStatementResult
 
 /// <summary>
 /// 现金流量表行项目
+/// </summary>
+/// <summary>
+/// CashFlowItem
 /// </summary>
 public class CashFlowItem
 {
@@ -221,6 +245,9 @@ public class CashFlowItem
 /// <summary>
 /// 现金流量表结果
 /// </summary>
+/// <summary>
+/// CashFlowResult
+/// </summary>
 public class CashFlowResult
 {
     /// <summary>
@@ -252,6 +279,9 @@ public class CashFlowResult
 /// <summary>
 /// 自定义报表模板创建/修改请求
 /// </summary>
+/// <summary>
+/// ReportTemplateRequest
+/// </summary>
 public class ReportTemplateRequest
 {
     /// <summary>
@@ -272,6 +302,9 @@ public class ReportTemplateRequest
 
 /// <summary>
 /// 多期对比查询参数
+/// </summary>
+/// <summary>
+/// CompareQuery
 /// </summary>
 public class CompareQuery
 {
@@ -294,6 +327,9 @@ public class CompareQuery
 /// <summary>
 /// 多期对比结果
 /// </summary>
+/// <summary>
+/// CompareResult
+/// </summary>
 public class CompareResult
 {
     /// <summary>
@@ -315,6 +351,9 @@ public class CompareResult
 /// <summary>
 /// 多期对比行项目
 /// </summary>
+/// <summary>
+/// CompareItem
+/// </summary>
 public class CompareItem
 {
     /// <summary>
@@ -335,6 +374,9 @@ public class CompareItem
 
 /// <summary>
 /// 报表导出请求参数
+/// </summary>
+/// <summary>
+/// ExportQuery
 /// </summary>
 public class ExportQuery
 {

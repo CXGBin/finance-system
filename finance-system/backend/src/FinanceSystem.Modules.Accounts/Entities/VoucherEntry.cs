@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.Accounts.Entities;
 /// 凭证分录实体
 /// </summary>
 [SugarTable("fm_voucher_entry", "凭证分录表")]
+/// <summary>
+/// VoucherEntry
+/// </summary>
 public class VoucherEntry : BaseEntity
 {
     /// <summary>

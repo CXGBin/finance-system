@@ -12,6 +12,9 @@ namespace FinanceSystem.Modules.System.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/system/user")]
+/// <summary>
+/// 用户管理控制器
+/// </summary>
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;

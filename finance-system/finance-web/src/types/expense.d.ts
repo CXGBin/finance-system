@@ -65,3 +65,16 @@ export interface ExpenseStats {
   budgetAmount: number;
   executionRate: number;
 }
+
+/** 借款申请 */
+export interface ExpenseLoan {
+  id: number;
+  loanNo: string;
+  applicantId: number;
+  applicantName: string;
+  amount: number;
+  remainAmount: number;
+  status: 'pending' | 'approved' | 'rejected' | 'settled';
+  createTime: string;
+  remark?: string;
+}

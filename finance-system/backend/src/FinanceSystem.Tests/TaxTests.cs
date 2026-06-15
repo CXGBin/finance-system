@@ -8,6 +8,9 @@ namespace FinanceSystem.Tests.Tax;
 /// <summary>
 /// 税额计算单元测试
 /// </summary>
+/// <summary>
+/// TaxCalculation测试
+/// </summary>
 public class TaxCalculationTests
 {
     /// <summary>
@@ -98,6 +101,9 @@ public class TaxCalculationTests
 /// <summary>
 /// 纳税申报状态流转单元测试
 /// </summary>
+/// <summary>
+/// TaxDeclaration测试
+/// </summary>
 public class TaxDeclarationTests
 {
     /// <summary>
@@ -160,6 +166,9 @@ public class TaxDeclarationTests
 
 /// <summary>
 /// 发票服务单元测试
+/// </summary>
+/// <summary>
+/// TaxInvoice测试
 /// </summary>
 public class TaxInvoiceTests
 {

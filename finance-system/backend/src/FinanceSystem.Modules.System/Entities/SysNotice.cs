@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.System.Entities;
 /// 系统公告实体
 /// </summary>
 [SugarTable("sys_notice")]
+/// <summary>
+/// SysNotice
+/// </summary>
 public class SysNotice : BaseEntity
 {
     /// <summary>公告标题</summary>

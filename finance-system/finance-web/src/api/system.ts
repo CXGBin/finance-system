@@ -126,14 +126,25 @@ export const configApi = {
   update: (data: Partial<SysConfig>) => put(`/system/config/${data.key}`, data),
 };
 
+/** 系统公告 */
+export interface SysNotice {
+  id: number;
+  title: string;
+  content: string;
+  noticeType: number;
+  status: number;
+  createdBy: string;
+  createdTime: string;
+}
+
 /** 系统公告API */
 export const noticeApi = {
   /** 获取公告列表 */
-  list: (noticeType?: number) => get<any[]>(`/system/notice/list`, { noticeType }),
+  list: (noticeType?: number) => get<SysNotice[]>(`/system/notice/list`, { noticeType }),
   /** 新增公告 */
-  create: (data: any) => post<number>('/system/notice', data),
+  create: (data: Omit<SysNotice, 'id' | 'createdTime'>) => post<number>('/system/notice', data),
   /** 修改公告 */
-  update: (id: number, data: any) => put(`/system/notice/${id}`, data),
+  update: (id: number, data: Partial<SysNotice>) => put(`/system/notice/${id}`, data),
   /** 删除公告 */
   remove: (id: number) => del(`/system/notice/${id}`),
 };

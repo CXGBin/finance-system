@@ -8,6 +8,9 @@ namespace FinanceSystem.Tests.Approval;
 /// <summary>
 /// 审批流程服务单元测试
 /// </summary>
+/// <summary>
+/// ApprovalFlow测试
+/// </summary>
 public class ApprovalFlowTests
 {
     /// <summary>
@@ -35,6 +38,9 @@ public class ApprovalFlowTests
 
 /// <summary>
 /// 审批实例状态流转单元测试
+/// </summary>
+/// <summary>
+/// ApprovalInstance测试
 /// </summary>
 public class ApprovalInstanceTests
 {
@@ -179,6 +185,9 @@ public class ApprovalInstanceTests
 
 /// <summary>
 /// 审批记录单元测试
+/// </summary>
+/// <summary>
+/// ApprovalRecord测试
 /// </summary>
 public class ApprovalRecordTests
 {

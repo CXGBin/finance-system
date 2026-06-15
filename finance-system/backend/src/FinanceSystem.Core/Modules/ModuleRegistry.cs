@@ -5,6 +5,9 @@ namespace FinanceSystem.Core.Modules;
 /// <summary>
 /// 模块注册器实现（管理所有业务模块的注册、查询与开关状态）
 /// </summary>
+/// <summary>
+/// ModuleRegistry
+/// </summary>
 public class ModuleRegistry : IModuleRegistry
 {
     /// <summary>已注册的模块定义（ModuleId → 定义）</summary>

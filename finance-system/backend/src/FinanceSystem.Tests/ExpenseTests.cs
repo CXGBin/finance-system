@@ -8,6 +8,9 @@ namespace FinanceSystem.Tests.Expense;
 /// <summary>
 /// 费用报销状态流转单元测试
 /// </summary>
+/// <summary>
+/// ExpenseClaim测试
+/// </summary>
 public class ExpenseClaimTests
 {
     /// <summary>
@@ -129,6 +132,9 @@ public class ExpenseClaimTests
 
 /// <summary>
 /// 费用类型服务单元测试
+/// </summary>
+/// <summary>
+/// ExpenseType测试
 /// </summary>
 public class ExpenseTypeTests
 {

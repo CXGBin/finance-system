@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.System.Entities;
 /// 角色菜单关联实体
 /// </summary>
 [SugarTable("sys_role_menu", "角色菜单关联表")]
+/// <summary>
+/// SysRoleMenu
+/// </summary>
 public class SysRoleMenu : BaseEntity
 {
     /// <summary>

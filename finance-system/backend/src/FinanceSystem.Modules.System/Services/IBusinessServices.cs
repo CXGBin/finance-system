@@ -6,6 +6,9 @@ namespace FinanceSystem.Modules.System.Services;
 /// <summary>
 /// 菜单管理服务接口
 /// </summary>
+/// <summary>
+/// 菜单管理服务接口
+/// </summary>
 public interface IMenuService
 {
     /// <summary>
@@ -13,6 +16,11 @@ public interface IMenuService
     /// </summary>
     /// <returns>菜单树形列表</returns>
     Task<List<SysMenu>> GetTreeAsync();
+
+    /// <summary>
+    /// 获取菜单详情
+    /// </summary>
+    Task<SysMenu?> GetByIdAsync(long id);
 
     /// <summary>
     /// 新增菜单
@@ -35,6 +43,9 @@ public interface IMenuService
     Task DeleteAsync(long id);
 }
 
+/// <summary>
+/// 部门管理服务接口
+/// </summary>
 /// <summary>
 /// 部门管理服务接口
 /// </summary>
@@ -67,6 +78,9 @@ public interface IDeptService
     Task DeleteAsync(long id);
 }
 
+/// <summary>
+/// 岗位管理服务接口
+/// </summary>
 /// <summary>
 /// 岗位管理服务接口
 /// </summary>
@@ -105,6 +119,9 @@ public interface IPostService
 
 /// <summary>
 /// 数据字典服务接口
+/// </summary>
+/// <summary>
+/// 字典管理服务接口
 /// </summary>
 public interface IDictService
 {
@@ -164,6 +181,9 @@ public interface IDictService
 /// <summary>
 /// 操作日志服务接口
 /// </summary>
+/// <summary>
+/// 操作日志服务接口
+/// </summary>
 public interface ILogService
 {
     /// <summary>
@@ -181,6 +201,9 @@ public interface ILogService
     Task<SysLog?> GetByIdAsync(long id);
 }
 
+/// <summary>
+/// 模块管理服务接口
+/// </summary>
 /// <summary>
 /// 模块管理服务接口
 /// </summary>
@@ -210,6 +233,9 @@ public interface IModuleService
 /// <summary>
 /// 系统配置服务接口
 /// </summary>
+/// <summary>
+/// 系统配置服务接口
+/// </summary>
 public interface IConfigService
 {
     /// <summary>
@@ -223,8 +249,16 @@ public interface IConfigService
     /// </summary>
     /// <param name="items">配置修改列表</param>
     Task BatchUpdateAsync(List<ConfigUpdateRequest> items);
+
+    /// <summary>
+    /// 修改单条配置
+    /// </summary>
+    Task UpdateByKeyAsync(string key, ConfigUpdateRequest request);
 }
 
+/// <summary>
+/// 系统公告服务接口
+/// </summary>
 /// <summary>
 /// 系统公告服务接口
 /// </summary>

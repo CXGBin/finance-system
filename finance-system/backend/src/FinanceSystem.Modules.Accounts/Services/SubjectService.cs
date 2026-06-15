@@ -8,6 +8,9 @@ namespace FinanceSystem.Modules.Accounts.Services;
 /// <summary>
 /// 会计科目服务实现
 /// </summary>
+/// <summary>
+/// 会计科目服务实现
+/// </summary>
 public class SubjectService : ISubjectService
 {
     private readonly ISqlSugarClient _db;

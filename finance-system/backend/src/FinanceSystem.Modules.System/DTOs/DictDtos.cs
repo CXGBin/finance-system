@@ -5,6 +5,9 @@ namespace FinanceSystem.Modules.System.DTOs;
 /// <summary>
 /// 字典类型查询条件
 /// </summary>
+/// <summary>
+/// DictTypeQuery
+/// </summary>
 public class DictTypeQuery : PageRequest
 {
     /// <summary>
@@ -25,6 +28,9 @@ public class DictTypeQuery : PageRequest
 
 /// <summary>
 /// 新增/编辑字典类型请求
+/// </summary>
+/// <summary>
+/// DictTypeCreateRequest
 /// </summary>
 public class DictTypeCreateRequest
 {
@@ -51,6 +57,9 @@ public class DictTypeCreateRequest
 
 /// <summary>
 /// 新增/编辑字典项请求
+/// </summary>
+/// <summary>
+/// DictDataCreateRequest
 /// </summary>
 public class DictDataCreateRequest
 {
@@ -88,6 +97,9 @@ public class DictDataCreateRequest
 /// <summary>
 /// 操作日志查询条件
 /// </summary>
+/// <summary>
+/// LogQuery
+/// </summary>
 public class LogQuery : PageRequest
 {
     /// <summary>
@@ -119,6 +131,9 @@ public class LogQuery : PageRequest
 /// <summary>
 /// 批量修改系统配置请求
 /// </summary>
+/// <summary>
+/// ConfigUpdateRequest
+/// </summary>
 public class ConfigUpdateRequest
 {
     /// <summary>
@@ -134,6 +149,9 @@ public class ConfigUpdateRequest
 
 /// <summary>
 /// 模块开关切换请求
+/// </summary>
+/// <summary>
+/// ModuleToggleRequest
 /// </summary>
 public class ModuleToggleRequest
 {

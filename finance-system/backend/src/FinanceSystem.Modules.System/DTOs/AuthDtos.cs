@@ -3,6 +3,9 @@ namespace FinanceSystem.Modules.System.DTOs;
 /// <summary>
 /// 登录请求参数
 /// </summary>
+/// <summary>
+/// LoginRequest
+/// </summary>
 public class LoginRequest
 {
     /// <summary>
@@ -23,6 +26,9 @@ public class LoginRequest
 
 /// <summary>
 /// 登录响应数据
+/// </summary>
+/// <summary>
+/// LoginResponse
 /// </summary>
 public class LoginResponse
 {
@@ -50,6 +56,9 @@ public class LoginResponse
 /// <summary>
 /// Token刷新请求
 /// </summary>
+/// <summary>
+/// RefreshTokenRequest
+/// </summary>
 public class RefreshTokenRequest
 {
     /// <summary>
@@ -60,6 +69,9 @@ public class RefreshTokenRequest
 
 /// <summary>
 /// 修改密码请求
+/// </summary>
+/// <summary>
+/// ChangePasswordRequest
 /// </summary>
 public class ChangePasswordRequest
 {
@@ -81,6 +93,9 @@ public class ChangePasswordRequest
 
 /// <summary>
 /// 用户基本信息（登录后返回）
+/// </summary>
+/// <summary>
+/// UserInfoDto
 /// </summary>
 public class UserInfoDto
 {

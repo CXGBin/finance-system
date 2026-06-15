@@ -7,18 +7,27 @@ namespace FinanceSystem.Modules.System.Entities;
 /// 系统模块管理实体
 /// </summary>
 [SugarTable("sys_module", "模块管理表")]
+/// <summary>
+/// SysModule
+/// </summary>
 public class SysModule : FullEntity
 {
     /// <summary>
     /// 模块标识（如 system/accounts/reports）
     /// </summary>
     [SugarColumn(Length = 50)]
+    /// <summary>
+    /// 模块标识
+    /// </summary>
     public string ModuleId { get; set; } = string.Empty;
 
     /// <summary>
     /// 模块名称
     /// </summary>
     [SugarColumn(Length = 100)]
+    /// <summary>
+    /// 模块名称
+    /// </summary>
     public string ModuleName { get; set; } = string.Empty;
 
     /// <summary>

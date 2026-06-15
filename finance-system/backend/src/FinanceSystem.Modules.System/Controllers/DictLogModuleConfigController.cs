@@ -11,6 +11,9 @@ namespace FinanceSystem.Modules.System.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/system/dict")]
+/// <summary>
+/// 字典管理控制器
+/// </summary>
 public class DictController : ControllerBase
 {
     private readonly IDictService _dictService;
@@ -104,6 +107,9 @@ public class DictController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/system/log")]
+/// <summary>
+/// 操作日志控制器
+/// </summary>
 public class LogController : ControllerBase
 {
     private readonly ILogService _logService;
@@ -140,6 +146,9 @@ public class LogController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/system/module")]
+/// <summary>
+/// 模块管理控制器
+/// </summary>
 public class ModuleController : ControllerBase
 {
     private readonly IModuleService _moduleService;
@@ -183,6 +192,9 @@ public class ModuleController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/system/config")]
+/// <summary>
+/// 系统配置控制器
+/// </summary>
 public class ConfigController : ControllerBase
 {
     private readonly IConfigService _configService;
@@ -199,6 +211,16 @@ public class ConfigController : ControllerBase
     public async Task<ApiResult<List<SysConfig>>> GetList()
     {
         return ApiResult<List<SysConfig>>.Success(await _configService.GetListAsync());
+    }
+
+    /// <summary>
+    /// 修改单条配置
+    /// </summary>
+    [HttpPut("{key}")]
+    public async Task<ApiResult<bool>> UpdateByKey(string key, [FromBody] ConfigUpdateRequest request)
+    {
+        await _configService.UpdateByKeyAsync(key, request);
+        return ApiResult<bool>.Success(true);
     }
 
     /// <summary>

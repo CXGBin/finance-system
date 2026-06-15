@@ -6,6 +6,9 @@ namespace FinanceSystem.Api.Middleware;
 /// <summary>
 /// 全局异常处理中间件
 /// </summary>
+/// <summary>
+/// GlobalExceptionMiddleware
+/// </summary>
 public class GlobalExceptionMiddleware
 {
     /// <summary>

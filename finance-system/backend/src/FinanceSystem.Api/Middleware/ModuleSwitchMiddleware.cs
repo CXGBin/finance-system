@@ -8,6 +8,9 @@ namespace FinanceSystem.Api.Middleware;
 /// 模块开关校验中间件
 /// 拦截已关闭模块的API请求，返回403错误
 /// </summary>
+/// <summary>
+/// ModuleSwitchMiddleware
+/// </summary>
 public class ModuleSwitchMiddleware
 {
     /// <summary>

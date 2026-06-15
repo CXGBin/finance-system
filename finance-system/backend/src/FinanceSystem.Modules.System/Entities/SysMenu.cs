@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.System.Entities;
 /// 系统菜单/权限实体
 /// </summary>
 [SugarTable("sys_menu", "系统菜单表")]
+/// <summary>
+/// SysMenu
+/// </summary>
 public class SysMenu : BaseEntity
 {
     /// <summary>
@@ -18,6 +21,9 @@ public class SysMenu : BaseEntity
     /// 菜单名称
     /// </summary>
     [SugarColumn(Length = 50)]
+    /// <summary>
+    /// 菜单名称
+    /// </summary>
     public string MenuName { get; set; } = string.Empty;
 
     /// <summary>

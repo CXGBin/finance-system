@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.Tax;
 /// <summary>
 /// 税务管理模块定义
 /// </summary>
+/// <summary>
+/// TaxModuleDefinition
+/// </summary>
 public class TaxModuleDefinition : IModuleDefinition
 {
     public string ModuleId => "tax";

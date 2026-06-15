@@ -14,6 +14,9 @@ namespace FinanceSystem.Modules.System.Services;
 /// <summary>
 /// 认证服务实现
 /// </summary>
+/// <summary>
+/// 认证服务实现
+/// </summary>
 public class AuthService : IAuthService
 {
     private readonly ISqlSugarClient _db;
@@ -155,7 +158,7 @@ public class AuthService : IAuthService
     /// <returns>JWT令牌字符串</returns>
     private string GenerateToken(SysUser user)
     {
-        var key = _config["Jwt:SecurityKey"] ?? "FinanceSystem2026SecretKey";
+        var key = _config["Jwt:SecurityKey"] ?? throw new InvalidOperationException("缺少 JWT 密钥配置 Jwt:SecurityKey");
         var expireMinutes = int.Parse(_config["Jwt:AccessTokenExpireMinutes"] ?? "120");
         var issuer = _config["Jwt:Issuer"] ?? "FinanceSystem";
         var audience = _config["Jwt:Audience"] ?? "FinanceSystem";

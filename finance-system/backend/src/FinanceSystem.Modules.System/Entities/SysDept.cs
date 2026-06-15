@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.System.Entities;
 /// 部门实体
 /// </summary>
 [SugarTable("sys_dept", "系统部门表")]
+/// <summary>
+/// SysDept
+/// </summary>
 public class SysDept : BaseEntity
 {
     /// <summary>
@@ -18,6 +21,9 @@ public class SysDept : BaseEntity
     /// 部门名称
     /// </summary>
     [SugarColumn(Length = 50)]
+    /// <summary>
+    /// 部门名称
+    /// </summary>
     public string DeptName { get; set; } = string.Empty;
 
     /// <summary>

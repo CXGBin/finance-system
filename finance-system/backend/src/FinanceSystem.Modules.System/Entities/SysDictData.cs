@@ -7,24 +7,36 @@ namespace FinanceSystem.Modules.System.Entities;
 /// 数据字典项实体
 /// </summary>
 [SugarTable("sys_dict_data", "数据字典项表")]
+/// <summary>
+/// SysDictData
+/// </summary>
 public class SysDictData : BaseEntity
 {
     /// <summary>
     /// 所属字典类型编码
     /// </summary>
     [SugarColumn(Length = 100)]
+    /// <summary>
+    /// 字典类型编码
+    /// </summary>
     public string DictType { get; set; } = string.Empty;
 
     /// <summary>
     /// 字典标签（显示值）
     /// </summary>
     [SugarColumn(Length = 100)]
+    /// <summary>
+    /// 字典项标签
+    /// </summary>
     public string DictLabel { get; set; } = string.Empty;
 
     /// <summary>
     /// 字典值（实际值）
     /// </summary>
     [SugarColumn(Length = 100)]
+    /// <summary>
+    /// 字典项值
+    /// </summary>
     public string DictValue { get; set; } = string.Empty;
 
     /// <summary>

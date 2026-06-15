@@ -12,6 +12,9 @@ namespace FinanceSystem.Modules.Reports.Services;
 /// <summary>
 /// 资产负债表服务实现
 /// </summary>
+/// <summary>
+/// 资产负债表服务实现
+/// </summary>
 public class BalanceSheetService : IBalanceSheetService
 {
     private readonly ISqlSugarClient _db;
@@ -140,6 +143,9 @@ public class BalanceSheetService : IBalanceSheetService
 /// <summary>
 /// 利润表服务实现
 /// </summary>
+/// <summary>
+/// 利润表服务实现
+/// </summary>
 public class IncomeStatementService : IIncomeStatementService
 {
     private readonly ISqlSugarClient _db;
@@ -230,6 +236,9 @@ public class IncomeStatementService : IIncomeStatementService
 
 /// <summary>
 /// 现金流量表服务实现（简化版）
+/// </summary>
+/// <summary>
+/// 现金流量表服务实现
 /// </summary>
 public class CashFlowService : ICashFlowService
 {
@@ -341,6 +350,9 @@ public class CashFlowService : ICashFlowService
 /// <summary>
 /// 科目余额表服务实现
 /// </summary>
+/// <summary>
+/// 科目余额表服务实现
+/// </summary>
 public class SubjectBalanceReportService : ISubjectBalanceReportService
 {
     private readonly ISqlSugarClient _db;
@@ -424,6 +436,9 @@ public class SubjectBalanceReportService : ISubjectBalanceReportService
     }
 }
 
+/// <summary>
+/// 自定义报表服务实现
+/// </summary>
 /// <summary>
 /// 自定义报表服务实现
 /// </summary>
@@ -577,6 +592,9 @@ internal class CustomReportRow
 /// <summary>
 /// 报表导出服务实现（CSV格式，无需第三方依赖）
 /// </summary>
+/// <summary>
+/// 报表导出服务实现
+/// </summary>
 public class ReportExportService : IReportExportService
 {
     private readonly ISqlSugarClient _db;
@@ -676,6 +694,9 @@ public class ReportExportService : IReportExportService
     }
 }
 
+/// <summary>
+/// 多期对比服务实现
+/// </summary>
 /// <summary>
 /// 多期对比服务实现
 /// </summary>

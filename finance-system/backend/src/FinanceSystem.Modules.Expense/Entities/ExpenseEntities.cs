@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.Expense.Entities;
 /// 费用类型
 /// </summary>
 [SugarTable("fm_expense_type", "费用类型表")]
+/// <summary>
+/// ExpenseType
+/// </summary>
 public class ExpenseType : FullEntity
 {
     /// <summary>费用类型编码</summary>
@@ -63,6 +66,9 @@ public class ExpenseType : FullEntity
 /// 费用报销单
 /// </summary>
 [SugarTable("fm_expense_claim", "费用报销单表")]
+/// <summary>
+/// ExpenseClaim
+/// </summary>
 public class ExpenseClaim : FullEntity
 {
     /// <summary>报销单号</summary>
@@ -140,6 +146,9 @@ public class ExpenseClaim : FullEntity
 /// 费用报销明细行
 /// </summary>
 [SugarTable("fm_expense_item", "费用报销明细表")]
+/// <summary>
+/// ExpenseItem
+/// </summary>
 public class ExpenseItem : FullEntity
 {
     /// <summary>报销单ID</summary>
@@ -189,6 +198,9 @@ public class ExpenseItem : FullEntity
 /// 费用分摊记录
 /// </summary>
 [SugarTable("fm_expense_allocate", "费用分摊表")]
+/// <summary>
+/// ExpenseAllocate
+/// </summary>
 public class ExpenseAllocate : FullEntity
 {
     [SugarColumn(Length = 50, IsNullable = false, ColumnDescription = "分摊单号")]

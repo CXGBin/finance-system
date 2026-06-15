@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.Approval;
 /// <summary>
 /// 审批流程模块定义
 /// </summary>
+/// <summary>
+/// ApprovalModuleDefinition
+/// </summary>
 public class ApprovalModuleDefinition : IModuleDefinition
 {
     public string ModuleId => "approval";

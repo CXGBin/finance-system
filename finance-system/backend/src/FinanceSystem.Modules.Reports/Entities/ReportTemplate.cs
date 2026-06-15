@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.Reports.Entities;
 /// 自定义报表模板
 /// </summary>
 [SugarTable("fm_report_template", "自定义报表模板表")]
+/// <summary>
+/// ReportTemplate
+/// </summary>
 public class ReportTemplate : FullEntity
 {
     /// <summary>

@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.System.Services;
 /// <summary>
 /// 角色管理服务接口
 /// </summary>
+/// <summary>
+/// 角色管理服务接口
+/// </summary>
 public interface IRoleService
 {
     /// <summary>

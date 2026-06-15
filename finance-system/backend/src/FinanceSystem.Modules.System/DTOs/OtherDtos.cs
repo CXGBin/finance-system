@@ -3,6 +3,9 @@ namespace FinanceSystem.Modules.System.DTOs;
 /// <summary>
 /// 新增/编辑菜单请求
 /// </summary>
+/// <summary>
+/// MenuCreateRequest
+/// </summary>
 public class MenuCreateRequest
 {
     /// <summary>
@@ -64,6 +67,9 @@ public class MenuCreateRequest
 /// <summary>
 /// 新增/编辑部门请求
 /// </summary>
+/// <summary>
+/// DeptCreateRequest
+/// </summary>
 public class DeptCreateRequest
 {
     /// <summary>
@@ -104,6 +110,9 @@ public class DeptCreateRequest
 
 /// <summary>
 /// 新增/编辑岗位请求
+/// </summary>
+/// <summary>
+/// PostCreateRequest
 /// </summary>
 public class PostCreateRequest
 {

@@ -3,6 +3,9 @@ namespace FinanceSystem.Core.Common;
 /// <summary>
 /// 分页请求参数
 /// </summary>
+/// <summary>
+/// PageRequest
+/// </summary>
 public class PageRequest
 {
     /// <summary>
@@ -20,6 +23,9 @@ public class PageRequest
 /// 分页响应数据
 /// </summary>
 /// <typeparam name="T">数据项类型</typeparam>
+/// <summary>
+/// PageResult
+/// </summary>
 public class PageResult<T>
 {
     /// <summary>

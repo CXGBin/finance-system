@@ -9,6 +9,9 @@ namespace FinanceSystem.Api.Middleware;
 /// 操作日志自动记录中间件
 /// 记录所有POST/PUT/DELETE请求（不含登录登出）
 /// </summary>
+/// <summary>
+/// OperationLogMiddleware
+/// </summary>
 public class OperationLogMiddleware
 {
     private readonly RequestDelegate _next;

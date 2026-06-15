@@ -11,6 +11,9 @@ namespace FinanceSystem.Modules.System.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/system/menu")]
+/// <summary>
+/// 菜单管理控制器
+/// </summary>
 public class MenuController : ControllerBase
 {
     private readonly IMenuService _menuService;
@@ -27,6 +30,16 @@ public class MenuController : ControllerBase
     public async Task<ApiResult<List<SysMenu>>> GetTree()
     {
         return ApiResult<List<SysMenu>>.Success(await _menuService.GetTreeAsync());
+    }
+
+    /// <summary>
+    /// 获取菜单详情
+    /// </summary>
+    [HttpGet("{id}")]
+    public async Task<ApiResult<SysMenu>> GetById(long id)
+    {
+        var menu = await _menuService.GetByIdAsync(id);
+        return menu == null ? ApiResult<SysMenu>.Fail("菜单不存在") : ApiResult<SysMenu>.Success(menu);
     }
 
     /// <summary>
@@ -64,6 +77,9 @@ public class MenuController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/system/dept")]
+/// <summary>
+/// 部门管理控制器
+/// </summary>
 public class DeptController : ControllerBase
 {
     private readonly IDeptService _deptService;
@@ -117,6 +133,9 @@ public class DeptController : ControllerBase
 /// </summary>
 [ApiController]
 [Route("api/system/post")]
+/// <summary>
+/// 岗位管理控制器
+/// </summary>
 public class PostController : ControllerBase
 {
     private readonly IPostService _postService;

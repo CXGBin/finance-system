@@ -6,6 +6,9 @@ namespace FinanceSystem.Modules.System;
 /// <summary>
 /// 系统管理模块定义（核心模块，始终启用）
 /// </summary>
+/// <summary>
+/// SystemModuleDefinition
+/// </summary>
 public class SystemModuleDefinition : IModuleDefinition
 {
     public string ModuleId => "system";

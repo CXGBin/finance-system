@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.Reports;
 /// <summary>
 /// 报表中心模块定义
 /// </summary>
+/// <summary>
+/// ReportsModuleDefinition
+/// </summary>
 public class ReportsModuleDefinition : IModuleDefinition
 {
     public string ModuleId => "report";

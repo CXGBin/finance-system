@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.Expense;
 /// <summary>
 /// 费用管理模块定义
 /// </summary>
+/// <summary>
+/// ExpenseModuleDefinition
+/// </summary>
 public class ExpenseModuleDefinition : IModuleDefinition
 {
     public string ModuleId => "expense";

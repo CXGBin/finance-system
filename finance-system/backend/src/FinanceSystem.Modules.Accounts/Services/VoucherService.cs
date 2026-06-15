@@ -8,6 +8,9 @@ namespace FinanceSystem.Modules.Accounts.Services;
 /// <summary>
 /// 凭证管理服务实现
 /// </summary>
+/// <summary>
+/// 凭证服务实现
+/// </summary>
 public class VoucherService : IVoucherService
 {
     private readonly ISqlSugarClient _db;
@@ -308,7 +311,7 @@ public class VoucherService : IVoucherService
     /// <summary>
     /// 复制凭证（生成草稿副本）
     /// </summary>
-    public async Task<long> CopyAsync(long id)
+    public async Task<long> CopyAsync(long id, long currentUserId)
     {
         var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id)
             ?? throw new NotFoundException("凭证不存在");
@@ -326,7 +329,7 @@ public class VoucherService : IVoucherService
             Status = 0, // 草稿
             TotalDebit = voucher.TotalDebit,
             TotalCredit = voucher.TotalCredit,
-            PreparedBy = 0,
+            PreparedBy = currentUserId,
             CreatedTime = DateTime.Now
         };
 
@@ -351,5 +354,19 @@ public class VoucherService : IVoucherService
         await _db.Insertable(newEntries).ExecuteCommandAsync();
 
         return newVoucher.Id;
+    }
+
+    /// <summary>
+    /// 删除凭证（仅草稿状态可删除）
+    /// </summary>
+    public async Task DeleteAsync(long id)
+    {
+        var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id)
+            ?? throw new NotFoundException("凭证不存在");
+        if (voucher.Status != 0)
+            throw new InvalidOperationException("仅草稿状态的凭证可以删除");
+
+        await _db.Deleteable<VoucherEntry>().Where(e => e.VoucherId == id).ExecuteCommandAsync();
+        await _db.Deleteable<Voucher>().Where(v => v.Id == id).ExecuteCommandAsync();
     }
 }

@@ -11,7 +11,7 @@ const AssetReport: React.FC = () => {
 
   const loadData = async () => {
     setLoading(true);
-    try { const res = await assetApi.reportData({ year }); setData(res.data || null); } finally { setLoading(false); }
+    try { const res = await assetApi.reportData({ year }); setData(res.data as { totalCount: number; totalOriginal: number; totalDepreciation: number; totalNet: number } | null); } finally { setLoading(false); };
   };
 
   return (
@@ -22,10 +22,10 @@ const AssetReport: React.FC = () => {
       </Row>
       {data && (
         <Row gutter={16}>
-          <Col span={6}><Statistic title="资产总数" value={(data as any).totalCount} /></Col>
-          <Col span={6}><Statistic title="资产原值合计" value={(data as any).totalOriginal} precision={2} /></Col>
-          <Col span={6}><Statistic title="累计折旧合计" value={(data as any).totalDepreciation} precision={2} /></Col>
-          <Col span={6}><Statistic title="净值合计" value={(data as any).totalNet} precision={2} /></Col>
+          <Col span={6}><Statistic title="资产总数" value={data.totalCount} /></Col>
+          <Col span={6}><Statistic title="资产原值合计" value={data.totalOriginal} precision={2} /></Col>
+          <Col span={6}><Statistic title="累计折旧合计" value={data.totalDepreciation} precision={2} /></Col>
+          <Col span={6}><Statistic title="净值合计" value={data.totalNet} precision={2} /></Col>
         </Row>
       )}
     </Card>

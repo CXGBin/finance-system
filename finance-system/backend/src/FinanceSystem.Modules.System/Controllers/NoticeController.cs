@@ -12,6 +12,9 @@ namespace FinanceSystem.Modules.System.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/system/notice")]
+/// <summary>
+/// 系统公告控制器
+/// </summary>
 public class NoticeController : ControllerBase
 {
     private readonly INoticeService _noticeService;

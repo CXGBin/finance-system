@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.Tax.Entities;
 /// 税种配置
 /// </summary>
 [SugarTable("fm_tax_category", "税种配置表")]
+/// <summary>
+/// TaxCategory
+/// </summary>
 public class TaxCategory : FullEntity
 {
     /// <summary>税种编码</summary>
@@ -70,6 +73,9 @@ public class TaxCategory : FullEntity
 /// 纳税申报记录
 /// </summary>
 [SugarTable("fm_tax_declaration", "纳税申报记录表")]
+/// <summary>
+/// TaxDeclaration
+/// </summary>
 public class TaxDeclaration : FullEntity
 {
     /// <summary>税种ID</summary>
@@ -126,6 +132,9 @@ public class TaxDeclaration : FullEntity
 /// 发票登记
 /// </summary>
 [SugarTable("fm_tax_invoice", "发票登记表")]
+/// <summary>
+/// TaxInvoice
+/// </summary>
 public class TaxInvoice : FullEntity
 {
     /// <summary>发票类型：1增值税专用发票 2增值税普通发票 3其他</summary>

@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.Accounts;
 /// <summary>
 /// 账务管理模块定义（核心模块，始终启用）
 /// </summary>
+/// <summary>
+/// AccountsModuleDefinition
+/// </summary>
 public class AccountsModuleDefinition : IModuleDefinition
 {
     public string ModuleId => "account";

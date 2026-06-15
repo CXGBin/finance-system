@@ -22,6 +22,7 @@ public interface IAssetCardService
     Task<AssetCard?> GetByIdAsync(long id);
     Task<long> CreateAsync(AssetCardRequest request);
     Task UpdateAsync(long id, AssetCardRequest request);
+    Task DeleteAsync(long id);
     Task ChangeStatusAsync(long id, int changeType, AssetChangeRequest request, long currentUserId);
     Task<List<AssetCard>> GetDepreciableListAsync(int month);
     /// <summary>资产处置（报废/出售）并自动生成凭证</summary>
@@ -188,6 +189,18 @@ public class AssetCardService : IAssetCardService
         entity.Location = request.Location;
         entity.Remark = request.Remark;
         await _db.Updateable(entity).ExecuteCommandAsync();
+    }
+
+    /// <summary>
+    /// 删除资产卡片
+    /// </summary>
+    public async Task DeleteAsync(long id)
+    {
+        var entity = await _db.Queryable<AssetCard>().FirstAsync(c => c.Id == id)
+            ?? throw new NotFoundException("资产不存在");
+        if (entity.Status == 4 || entity.Status == 5)
+            throw new InvalidOperationException("已处置或已报废的资产不可删除");
+        await _db.Deleteable<AssetCard>().Where(c => c.Id == id).ExecuteCommandAsync();
     }
 
     /// <summary>

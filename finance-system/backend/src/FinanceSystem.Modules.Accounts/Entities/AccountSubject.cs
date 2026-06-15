@@ -7,18 +7,27 @@ namespace FinanceSystem.Modules.Accounts.Entities;
 /// 会计科目实体
 /// </summary>
 [SugarTable("fm_account_subject", "会计科目表")]
+/// <summary>
+/// AccountSubject
+/// </summary>
 public class AccountSubject : BaseEntity
 {
     /// <summary>
     /// 科目编码（如1001、1002.01）
     /// </summary>
     [SugarColumn(Length = 20)]
+    /// <summary>
+    /// 科目编码
+    /// </summary>
     public string SubjectCode { get; set; } = string.Empty;
 
     /// <summary>
     /// 科目名称
     /// </summary>
     [SugarColumn(Length = 100)]
+    /// <summary>
+    /// 科目名称
+    /// </summary>
     public string SubjectName { get; set; } = string.Empty;
 
     /// <summary>

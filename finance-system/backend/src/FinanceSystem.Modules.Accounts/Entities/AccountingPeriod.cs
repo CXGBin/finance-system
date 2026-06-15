@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.Accounts.Entities;
 /// 会计期间实体
 /// </summary>
 [SugarTable("fm_period", "会计期间表")]
+/// <summary>
+/// AccountingPeriod
+/// </summary>
 public class AccountingPeriod : BaseEntity
 {
     /// <summary>

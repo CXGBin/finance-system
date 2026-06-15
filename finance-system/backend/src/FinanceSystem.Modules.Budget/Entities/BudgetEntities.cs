@@ -7,6 +7,9 @@ namespace FinanceSystem.Modules.Budget.Entities;
 /// 预算年度
 /// </summary>
 [SugarTable("fm_budget_year", "预算年度表")]
+/// <summary>
+/// BudgetYear
+/// </summary>
 public class BudgetYear : FullEntity
 {
     /// <summary>
@@ -50,6 +53,9 @@ public class BudgetYear : FullEntity
 /// 预算科目（科目维度预算设置）
 /// </summary>
 [SugarTable("fm_budget_subject", "预算科目表")]
+/// <summary>
+/// BudgetSubject
+/// </summary>
 public class BudgetSubject : FullEntity
 {
     /// <summary>
@@ -102,6 +108,9 @@ public class BudgetSubject : FullEntity
 /// 月度预算明细
 /// </summary>
 [SugarTable("fm_budget_monthly", "月度预算明细表")]
+/// <summary>
+/// BudgetMonthly
+/// </summary>
 public class BudgetMonthly : FullEntity
 {
     /// <summary>
@@ -136,6 +145,9 @@ public class BudgetMonthly : FullEntity
 /// 预算调整记录
 /// </summary>
 [SugarTable("fm_budget_adjustment", "预算调整记录表")]
+/// <summary>
+/// BudgetAdjustment
+/// </summary>
 public class BudgetAdjustment : FullEntity
 {
     /// <summary>
@@ -215,6 +227,9 @@ public class BudgetAdjustment : FullEntity
 /// 预算预警配置
 /// </summary>
 [SugarTable("fm_budget_alert_config", "预算预警配置表")]
+/// <summary>
+/// BudgetAlertConfig
+/// </summary>
 public class BudgetAlertConfig : FullEntity
 {
     /// <summary>

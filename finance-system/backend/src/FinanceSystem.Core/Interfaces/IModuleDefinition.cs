@@ -5,6 +5,9 @@ namespace FinanceSystem.Core.Interfaces;
 /// <summary>
 /// 模块定义接口（每个业务模块实现此接口）
 /// </summary>
+/// <summary>
+/// IModuleDefinition
+/// </summary>
 public interface IModuleDefinition
 {
     /// <summary>
@@ -41,6 +44,9 @@ public interface IModuleDefinition
 
 /// <summary>
 /// 模块注册器（管理所有模块的注册与查询）
+/// </summary>
+/// <summary>
+/// IModuleRegistry
 /// </summary>
 public interface IModuleRegistry
 {

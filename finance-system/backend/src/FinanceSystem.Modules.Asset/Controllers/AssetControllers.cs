@@ -9,6 +9,9 @@ namespace FinanceSystem.Modules.Asset.Controllers;
 
 [ApiController]
 [Route("api/asset/category")]
+/// <summary>
+/// 资产分类控制器
+/// </summary>
 public class AssetCategoryController : ControllerBase
 {
     private readonly IAssetCategoryService _service;
@@ -29,6 +32,9 @@ public class AssetCategoryController : ControllerBase
 
 [ApiController]
 [Route("api/asset/card")]
+/// <summary>
+/// 资产卡片控制器
+/// </summary>
 public class AssetCardController : ControllerBase
 {
     private readonly IAssetCardService _service;
@@ -46,12 +52,21 @@ public class AssetCardController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ApiResult<bool>> Update(long id, [FromBody] AssetCardRequest request) { await _service.UpdateAsync(id, request); return ApiResult<bool>.Success(true); }
 
+    /// <summary>
+    /// 删除资产卡片
+    /// </summary>
+    [HttpDelete("{id}")]
+    public async Task<ApiResult<bool>> Delete(long id) { await _service.DeleteAsync(id); return ApiResult<bool>.Success(true); }
+
     [HttpPost("{id}/change")]
     public async Task<ApiResult<bool>> ChangeStatus(long id, [FromQuery] int changeType, [FromBody] AssetChangeRequest request) { await _service.ChangeStatusAsync(id, changeType, request, HttpContext.GetCurrentUserId()); return ApiResult<bool>.Success(true); }
 }
 
 [ApiController]
 [Route("api/asset/depreciation")]
+/// <summary>
+/// 资产折旧控制器
+/// </summary>
 public class AssetDepreciationController : ControllerBase
 {
     private readonly IAssetDepreciationService _service;
@@ -70,6 +85,9 @@ public class AssetDepreciationController : ControllerBase
 /// <summary>资产盘点控制器</summary>
 [ApiController]
 [Route("api/asset/inventory")]
+/// <summary>
+/// 资产盘点控制器
+/// </summary>
 public class AssetInventoryController : ControllerBase
 {
     private readonly IAssetInventoryService _service;
@@ -88,6 +106,9 @@ public class AssetInventoryController : ControllerBase
 /// <summary>资产报表控制器</summary>
 [ApiController]
 [Route("api/asset/report")]
+/// <summary>
+/// 资产报表控制器
+/// </summary>
 public class AssetReportController : ControllerBase
 {
     private readonly IAssetReportService _service;

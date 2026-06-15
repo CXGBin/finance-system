@@ -8,6 +8,9 @@ namespace FinanceSystem.Modules.Budget.Services;
 /// <summary>
 /// 预算年度服务实现
 /// </summary>
+/// <summary>
+/// 预算年度服务实现
+/// </summary>
 public class BudgetYearService : IBudgetYearService
 {
     private readonly ISqlSugarClient _db;
@@ -59,6 +62,9 @@ public class BudgetYearService : IBudgetYearService
     }
 }
 
+/// <summary>
+/// 预算科目服务实现
+/// </summary>
 /// <summary>
 /// 预算科目服务实现
 /// </summary>
@@ -126,6 +132,9 @@ public class BudgetSubjectService : IBudgetSubjectService
     }
 }
 
+/// <summary>
+/// 月度预算服务实现
+/// </summary>
 /// <summary>
 /// 月度预算服务实现
 /// </summary>
@@ -207,6 +216,9 @@ public class BudgetMonthlyService : IBudgetMonthlyService
 /// <summary>
 /// 预算执行跟踪服务实现
 /// </summary>
+/// <summary>
+/// 预算执行跟踪服务实现
+/// </summary>
 public class BudgetExecutionService : IBudgetExecutionService
 {
     private readonly ISqlSugarClient _db;
@@ -284,6 +296,9 @@ public class BudgetExecutionService : IBudgetExecutionService
 /// <summary>
 /// 预算调整服务实现
 /// </summary>
+/// <summary>
+/// 预算调整服务实现
+/// </summary>
 public class BudgetAdjustService : IBudgetAdjustService
 {
     private readonly ISqlSugarClient _db;
@@ -346,6 +361,9 @@ public class BudgetAdjustService : IBudgetAdjustService
 /// <summary>
 /// 预算预警服务实现
 /// </summary>
+/// <summary>
+/// 预算预警服务实现
+/// </summary>
 public class BudgetAlertService : IBudgetAlertService
 {
     private readonly ISqlSugarClient _db;
@@ -404,6 +422,9 @@ public class BudgetAlertService : IBudgetAlertService
     }
 }
 
+/// <summary>
+/// 预算分析服务实现
+/// </summary>
 /// <summary>
 /// 预算分析服务实现
 /// </summary>

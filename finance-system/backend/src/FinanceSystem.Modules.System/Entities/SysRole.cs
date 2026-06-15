@@ -7,18 +7,27 @@ namespace FinanceSystem.Modules.System.Entities;
 /// 系统角色实体
 /// </summary>
 [SugarTable("sys_role", "系统角色表")]
+/// <summary>
+/// SysRole
+/// </summary>
 public class SysRole : BaseEntity
 {
     /// <summary>
     /// 角色名称
     /// </summary>
     [SugarColumn(Length = 50)]
+    /// <summary>
+    /// 角色名称
+    /// </summary>
     public string RoleName { get; set; } = string.Empty;
 
     /// <summary>
     /// 角色编码（唯一，大写字母+下划线）
     /// </summary>
     [SugarColumn(Length = 50)]
+    /// <summary>
+    /// 角色编码
+    /// </summary>
     public string RoleCode { get; set; } = string.Empty;
 
     /// <summary>

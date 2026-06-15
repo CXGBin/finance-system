@@ -8,6 +8,9 @@ namespace FinanceSystem.Modules.Reports.Services;
 /// <summary>
 /// 资产负债表服务接口
 /// </summary>
+/// <summary>
+/// 资产负债表服务接口
+/// </summary>
 public interface IBalanceSheetService
 {
     /// <summary>
@@ -16,6 +19,9 @@ public interface IBalanceSheetService
     Task<BalanceSheetResult> GenerateAsync(ReportQuery query);
 }
 
+/// <summary>
+/// 利润表服务接口
+/// </summary>
 /// <summary>
 /// 利润表服务接口
 /// </summary>
@@ -30,6 +36,9 @@ public interface IIncomeStatementService
 /// <summary>
 /// 现金流量表服务接口
 /// </summary>
+/// <summary>
+/// 现金流量表服务接口
+/// </summary>
 public interface ICashFlowService
 {
     /// <summary>
@@ -41,6 +50,9 @@ public interface ICashFlowService
 /// <summary>
 /// 科目余额表服务接口
 /// </summary>
+/// <summary>
+/// 科目余额表服务接口
+/// </summary>
 public interface ISubjectBalanceReportService
 {
     /// <summary>
@@ -49,6 +61,9 @@ public interface ISubjectBalanceReportService
     Task<object> GetReportAsync(SubjectBalanceReportQuery query);
 }
 
+/// <summary>
+/// 自定义报表服务接口
+/// </summary>
 /// <summary>
 /// 自定义报表服务接口
 /// </summary>
@@ -83,6 +98,9 @@ public interface ICustomReportService
 /// <summary>
 /// 报表导出服务接口
 /// </summary>
+/// <summary>
+/// 报表导出服务接口
+/// </summary>
 public interface IReportExportService
 {
     /// <summary>
@@ -91,6 +109,9 @@ public interface IReportExportService
     Task<string> ExportAsync(ExportQuery query);
 }
 
+/// <summary>
+/// 多期对比服务接口
+/// </summary>
 /// <summary>
 /// 多期对比服务接口
 /// </summary>

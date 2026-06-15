@@ -4,10 +4,25 @@ namespace FinanceSystem.Modules.Tax.DTOs;
 /// <summary>税种创建/修改</summary>
 public class TaxCategoryRequest
 {
+    /// <summary>
+    /// 税种编码
+    /// </summary>
     public string TaxCode { get; set; } = string.Empty;
+    /// <summary>
+    /// 税种名称
+    /// </summary>
     public string TaxName { get; set; } = string.Empty;
+    /// <summary>
+    /// 税率（%）
+    /// </summary>
     public decimal TaxRate { get; set; }
+    /// <summary>
+    /// 计算方法（1从价 2从量）
+    /// </summary>
     public int CalculationMethod { get; set; } = 1;
+    /// <summary>
+    /// 申报周期（1月度 2季度 3年度）
+    /// </summary>
     public int DeclareCycle { get; set; } = 1;
     public long? SubjectId { get; set; }
     public string? Remark { get; set; }
@@ -24,12 +39,33 @@ public class TaxDeclarationQuery : PageRequest
 /// <summary>发票登记请求</summary>
 public class TaxInvoiceRequest
 {
+    /// <summary>
+    /// 发票类型（1进项 2销项）
+    /// </summary>
     public int InvoiceType { get; set; }
+    /// <summary>
+    /// 发票号码
+    /// </summary>
     public string InvoiceNo { get; set; } = string.Empty;
+    /// <summary>
+    /// 开票日期
+    /// </summary>
     public DateTime InvoiceDate { get; set; }
+    /// <summary>
+    /// 对方名称
+    /// </summary>
     public string CounterpartyName { get; set; } = string.Empty;
+    /// <summary>
+    /// 应纳税额
+    /// </summary>
     public decimal TaxAmount { get; set; }
+    /// <summary>
+    /// 不含税金额
+    /// </summary>
     public decimal AmountWithoutTax { get; set; }
+    /// <summary>
+    /// 收支方向
+    /// </summary>
     public int Direction { get; set; }
     public string? Remark { get; set; }
 }
@@ -47,6 +83,9 @@ public class TaxInvoiceQuery : PageRequest
 public class TaxCalculateRequest
 {
     public long TaxCategoryId { get; set; }
+    /// <summary>
+    /// 申报期间
+    /// </summary>
     public string DeclarePeriod { get; set; } = string.Empty;
     /// <summary>手动指定的应纳税额基数（仅当税种未关联科目时使用）</summary>
     public decimal? TaxBase { get; set; }
@@ -55,6 +94,9 @@ public class TaxCalculateRequest
 /// <summary>附加税计算请求</summary>
 public class SurchargeRequest
 {
+    /// <summary>
+    /// 申报期间
+    /// </summary>
     public string DeclarePeriod { get; set; } = string.Empty;
     public long VatDeclarationId { get; set; }
 }

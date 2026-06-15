@@ -3,6 +3,9 @@ namespace FinanceSystem.Core.Common;
 /// <summary>
 /// 业务异常
 /// </summary>
+/// <summary>
+/// BusinessException
+/// </summary>
 public class BusinessException : Exception
 {
     /// <summary>
@@ -24,6 +27,9 @@ public class BusinessException : Exception
 /// <summary>
 /// 未授权异常（401）
 /// </summary>
+/// <summary>
+/// UnauthorizedException
+/// </summary>
 public class UnauthorizedException : BusinessException
 {
     /// <summary>
@@ -38,6 +44,9 @@ public class UnauthorizedException : BusinessException
 /// <summary>
 /// 禁止访问异常（403）
 /// </summary>
+/// <summary>
+/// ForbiddenException
+/// </summary>
 public class ForbiddenException : BusinessException
 {
     /// <summary>
@@ -51,6 +60,9 @@ public class ForbiddenException : BusinessException
 
 /// <summary>
 /// 资源未找到异常（404）
+/// </summary>
+/// <summary>
+/// NotFoundException
 /// </summary>
 public class NotFoundException : BusinessException
 {

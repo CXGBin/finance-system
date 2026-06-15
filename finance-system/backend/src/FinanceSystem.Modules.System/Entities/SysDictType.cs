@@ -7,18 +7,27 @@ namespace FinanceSystem.Modules.System.Entities;
 /// 数据字典类型实体
 /// </summary>
 [SugarTable("sys_dict_type", "数据字典类型表")]
+/// <summary>
+/// SysDictType
+/// </summary>
 public class SysDictType : BaseEntity
 {
     /// <summary>
     /// 字典名称（如"凭证类型"）
     /// </summary>
     [SugarColumn(Length = 100)]
+    /// <summary>
+    /// 字典名称
+    /// </summary>
     public string DictName { get; set; } = string.Empty;
 
     /// <summary>
     /// 字典类型编码（唯一，如"voucher_type"）
     /// </summary>
     [SugarColumn(Length = 100)]
+    /// <summary>
+    /// 字典类型编码
+    /// </summary>
     public string DictType { get; set; } = string.Empty;
 
     /// <summary>
