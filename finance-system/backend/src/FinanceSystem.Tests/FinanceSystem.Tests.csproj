@@ -30,6 +30,11 @@
     <ProjectReference Include="..\FinanceSystem.Modules.System\FinanceSystem.Modules.System.csproj" />
     <ProjectReference Include="..\FinanceSystem.Modules.Accounts\FinanceSystem.Modules.Accounts.csproj" />
     <ProjectReference Include="..\FinanceSystem.Modules.Asset\FinanceSystem.Modules.Asset.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Modules.Budget\FinanceSystem.Modules.Budget.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Modules.Approval\FinanceSystem.Modules.Approval.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Modules.Expense\FinanceSystem.Modules.Expense.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Modules.Reports\FinanceSystem.Modules.Reports.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Modules.Tax\FinanceSystem.Modules.Tax.csproj" />
   </ItemGroup>
 
 </Project>
