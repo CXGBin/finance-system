@@ -14,10 +14,12 @@ namespace FinanceSystem.Modules.System.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly IUserService _userService;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, IUserService userService)
     {
         _authService = authService;
+        _userService = userService;
     }
 
     /// <summary>
@@ -29,6 +31,19 @@ public class AuthController : ControllerBase
         var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
         var result = await _authService.LoginAsync(request, ip);
         return ApiResult<LoginResponse>.Success(result);
+    }
+
+    /// <summary>
+    /// 获取当前登录用户信息
+    /// </summary>
+    [HttpPost("userinfo")]
+    public async Task<ApiResult<UserProfile>> GetUserInfo()
+    {
+        var userId = HttpContext.GetCurrentUserId();
+        if (userId <= 0) return ApiResult<UserProfile>.Fail("未登录");
+        var profile = await _userService.GetProfileAsync(userId);
+        if (profile == null) return ApiResult<UserProfile>.Fail("用户信息不存在");
+        return ApiResult<UserProfile>.Success(profile);
     }
 
     /// <summary>
