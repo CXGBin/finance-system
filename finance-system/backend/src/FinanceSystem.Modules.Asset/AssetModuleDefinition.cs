@@ -23,5 +23,6 @@ public class AssetModuleDefinition : IModuleDefinition
         services.AddScoped<IAssetCategoryService, AssetCategoryService>();
         services.AddScoped<IAssetCardService, AssetCardService>();
         services.AddScoped<IAssetDepreciationService, AssetDepreciationService>();
+        services.AddScoped<IAssetInventoryService, AssetInventoryService>();
     }
 }

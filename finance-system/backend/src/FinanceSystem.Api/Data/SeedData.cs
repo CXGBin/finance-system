@@ -36,62 +36,102 @@ public static class SeedData
         }
         else
         {
-            // SQL Server等：使用CodeFirst自动建表
-            db.CodeFirst.InitTables<SysModule>();
-            db.CodeFirst.InitTables<SysRole>();
-            db.CodeFirst.InitTables<SysDept>();
-            db.CodeFirst.InitTables<SysUser>();
-            db.CodeFirst.InitTables<SysUserRole>();
-            db.CodeFirst.InitTables<SysMenu>();
-            db.CodeFirst.InitTables<SysRoleMenu>();
-            db.CodeFirst.InitTables<SysPost>();
-            db.CodeFirst.InitTables<SysDictType>();
-            db.CodeFirst.InitTables<SysDictData>();
-            db.CodeFirst.InitTables<SysLog>();
-            db.CodeFirst.InitTables<SysConfig>();
-            db.CodeFirst.InitTables<SysNotice>();
-            db.CodeFirst.InitTables<AccountSubject>();
-            db.CodeFirst.InitTables<AccountingPeriod>();
-            db.CodeFirst.InitTables<SubjectBalance>();
-            db.CodeFirst.InitTables<Voucher>();
-            db.CodeFirst.InitTables<VoucherEntry>();
-            db.CodeFirst.InitTables<AuxProject>();
-            db.CodeFirst.InitTables<AuxCustomer>();
-            db.CodeFirst.InitTables<AuxSupplier>();
-            db.CodeFirst.InitTables<ApprovalFlow>();
-            db.CodeFirst.InitTables<ApprovalInstance>();
-            db.CodeFirst.InitTables<ApprovalRecord>();
-            db.CodeFirst.InitTables<AssetCategory>();
-            db.CodeFirst.InitTables<AssetCard>();
-            db.CodeFirst.InitTables<AssetDepreciation>();
-            db.CodeFirst.InitTables<AssetChange>();
-            db.CodeFirst.InitTables<AssetInventory>();
-            db.CodeFirst.InitTables<BudgetYear>();
-            db.CodeFirst.InitTables<BudgetSubject>();
-            db.CodeFirst.InitTables<BudgetMonthly>();
-            db.CodeFirst.InitTables<BudgetAdjustment>();
-            db.CodeFirst.InitTables<BudgetAlertConfig>();
-            db.CodeFirst.InitTables<ExpenseType>();
-            db.CodeFirst.InitTables<ExpenseClaim>();
-            db.CodeFirst.InitTables<ExpenseItem>();
-            db.CodeFirst.InitTables<ExpenseAllocate>();
-            db.CodeFirst.InitTables<TaxCategory>();
-            db.CodeFirst.InitTables<TaxDeclaration>();
-            db.CodeFirst.InitTables<TaxInvoice>();
-            db.CodeFirst.InitTables<ReportTemplate>();
+            // SQL Server等：检查表是否已存在（init.sql已创建则跳过CodeFirst）
+            var hasModuleTable = db.Ado.GetScalar("SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE' AND TABLE_NAME='sys_module'") != null;
+            if (!hasModuleTable)
+            {
+                // 使用CodeFirst自动建表
+                db.CodeFirst.InitTables<SysModule>();
+                db.CodeFirst.InitTables<SysRole>();
+                db.CodeFirst.InitTables<SysDept>();
+                db.CodeFirst.InitTables<SysUser>();
+                db.CodeFirst.InitTables<SysUserRole>();
+                db.CodeFirst.InitTables<SysMenu>();
+                db.CodeFirst.InitTables<SysRoleMenu>();
+                db.CodeFirst.InitTables<SysPost>();
+                db.CodeFirst.InitTables<SysDictType>();
+                db.CodeFirst.InitTables<SysDictData>();
+                db.CodeFirst.InitTables<SysLog>();
+                db.CodeFirst.InitTables<SysConfig>();
+                db.CodeFirst.InitTables<SysNotice>();
+                db.CodeFirst.InitTables<AccountSubject>();
+                db.CodeFirst.InitTables<AccountingPeriod>();
+                db.CodeFirst.InitTables<SubjectBalance>();
+                db.CodeFirst.InitTables<Voucher>();
+                db.CodeFirst.InitTables<VoucherEntry>();
+                db.CodeFirst.InitTables<AuxProject>();
+                db.CodeFirst.InitTables<AuxCustomer>();
+                db.CodeFirst.InitTables<AuxSupplier>();
+                db.CodeFirst.InitTables<ApprovalFlow>();
+                db.CodeFirst.InitTables<ApprovalInstance>();
+                db.CodeFirst.InitTables<ApprovalRecord>();
+                db.CodeFirst.InitTables<AssetCategory>();
+                db.CodeFirst.InitTables<AssetCard>();
+                db.CodeFirst.InitTables<AssetDepreciation>();
+                db.CodeFirst.InitTables<AssetChange>();
+                db.CodeFirst.InitTables<AssetInventory>();
+                db.CodeFirst.InitTables<BudgetYear>();
+                db.CodeFirst.InitTables<BudgetSubject>();
+                db.CodeFirst.InitTables<BudgetMonthly>();
+                db.CodeFirst.InitTables<BudgetAdjustment>();
+                db.CodeFirst.InitTables<BudgetAlertConfig>();
+                db.CodeFirst.InitTables<ExpenseType>();
+                db.CodeFirst.InitTables<ExpenseClaim>();
+                db.CodeFirst.InitTables<ExpenseItem>();
+                db.CodeFirst.InitTables<ExpenseAllocate>();
+                db.CodeFirst.InitTables<TaxCategory>();
+                db.CodeFirst.InitTables<TaxDeclaration>();
+                db.CodeFirst.InitTables<TaxInvoice>();
+                db.CodeFirst.InitTables<ReportTemplate>();
+            }
+            else
+            {
+                Console.WriteLine("数据库表已存在，跳过CodeFirst建表");
+            }
         }
 
-        // 检查是否已有数据，避免重复初始化
+        // 检查是否已有数据，避免重复初始化（逐表检查，支持init.sql部分种子）
+        var moduleCount = await db.Queryable<SysModule>().CountAsync();
+        var roleCount = await db.Queryable<SysRole>().CountAsync();
         var userCount = await db.Queryable<SysUser>().CountAsync();
-        if (userCount > 0) return;
+        var menuCount = await db.Queryable<SysMenu>().CountAsync();
+        var roleMenuCount = await db.Queryable<SysRoleMenu>().CountAsync();
+        var userRoleCount = await db.Queryable<SysUserRole>().CountAsync();
 
-        // 按顺序初始化各模块种子数据
-        await InitModulesAsync(db);
-        var roleId = await InitRoleAsync(db);
-        var deptId = await InitDeptAsync(db);
-        var userId = await InitAdminUserAsync(db, roleId, deptId);
-        var menuIds = await InitMenusAsync(db);
-        await InitRoleMenuAsync(db, roleId, menuIds);
+        if (moduleCount == 0) await InitModulesAsync(db);
+        long roleId = roleCount > 0 ? (await db.Queryable<SysRole>().FirstAsync())!.Id : await InitRoleAsync(db);
+        var deptCount = await db.Queryable<SysDept>().CountAsync();
+        long deptId = deptCount > 0 ? (await db.Queryable<SysDept>().FirstAsync())!.Id : await InitDeptAsync(db);
+
+        if (userCount == 0)
+        {
+            var userId = await InitAdminUserAsync(db, roleId, deptId);
+        }
+        else if (userRoleCount == 0)
+        {
+            // 用户已存在但未关联角色（如init.sql只建了用户）
+            var adminUser = await db.Queryable<SysUser>().FirstAsync(u => u.Username == "admin")!
+                ?? await db.Queryable<SysUser>().FirstAsync();
+            if (adminUser != null)
+            {
+                await db.Insertable(new SysUserRole { UserId = adminUser.Id, RoleId = roleId }).ExecuteCommandAsync();
+            }
+        }
+
+        List<long> menuIds;
+        if (menuCount == 0)
+        {
+            menuIds = await InitMenusAsync(db);
+        }
+        else
+        {
+            menuIds = await db.Queryable<SysMenu>().Select(m => m.Id).ToListAsync();
+        }
+
+        if (roleMenuCount == 0 && menuIds.Count > 0)
+        {
+            await InitRoleMenuAsync(db, roleId, menuIds);
+        }
     }
 
     /// <summary>

@@ -23,5 +23,6 @@ public class ExpenseModuleDefinition : IModuleDefinition
         services.AddScoped<IExpenseTypeService, ExpenseTypeService>();
         services.AddScoped<IExpenseClaimService, ExpenseClaimService>();
         services.AddScoped<IExpenseStatisticsService, ExpenseStatisticsService>();
+        services.AddScoped<IExpenseAllocateService, ExpenseAllocateService>();
     }
 }

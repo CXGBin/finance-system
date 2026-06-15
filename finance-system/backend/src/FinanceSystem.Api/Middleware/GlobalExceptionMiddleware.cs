@@ -43,9 +43,10 @@ public class GlobalExceptionMiddleware
         {
             await HandleException(context, ex.Message, 401);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            await HandleException(context, "服务器内部错误", 500);
+            Console.WriteLine($"[ERROR] {ex}");
+            await HandleException(context, $"服务器内部错误: {ex.Message}", 500);
         }
     }
 

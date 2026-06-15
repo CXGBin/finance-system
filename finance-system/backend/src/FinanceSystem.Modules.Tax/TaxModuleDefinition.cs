@@ -23,5 +23,7 @@ public class TaxModuleDefinition : IModuleDefinition
         services.AddScoped<ITaxCategoryService, TaxCategoryService>();
         services.AddScoped<ITaxDeclarationService, TaxDeclarationService>();
         services.AddScoped<ITaxInvoiceService, TaxInvoiceService>();
+        services.AddScoped<ITaxCalendarService, TaxCalendarService>();
+        services.AddScoped<ITaxReportService, TaxReportService>();
     }
 }

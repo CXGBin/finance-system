@@ -26,5 +26,6 @@ public class BudgetModuleDefinition : IModuleDefinition
         services.AddScoped<IBudgetExecutionService, BudgetExecutionService>();
         services.AddScoped<IBudgetAdjustService, BudgetAdjustService>();
         services.AddScoped<IBudgetAlertService, BudgetAlertService>();
+        services.AddScoped<IBudgetAnalysisService, BudgetAnalysisService>();
     }
 }

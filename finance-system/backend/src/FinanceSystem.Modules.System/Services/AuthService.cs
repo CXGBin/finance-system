@@ -240,9 +240,8 @@ public class AuthService : IAuthService
             .ToListAsync();
 
         var permissions = await _db.Queryable<SysMenu>()
-            .Where(m => menuIds.Contains(m.Id) && m.Status == 1 && m.MenuType == 3)
+            .Where(m => menuIds.Contains(m.Id) && m.Status == 1 && m.MenuType == 3 && m.Permission != null)
             .Select(m => m.Permission!)
-            .Where(p => p != null)
             .ToListAsync();
 
         // 查询已启用模块
