@@ -12,8 +12,13 @@ const CustomReport: React.FC = () => {
   useEffect(() => { loadIds(); }, []);
 
   const loadIds = async () => {
-    // TODO: 从报表模板API获取列表
-    setReportIds([{ label: '自定义报表1', value: '1' }]);
+    try {
+      const res = await reportApi.templateList({ pageIndex: 1, pageSize: 100 });
+      const list = (res.data as any)?.list || res.data || [];
+      setReportIds(list.map((t: any) => ({ label: t.templateName || t.name, value: String(t.id) })));
+    } catch {
+      setReportIds([]);
+    }
   };
 
   const loadData = async () => {

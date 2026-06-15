@@ -1,0 +1,47 @@
+import { get, post, put, del } from './request';
+import type { ExpenseType, ExpenseClaim, PaymentRecord, ExpenseAllocate, ExpenseStats } from '@/types/expense.d';
+import type { PageParams, PagedResult } from '@/types/api.d';
+
+export const expenseApi = {
+  // ========== 费用类型（后端: api/expense/type）==========
+  /** 获取费用类型列表 */
+  typeList: () => get<ExpenseType[]>('/expense/type/list'),
+  /** 新增费用类型 */
+  typeAdd: (data: Partial<ExpenseType>) => post('/expense/type', data),
+  /** 修改费用类型 */
+  typeUpdate: (data: Partial<ExpenseType>) => put(`/expense/type/${data.id}`, data),
+  /** 删除费用类型 */
+  typeRemove: (id: number) => del(`/expense/type/${id}`),
+
+  // ========== 报销管理（后端: api/expense/claim）==========
+  /** 获取报销列表 */
+  claimList: (params: PageParams & Partial<ExpenseClaim>) => get<PagedResult<ExpenseClaim>>('/expense/claim/list', params as any),
+  /** 获取报销详情 */
+  claimDetail: (id: number) => get<ExpenseClaim>(`/expense/claim/${id}`),
+  /** 新增报销 */
+  claimAdd: (data: Partial<ExpenseClaim>) => post('/expense/claim', data),
+  /** 修改报销 */
+  claimUpdate: (data: Partial<ExpenseClaim>) => put(`/expense/claim/${data.id}`, data),
+  /** 提交报销 */
+  claimSubmit: (id: number) => post(`/expense/claim/${id}/submit`),
+  /** 审批通过 */
+  claimApprove: (id: number) => post(`/expense/claim/${id}/approve`),
+  /** 审批驳回 */
+  claimReject: (id: number) => post(`/expense/claim/${id}/reject`),
+  /** 确认付款 */
+  claimPay: (id: number) => post(`/expense/claim/${id}/pay`),
+
+  // ========== 费用统计（后端: api/expense/statistics）==========
+  /** 获取费用统计 */
+  statistics: (params: Record<string, unknown>) => get<ExpenseStats[]>('/expense/statistics', params as any),
+
+  // ========== 兼容旧调用（别名）==========
+  /** 付款列表（后端暂无独立付款接口，使用报销列表过滤已付款） */
+  paymentList: (params: PageParams) => get<PagedResult<ExpenseClaim>>('/expense/claim/list', { ...params, paymentStatus: 1 } as any),
+  /** 付款确认 */
+  paymentConfirm: (id: number) => post(`/expense/claim/${id}/pay`),
+  /** 分摊列表（后端暂无独立分摊接口） */
+  allocateList: (params: PageParams) => get<PagedResult<ExpenseAllocate>>('/expense/claim/list', params as any),
+  /** 新增分摊 */
+  allocateAdd: (data: Partial<ExpenseAllocate>) => post('/expense/claim', data),
+};
