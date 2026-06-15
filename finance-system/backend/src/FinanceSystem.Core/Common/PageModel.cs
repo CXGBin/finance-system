@@ -1,0 +1,49 @@
+namespace FinanceSystem.Core.Common;
+
+/// <summary>
+/// 分页请求参数
+/// </summary>
+public class PageRequest
+{
+    /// <summary>
+    /// 页码（从1开始）
+    /// </summary>
+    public int PageIndex { get; set; } = 1;
+
+    /// <summary>
+    /// 每页条数
+    /// </summary>
+    public int PageSize { get; set; } = 20;
+}
+
+/// <summary>
+/// 分页响应数据
+/// </summary>
+/// <typeparam name="T">数据项类型</typeparam>
+public class PageResult<T>
+{
+    /// <summary>
+    /// 数据列表
+    /// </summary>
+    public List<T> List { get; set; } = new();
+
+    /// <summary>
+    /// 总记录数
+    /// </summary>
+    public int Total { get; set; }
+
+    /// <summary>
+    /// 当前页码
+    /// </summary>
+    public int PageIndex { get; set; }
+
+    /// <summary>
+    /// 每页条数
+    /// </summary>
+    public int PageSize { get; set; }
+
+    /// <summary>
+    /// 总页数
+    /// </summary>
+    public int TotalPages => PageSize > 0 ? (int)Math.Ceiling((double)Total / PageSize) : 0;
+}

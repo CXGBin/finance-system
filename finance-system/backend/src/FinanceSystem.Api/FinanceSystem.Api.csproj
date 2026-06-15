@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FinanceSystem.Core\FinanceSystem.Core.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Infrastructure\FinanceSystem.Infrastructure.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Modules.System\FinanceSystem.Modules.System.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Modules.Accounts\FinanceSystem.Modules.Accounts.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Modules.Reports\FinanceSystem.Modules.Reports.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Modules.Budget\FinanceSystem.Modules.Budget.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Modules.Approval\FinanceSystem.Modules.Approval.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Modules.Asset\FinanceSystem.Modules.Asset.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Modules.Expense\FinanceSystem.Modules.Expense.csproj" />
+    <ProjectReference Include="..\FinanceSystem.Modules.Tax\FinanceSystem.Modules.Tax.csproj" />
+  </ItemGroup>
+</Project>
