@@ -85,6 +85,11 @@ public interface IVoucherService
     Task VoidAsync(long id);
 
     /// <summary>
+    /// 复制凭证（生成草稿副本）
+    /// </summary>
+    Task<long> CopyAsync(long id);
+
+    /// <summary>
     /// 批量审核凭证
     /// </summary>
     Task BatchAuditAsync(List<long> ids, long currentUserId);

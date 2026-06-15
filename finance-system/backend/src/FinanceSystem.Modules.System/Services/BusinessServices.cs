@@ -501,3 +501,51 @@ public class ConfigService : IConfigService
         }
     }
 }
+
+/// <summary>
+/// 系统公告服务实现
+/// </summary>
+public class NoticeService : INoticeService
+{
+    private readonly ISqlSugarClient _db;
+    public NoticeService(ISqlSugarClient db) => _db = db;
+
+    public async Task<List<SysNotice>> GetListAsync(int? noticeType = null)
+    {
+        return await _db.Queryable<SysNotice>()
+            .WhereIF(noticeType.HasValue, n => n.NoticeType == noticeType)
+            .Where(n => n.Status == 1)
+            .OrderByDescending(n => n.CreatedTime)
+            .ToListAsync();
+    }
+
+    public async Task<long> CreateAsync(NoticeCreateRequest request, long currentUserId)
+    {
+        var entity = new SysNotice
+        {
+            Title = request.Title,
+            Content = request.Content,
+            NoticeType = request.NoticeType,
+            Status = request.Status,
+            CreatedBy = currentUserId
+        };
+        await _db.Insertable(entity).ExecuteCommandAsync();
+        return entity.Id;
+    }
+
+    public async Task UpdateAsync(long id, NoticeCreateRequest request)
+    {
+        var entity = await _db.Queryable<SysNotice>().FirstAsync(n => n.Id == id)
+            ?? throw new NotFoundException("公告不存在");
+        entity.Title = request.Title;
+        entity.Content = request.Content;
+        entity.NoticeType = request.NoticeType;
+        entity.Status = request.Status;
+        await _db.Updateable(entity).ExecuteCommandAsync();
+    }
+
+    public async Task DeleteAsync(long id)
+    {
+        await _db.Deleteable<SysNotice>().Where(n => n.Id == id).ExecuteCommandAsync();
+    }
+}

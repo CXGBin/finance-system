@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { voucherApi } from '@/api/account';
 import { approvalApi } from '@/api/approval';
 import { expenseApi } from '@/api/expense';
+import { noticeApi } from '@/api/system';
 
 const { Title } = Typography;
 
@@ -25,6 +26,7 @@ const DashboardPage: React.FC = () => {
     monthlyExpense: 0,
     todoCount: 0,
   });
+  const [notices, setNotices] = useState<any[]>([]);
 
   useEffect(() => {
     loadStats();
@@ -34,15 +36,17 @@ const DashboardPage: React.FC = () => {
     setLoading(true);
     try {
       // 并行请求各模块统计数据
-      const [voucherRes, approvalRes, expenseRes] = await Promise.allSettled([
+      const [voucherRes, approvalRes, expenseRes, noticeRes] = await Promise.allSettled([
         voucherApi.page({ pageIndex: 1, pageSize: 1, currentMonth: true } as any),
         approvalApi.pending({ pageIndex: 1, pageSize: 1 } as any),
         expenseApi.statistics({ startDate: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-01` }),
+        noticeApi.list(2),
       ]);
 
       const voucherData = voucherRes.status === 'fulfilled' ? (voucherRes.value.data as any) : null;
       const approvalData = approvalRes.status === 'fulfilled' ? (approvalRes.value.data as any) : null;
       const expenseData = expenseRes.status === 'fulfilled' ? (expenseRes.value.data as any) : null;
+      const noticeData = noticeRes.status === 'fulfilled' ? (noticeRes.value.data as any) : null;
 
       setStats({
         voucherCount: voucherData?.total || 0,
@@ -50,6 +54,7 @@ const DashboardPage: React.FC = () => {
         monthlyExpense: expenseData ? (Array.isArray(expenseData) ? expenseData.reduce((s: number, d: any) => s + (d.totalAmount || 0), 0) : (expenseData.totalAmount || 0)) : 0,
         todoCount: voucherData?.total || 0,
       });
+      if (noticeData) setNotices(noticeData.slice(0, 5));
     } catch {
       // 数据加载失败时显示默认值
     } finally {
@@ -105,7 +110,13 @@ const DashboardPage: React.FC = () => {
         </Col>
         <Col span={12}>
           <Card title="系统公告" size="small">
-            <div style={{ padding: '8px 0' }}>暂无公告信息</div>
+            {notices.length > 0 ? notices.map((n: any) => (
+              <div key={n.id} style={{ padding: '4px 0', borderBottom: '1px solid #f0f0f0' }}>
+                <Typography.Text strong>{n.title}</Typography.Text>
+                <br />
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>{n.content?.substring(0, 60)}{n.content?.length > 60 ? '...' : ''}</Typography.Text>
+              </div>
+            )) : <div style={{ padding: '8px 0', color: '#999' }}>暂无公告</div>}
           </Card>
         </Col>
       </Row>

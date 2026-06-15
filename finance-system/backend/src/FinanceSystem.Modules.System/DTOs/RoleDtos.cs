@@ -58,3 +58,18 @@ public class RoleCreateRequest
     /// </summary>
     public List<long> MenuIds { get; set; } = new();
 }
+
+/// <summary>
+/// 公告创建/修改请求
+/// </summary>
+public class NoticeCreateRequest
+{
+    /// <summary>公告标题</summary>
+    public string Title { get; set; } = string.Empty;
+    /// <summary>公告内容</summary>
+    public string Content { get; set; } = string.Empty;
+    /// <summary>公告类型（1通知 2公告）</summary>
+    public int NoticeType { get; set; } = 1;
+    /// <summary>状态（0禁用 1启用）</summary>
+    public int Status { get; set; } = 1;
+}

@@ -252,4 +252,52 @@ public class VoucherService : IVoucherService
             .CountAsync() + 1;
         return $"{prefix}-{count:D4}";
     }
+
+    /// <summary>
+    /// 复制凭证（生成草稿副本）
+    /// </summary>
+    public async Task<long> CopyAsync(long id)
+    {
+        var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id)
+            ?? throw new NotFoundException("凭证不存在");
+
+        // 生成新凭证号
+        var newNo = await GenerateVoucherNoAsync(voucher.PeriodId, voucher.VoucherType);
+
+        var newVoucher = new Voucher
+        {
+            VoucherNo = newNo,
+            VoucherDate = DateTime.Today,
+            PeriodId = voucher.PeriodId,
+            VoucherType = voucher.VoucherType,
+            AbstractText = voucher.AbstractText + "（复制）",
+            Status = 0, // 草稿
+            TotalDebit = voucher.TotalDebit,
+            TotalCredit = voucher.TotalCredit,
+            PreparedBy = 0,
+            CreatedTime = DateTime.Now
+        };
+
+        await _db.Insertable(newVoucher).ExecuteCommandAsync();
+
+        // 复制分录
+        var entries = await _db.Queryable<VoucherEntry>()
+            .Where(e => e.VoucherId == id).ToListAsync();
+
+        var newEntries = entries.Select(e => new VoucherEntry
+        {
+            VoucherId = newVoucher.Id,
+            Summary = e.Summary,
+            SubjectId = e.SubjectId,
+            DebitAmount = e.DebitAmount,
+            CreditAmount = e.CreditAmount,
+            AuxiliaryType = e.AuxiliaryType,
+            AuxiliaryId = e.AuxiliaryId,
+            CreatedTime = DateTime.Now
+        }).ToList();
+
+        await _db.Insertable(newEntries).ExecuteCommandAsync();
+
+        return newVoucher.Id;
+    }
 }

@@ -224,3 +224,18 @@ public interface IConfigService
     /// <param name="items">配置修改列表</param>
     Task BatchUpdateAsync(List<ConfigUpdateRequest> items);
 }
+
+/// <summary>
+/// 系统公告服务接口
+/// </summary>
+public interface INoticeService
+{
+    /// <summary>获取公告列表</summary>
+    Task<List<SysNotice>> GetListAsync(int? noticeType = null);
+    /// <summary>新增公告</summary>
+    Task<long> CreateAsync(NoticeCreateRequest request, long currentUserId);
+    /// <summary>修改公告</summary>
+    Task UpdateAsync(long id, NoticeCreateRequest request);
+    /// <summary>删除公告</summary>
+    Task DeleteAsync(long id);
+}

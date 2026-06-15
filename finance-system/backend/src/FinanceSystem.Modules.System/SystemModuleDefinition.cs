@@ -26,5 +26,6 @@ public class SystemModuleDefinition : IModuleDefinition
         services.AddScoped<Services.ILogService, Services.LogService>();
         services.AddScoped<Services.IModuleService, Services.ModuleService>();
         services.AddScoped<Services.IConfigService, Services.ConfigService>();
+        services.AddScoped<Services.INoticeService, Services.NoticeService>();
     }
 }

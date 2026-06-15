@@ -125,3 +125,15 @@ export const configApi = {
   /** 兼容旧调用（别名） */
   update: (data: Partial<SysConfig>) => put(`/system/config/${data.key}`, data),
 };
+
+/** 系统公告API */
+export const noticeApi = {
+  /** 获取公告列表 */
+  list: (noticeType?: number) => get<any[]>(`/system/notice/list`, { noticeType }),
+  /** 新增公告 */
+  create: (data: any) => post<number>(/system/notice, data),
+  /** 修改公告 */
+  update: (id: number, data: any) => put(`/system/notice/${id}`, data),
+  /** 删除公告 */
+  remove: (id: number) => del(`/system/notice/${id}`),
+};

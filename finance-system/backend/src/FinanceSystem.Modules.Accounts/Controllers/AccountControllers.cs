@@ -232,6 +232,16 @@ public class VoucherController : ControllerBase
             ?? throw new BusinessException("凭证不存在");
         return ApiResult<object>.Success(voucher);
     }
+
+    /// <summary>
+    /// 复制凭证（生成草稿副本，清除审核信息）
+    /// </summary>
+    [HttpPost("{id}/copy")]
+    public async Task<ApiResult<long>> Copy(long id)
+    {
+        var newId = await _voucherService.CopyAsync(id);
+        return ApiResult<long>.Success(newId);
+    }
 }
 
 /// <summary>
