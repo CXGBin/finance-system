@@ -23,4 +23,7 @@
     <ProjectReference Include="..\FinanceSystem.Modules.Expense\FinanceSystem.Modules.Expense.csproj" />
     <ProjectReference Include="..\FinanceSystem.Modules.Tax\FinanceSystem.Modules.Tax.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="init-sqlite.sql" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

@@ -1,4 +1,11 @@
 using FinanceSystem.Modules.System.Entities;
+using FinanceSystem.Modules.Accounts.Entities;
+using FinanceSystem.Modules.Approval.Entities;
+using FinanceSystem.Modules.Asset.Entities;
+using FinanceSystem.Modules.Budget.Entities;
+using FinanceSystem.Modules.Expense.Entities;
+using FinanceSystem.Modules.Tax.Entities;
+using FinanceSystem.Modules.Reports.Entities;
 using SqlSugar;
 using BCrypt.Net;
 
@@ -16,6 +23,64 @@ public static class SeedData
     /// <param name="db">SqlSugar客户端</param>
     public static async Task InitializeAsync(ISqlSugarClient db)
     {
+        var isSqlite = db.CurrentConnectionConfig.DbType == SqlSugar.DbType.Sqlite;
+        if (isSqlite)
+        {
+            // SQLite模式：用原生SQL创建表（SqlSugar CodeFirst对可空类型处理不兼容SQLite）
+            var sqlPath = Path.Combine(AppContext.BaseDirectory, "init-sqlite.sql");
+            if (File.Exists(sqlPath))
+            {
+                var sql = File.ReadAllText(sqlPath);
+                db.Ado.ExecuteCommand(sql);
+            }
+        }
+        else
+        {
+            // SQL Server等：使用CodeFirst自动建表
+            db.CodeFirst.InitTables<SysModule>();
+            db.CodeFirst.InitTables<SysRole>();
+            db.CodeFirst.InitTables<SysDept>();
+            db.CodeFirst.InitTables<SysUser>();
+            db.CodeFirst.InitTables<SysUserRole>();
+            db.CodeFirst.InitTables<SysMenu>();
+            db.CodeFirst.InitTables<SysRoleMenu>();
+            db.CodeFirst.InitTables<SysPost>();
+            db.CodeFirst.InitTables<SysDictType>();
+            db.CodeFirst.InitTables<SysDictData>();
+            db.CodeFirst.InitTables<SysLog>();
+            db.CodeFirst.InitTables<SysConfig>();
+            db.CodeFirst.InitTables<SysNotice>();
+            db.CodeFirst.InitTables<AccountSubject>();
+            db.CodeFirst.InitTables<AccountingPeriod>();
+            db.CodeFirst.InitTables<SubjectBalance>();
+            db.CodeFirst.InitTables<Voucher>();
+            db.CodeFirst.InitTables<VoucherEntry>();
+            db.CodeFirst.InitTables<AuxProject>();
+            db.CodeFirst.InitTables<AuxCustomer>();
+            db.CodeFirst.InitTables<AuxSupplier>();
+            db.CodeFirst.InitTables<ApprovalFlow>();
+            db.CodeFirst.InitTables<ApprovalInstance>();
+            db.CodeFirst.InitTables<ApprovalRecord>();
+            db.CodeFirst.InitTables<AssetCategory>();
+            db.CodeFirst.InitTables<AssetCard>();
+            db.CodeFirst.InitTables<AssetDepreciation>();
+            db.CodeFirst.InitTables<AssetChange>();
+            db.CodeFirst.InitTables<AssetInventory>();
+            db.CodeFirst.InitTables<BudgetYear>();
+            db.CodeFirst.InitTables<BudgetSubject>();
+            db.CodeFirst.InitTables<BudgetMonthly>();
+            db.CodeFirst.InitTables<BudgetAdjustment>();
+            db.CodeFirst.InitTables<BudgetAlertConfig>();
+            db.CodeFirst.InitTables<ExpenseType>();
+            db.CodeFirst.InitTables<ExpenseClaim>();
+            db.CodeFirst.InitTables<ExpenseItem>();
+            db.CodeFirst.InitTables<ExpenseAllocate>();
+            db.CodeFirst.InitTables<TaxCategory>();
+            db.CodeFirst.InitTables<TaxDeclaration>();
+            db.CodeFirst.InitTables<TaxInvoice>();
+            db.CodeFirst.InitTables<ReportTemplate>();
+        }
+
         // 检查是否已有数据，避免重复初始化
         var userCount = await db.Queryable<SysUser>().CountAsync();
         if (userCount > 0) return;
@@ -36,14 +101,14 @@ public static class SeedData
     {
         var modules = new List<SysModule>
         {
-            new() { ModuleId = "system", ModuleName = "系统管理", IsEnabled = 1, IsCore = 1, SortOrder = 1, Description = "核心模块：用户、角色、菜单、部门、字典等基础管理" },
-            new() { ModuleId = "account", ModuleName = "账务管理", IsEnabled = 1, IsCore = 1, SortOrder = 2, Description = "核心模块：科目、凭证、账簿、期末处理", Dependencies = "system" },
-            new() { ModuleId = "report", ModuleName = "报表中心", IsEnabled = 1, IsCore = 0, SortOrder = 3, Description = "资产负债表、利润表、现金流量表等", Dependencies = "account" },
-            new() { ModuleId = "budget", ModuleName = "预算管理", IsEnabled = 1, IsCore = 0, SortOrder = 4, Description = "预算编制、执行跟踪、预警分析", Dependencies = "account,system" },
-            new() { ModuleId = "approval", ModuleName = "审批流程", IsEnabled = 1, IsCore = 0, SortOrder = 5, Description = "通用审批能力，可被多模块调用", Dependencies = "system" },
-            new() { ModuleId = "asset", ModuleName = "资产管理", IsEnabled = 1, IsCore = 0, SortOrder = 6, Description = "固定资产全生命周期管理", Dependencies = "account" },
-            new() { ModuleId = "expense", ModuleName = "费用管理", IsEnabled = 1, IsCore = 0, SortOrder = 7, Description = "报销、费用分摊、费用统计", Dependencies = "account,system,approval" },
-            new() { ModuleId = "tax", ModuleName = "税务管理", IsEnabled = 1, IsCore = 0, SortOrder = 8, Description = "税种维护、纳税申报、发票管理", Dependencies = "account" }
+            new() { ModuleId = "system", ModuleName = "系统管理", IsEnabled = 1, IsCore = 1, SortOrder = 1, Description = "核心模块：用户、角色、菜单、部门、字典等基础管理", UpdatedTime = DateTime.Now },
+            new() { ModuleId = "account", ModuleName = "账务管理", IsEnabled = 1, IsCore = 1, SortOrder = 2, Description = "核心模块：科目、凭证、账簿、期末处理", Dependencies = "system", UpdatedTime = DateTime.Now },
+            new() { ModuleId = "report", ModuleName = "报表中心", IsEnabled = 1, IsCore = 0, SortOrder = 3, Description = "资产负债表、利润表、现金流量表等", Dependencies = "account", UpdatedTime = DateTime.Now },
+            new() { ModuleId = "budget", ModuleName = "预算管理", IsEnabled = 1, IsCore = 0, SortOrder = 4, Description = "预算编制、执行跟踪、预警分析", Dependencies = "account,system", UpdatedTime = DateTime.Now },
+            new() { ModuleId = "approval", ModuleName = "审批流程", IsEnabled = 1, IsCore = 0, SortOrder = 5, Description = "通用审批能力，可被多模块调用", Dependencies = "system", UpdatedTime = DateTime.Now },
+            new() { ModuleId = "asset", ModuleName = "资产管理", IsEnabled = 1, IsCore = 0, SortOrder = 6, Description = "固定资产全生命周期管理", Dependencies = "account", UpdatedTime = DateTime.Now },
+            new() { ModuleId = "expense", ModuleName = "费用管理", IsEnabled = 1, IsCore = 0, SortOrder = 7, Description = "报销、费用分摊、费用统计", Dependencies = "account,system,approval", UpdatedTime = DateTime.Now },
+            new() { ModuleId = "tax", ModuleName = "税务管理", IsEnabled = 1, IsCore = 0, SortOrder = 8, Description = "税种维护、纳税申报、发票管理", Dependencies = "account", UpdatedTime = DateTime.Now }
         };
         await db.Insertable(modules).ExecuteCommandAsync();
     }
@@ -76,6 +141,9 @@ public static class SeedData
         {
             ParentId = 0,
             DeptName = "总公司",
+            Leader = "",
+            Phone = "",
+            Email = "",
             SortOrder = 1,
             Status = 1
         };
@@ -97,8 +165,11 @@ public static class SeedData
             Email = "admin@finance.com",
             Phone = "13800000000",
             DeptId = deptId,
+            PostId = 0,
             Status = 1,
-            Remark = "系统默认超级管理员"
+            LoginFailCount = 0,
+            Remark = "系统默认超级管理员",
+            UpdatedTime = DateTime.Now
         };
         await db.Insertable(user).ExecuteCommandAsync();
 
@@ -247,4 +318,5 @@ public static class SeedData
             }
         }
     }
+
 }

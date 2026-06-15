@@ -15,7 +15,7 @@ export const assetApi = {
 
   // ========== 资产卡片（后端: api/asset/card）==========
   /** 分页查询资产卡片 */
-  cardList: (params: PageParams & Partial<AssetCard>) => get<PagedResult<AssetCard>>('/asset/card/page', params as any),
+  cardList: (params: PageParams & Partial<AssetCard>) => get<PagedResult<AssetCard>>('/asset/card/page', params),
   /** 获取资产详情 */
   cardDetail: (id: number) => get<AssetCard>(`/asset/card/${id}`),
   /** 新增资产 */
@@ -34,7 +34,7 @@ export const assetApi = {
   /** 确认折旧 */
   depreciationConfirm: (year: number, month: number) => post('/asset/depreciation/confirm', null, { params: { year, month } }),
   /** 折旧汇总 */
-  depreciationSummary: (year: number) => get<any[]>('/asset/depreciation/summary', { year }),
+  depreciationSummary: (year: number) => get<DepreciationRecord[]>('/asset/depreciation/summary', { year }),
 
   // ========== 兼容旧调用（别名）==========
   /** @deprecated 使用 depreciationCalculate */

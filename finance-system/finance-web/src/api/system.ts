@@ -5,7 +5,7 @@ import type { PageParams, PagedResult } from '@/types/api.d';
 // 用户管理
 export const userApi = {
   /** 分页查询用户列表 */
-  page: (params: PageParams & Partial<User>) => get<PagedResult<User>>('/system/user/page', params as any),
+  page: (params: PageParams & Partial<User>) => get<PagedResult<User>>('/system/user/page', params),
   /** 查询用户详情 */
   detail: (id: number) => get<User>(`/system/user/${id}`),
   /** 新增用户 */
@@ -23,13 +23,13 @@ export const userApi = {
   /** 修改个人信息 */
   updateProfile: (data: Partial<User>) => put('/system/user/profile', data),
   /** 兼容旧调用（别名） */
-  list: (params: PageParams & Partial<User>) => get<PagedResult<User>>('/system/user/page', params as any),
+  list: (params: PageParams & Partial<User>) => get<PagedResult<User>>('/system/user/page', params),
 };
 
 // 角色管理
 export const roleApi = {
   /** 分页查询角色列表 */
-  page: (params: PageParams & Partial<SysRole>) => get<PagedResult<SysRole>>('/system/role/page', params as any),
+  page: (params: PageParams & Partial<SysRole>) => get<PagedResult<SysRole>>('/system/role/page', params),
   /** 获取所有启用角色列表（下拉） */
   all: () => get<SysRole[]>('/system/role/list'),
   /** 查询角色详情 */
@@ -43,7 +43,7 @@ export const roleApi = {
   /** 获取角色已分配菜单 */
   menus: (id: number) => get<number[]>(`/system/role/${id}/menus`),
   /** 兼容旧调用（别名） */
-  list: (params: PageParams & Partial<SysRole>) => get<PagedResult<SysRole>>('/system/role/page', params as any),
+  list: (params: PageParams & Partial<SysRole>) => get<PagedResult<SysRole>>('/system/role/page', params),
 };
 
 // 菜单管理
@@ -65,7 +65,7 @@ export const deptApi = {
 
 // 岗位管理
 export const postApi = {
-  list: (params: PageParams & Partial<Post>) => get<PagedResult<Post>>('/system/post/page', params as any),
+  list: (params: PageParams & Partial<Post>) => get<PagedResult<Post>>('/system/post/page', params),
   add: (data: Partial<Post>) => post('/system/post', data),
   update: (data: Partial<Post>) => put(`/system/post/${data.id}`, data),
   remove: (id: number) => del(`/system/post/${id}`),
@@ -74,7 +74,7 @@ export const postApi = {
 // 数据字典
 export const dictApi = {
   /** 分页查询字典类型 */
-  typePage: (params: PageParams) => get<PagedResult<DictType>>('/system/dict/type/page', params as any),
+  typePage: (params: PageParams) => get<PagedResult<DictType>>('/system/dict/type/page', params),
   /** 新增字典类型 */
   typeAdd: (data: Partial<DictType>) => post('/system/dict/type', data),
   /** 编辑字典类型 */
@@ -90,18 +90,18 @@ export const dictApi = {
   /** 删除字典项 */
   itemRemove: (id: number) => del(`/system/dict/data/${id}`),
   /** 兼容旧调用（别名） */
-  typeList: () => get<DictType[]>('/system/dict/type/page', { pageIndex: 1, pageSize: 999 } as any),
+  typeList: () => get<DictType[]>('/system/dict/type/page', { pageIndex: 1, pageSize: 999 }),
   itemList: (dictId: number) => get<DictItem[]>(`/system/dict/data/${dictId}`),
 };
 
 // 操作日志
 export const logApi = {
   /** 分页查询操作日志 */
-  page: (params: PageParams & Partial<OperLog>) => get<PagedResult<OperLog>>('/system/log/page', params as any),
+  page: (params: PageParams & Partial<OperLog>) => get<PagedResult<OperLog>>('/system/log/page', params),
   /** 查看日志详情 */
   detail: (id: number) => get<OperLog>(`/system/log/${id}`),
   /** 兼容旧调用（别名） */
-  list: (params: PageParams & Partial<OperLog>) => get<PagedResult<OperLog>>('/system/log/page', params as any),
+  list: (params: PageParams & Partial<OperLog>) => get<PagedResult<OperLog>>('/system/log/page', params),
 };
 
 // 模块管理

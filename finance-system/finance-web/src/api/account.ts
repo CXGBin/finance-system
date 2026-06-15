@@ -5,7 +5,7 @@ import type { PageParams, PagedResult } from '@/types/api.d';
 // 科目管理
 export const subjectApi = {
   /** 获取科目树 */
-  tree: (enabledOnly?: boolean) => get<Subject[]>('/account/subject/tree', { enabledOnly } as any),
+  tree: (enabledOnly?: boolean) => get<Subject[]>('/account/subject/tree', { enabledOnly }),
   /** 获取科目详情 */
   detail: (id: number) => get<Subject>(`/account/subject/${id}`),
   /** 新增科目 */
@@ -31,7 +31,7 @@ export const balanceApi = {
 // 凭证
 export const voucherApi = {
   /** 分页查询凭证 */
-  page: (params: PageParams & Partial<Voucher>) => get<PagedResult<Voucher>>('/account/voucher/page', params as any),
+  page: (params: PageParams & Partial<Voucher>) => get<PagedResult<Voucher>>('/account/voucher/page', params),
   /** 获取凭证详情（含分录） */
   detail: (id: number) => get<Voucher>(`/account/voucher/${id}`),
   /** 新增凭证（草稿） */
@@ -68,13 +68,13 @@ export const periodApi = {
 export const ledgerApi = {
   /** 总账查询 */
   general: (params: { subjectId?: number; startPeriod: string; endPeriod: string }) =>
-    get<LedgerRecord[]>('/account/ledger/general', params as any),
+    get<LedgerRecord[]>('/account/ledger/general', params),
   /** 明细账查询 */
   detail: (params: { subjectId?: number; startPeriod: string; endPeriod: string }) =>
-    get<LedgerRecord[]>('/account/ledger/detail', params as any),
+    get<LedgerRecord[]>('/account/ledger/detail', params),
   /** 日记账查询（现金/银行） */
   journal: (params: { startPeriod: string; endPeriod: string }) =>
-    get<LedgerRecord[]>('/account/ledger/journal', params as any),
+    get<LedgerRecord[]>('/account/ledger/journal', params),
   /** 科目汇总表 */
   subjectSummary: (year: number, month: number) =>
     get<LedgerRecord[]>('/account/ledger/subject-summary', { year, month }),

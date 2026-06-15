@@ -33,7 +33,7 @@ public class ReportTemplate : FullEntity
     /// <summary>
     /// 报表模板JSON数据（含行定义、公式等）
     /// </summary>
-    [SugarColumn(ColumnDataType = "nvarchar(max)", IsNullable = false, ColumnDescription = "模板JSON数据")]
+    [SugarColumn(ColumnDataType = "TEXT", IsNullable = false, ColumnDescription = "模板JSON数据")]
     /// <summary>
     /// 模板JSON数据
     /// </summary>

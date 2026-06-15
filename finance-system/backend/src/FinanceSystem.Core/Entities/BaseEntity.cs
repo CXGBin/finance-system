@@ -11,7 +11,7 @@ public class BaseEntity
     /// <summary>
     /// 主键
     /// </summary>
-    [SqlSugar.SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
+    [SqlSugar.SugarColumn(IsPrimaryKey = true, IsIdentity = true, ColumnDataType = "INTEGER")]
     /// <summary>
     /// 主键ID
     /// </summary>

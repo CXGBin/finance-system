@@ -70,7 +70,7 @@ public class AuthService : IAuthService
         // 生成Token
         var accessToken = GenerateToken(user);
         var refreshToken = GenerateRefreshToken();
-        var expiresIn = int.Parse(_config["Jwt:AccessTokenExpireMinutes"] ?? "120");
+        var expiresIn = int.Parse(_config["JwtSettings:AccessTokenExpireMinutes"] ?? "120");
 
         var userInfo = await BuildUserInfoAsync(user);
 
@@ -112,7 +112,7 @@ public class AuthService : IAuthService
         var userInfo = await BuildUserInfoAsync(user);
         var token = GenerateToken(user);
         var refreshToken = Guid.NewGuid().ToString("N");
-        var expiresIn = int.Parse(_config["Jwt:AccessTokenExpireMinutes"] ?? "120");
+        var expiresIn = int.Parse(_config["JwtSettings:AccessTokenExpireMinutes"] ?? "120");
 
         _refreshTokenStore[refreshToken] = user.Id;
         _cleanupExpiredRefreshTokens();
@@ -158,10 +158,10 @@ public class AuthService : IAuthService
     /// <returns>JWT令牌字符串</returns>
     private string GenerateToken(SysUser user)
     {
-        var key = _config["Jwt:SecurityKey"] ?? throw new InvalidOperationException("缺少 JWT 密钥配置 Jwt:SecurityKey");
-        var expireMinutes = int.Parse(_config["Jwt:AccessTokenExpireMinutes"] ?? "120");
-        var issuer = _config["Jwt:Issuer"] ?? "FinanceSystem";
-        var audience = _config["Jwt:Audience"] ?? "FinanceSystem";
+        var key = _config["JwtSettings:Secret"] ?? throw new InvalidOperationException("缺少 JWT 密钥配置 JwtSettings:Secret");
+        var expireMinutes = int.Parse(_config["JwtSettings:AccessTokenExpireMinutes"] ?? "120");
+        var issuer = _config["JwtSettings:Issuer"] ?? "FinanceSystem";
+        var audience = _config["JwtSettings:Audience"] ?? "FinanceSystem";
 
         var claims = new[]
         {

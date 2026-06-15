@@ -55,7 +55,7 @@ public class ApprovalFlow : FullEntity
     /// <summary>
     /// 流程节点定义JSON
     /// </summary>
-    [SugarColumn(ColumnDataType = "nvarchar(max)", IsNullable = false, ColumnDescription = "节点定义JSON")]
+    [SugarColumn(ColumnDataType = "TEXT", IsNullable = false, ColumnDescription = "节点定义JSON")]
     /// <summary>
     /// 审批节点配置（JSON）
     /// </summary>

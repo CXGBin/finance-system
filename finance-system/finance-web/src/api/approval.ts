@@ -5,7 +5,7 @@ import type { PageParams, PagedResult } from '@/types/api.d';
 export const approvalApi = {
   // ========== 流程模板管理（后端路由: api/approval/flow）==========
   /** 获取流程列表 */
-  templateList: (params: PageParams & { moduleType?: string }) => get<PagedResult<ApprovalTemplate>>('/approval/flow/list', params as any),
+  templateList: (params: PageParams & { moduleType?: string }) => get<PagedResult<ApprovalTemplate>>('/approval/flow/list', params),
   /** 创建流程 */
   templateAdd: (data: Partial<ApprovalTemplate>) => post('/approval/flow', data),
   /** 修改流程 */
@@ -15,13 +15,13 @@ export const approvalApi = {
 
   // ========== 审批实例（后端路由: api/approval/instance）==========
   /** 分页查询审批实例（支持 status 参数筛选: pending/done/my） */
-  list: (params: PageParams & { status?: string; type?: string }) => get<PagedResult<ApprovalInstance>>('/approval/instance/list', params as any),
+  list: (params: PageParams & { status?: string; type?: string }) => get<PagedResult<ApprovalInstance>>('/approval/instance/list', params),
   /** 待办（便捷方法） */
-  pending: (params: PageParams) => get<PagedResult<ApprovalInstance>>('/approval/instance/list', { ...params, status: 'pending' } as any),
+  pending: (params: PageParams) => get<PagedResult<ApprovalInstance>>('/approval/instance/list', { ...params, status: "pending" }),
   /** 已办（便捷方法） */
-  done: (params: PageParams) => get<PagedResult<ApprovalInstance>>('/approval/instance/list', { ...params, status: 'done' } as any),
+  done: (params: PageParams) => get<PagedResult<ApprovalInstance>>('/approval/instance/list', { ...params, status: "done" }),
   /** 我的申请（便捷方法） */
-  my: (params: PageParams) => get<PagedResult<ApprovalInstance>>('/approval/instance/list', { ...params, type: 'mine' } as any),
+  my: (params: PageParams) => get<PagedResult<ApprovalInstance>>('/approval/instance/list', { ...params, type: "mine" }),
   /** 获取审批详情 */
   detail: (id: number) => get<ApprovalInstance>(`/approval/instance/${id}`),
   /** 发起审批 */
@@ -36,5 +36,5 @@ export const approvalApi = {
   /** 撤回审批 */
   withdraw: (id: number) => post(`/approval/instance/${id}/withdraw`),
   /** 获取审批记录 */
-  records: (instanceId: number) => get<any[]>(`/approval/instance/${instanceId}/records`),
+  records: (instanceId: number) => get<{ nodeIndex: number; nodeName: string; approverName: string; action: number; comment: string; createTime: string }[]>(`/approval/instance/${instanceId}/records`),
 };
