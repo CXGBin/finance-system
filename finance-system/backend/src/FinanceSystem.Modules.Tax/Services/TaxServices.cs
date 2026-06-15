@@ -13,6 +13,22 @@ public interface ITaxDeclarationService { Task<PageResult<TaxDeclaration>> GetLi
 /// <summary>发票服务接口</summary>
 public interface ITaxInvoiceService { Task<PageResult<TaxInvoice>> GetListAsync(TaxInvoiceQuery query); Task<long> CreateAsync(TaxInvoiceRequest request); Task VerifyAsync(long id); }
 
+/// <summary>税务报表服务接口</summary>
+public interface ITaxReportService
+{
+    /// <summary>获取税务汇总报表</summary>
+    Task<object> GetSummaryAsync(int year);
+    /// <summary>获取分税种申报汇总</summary>
+    Task<List<object>> GetByCategoryAsync(int year, int? month);
+}
+
+/// <summary>税务日历服务接口</summary>
+public interface ITaxCalendarService
+{
+    /// <summary>获取指定月份的税务日历事项</summary>
+    Task<List<object>> GetCalendarAsync(int year, int month);
+}
+
 /// <summary>税种服务实现</summary>
 public class TaxCategoryService : ITaxCategoryService
 {
@@ -169,5 +185,79 @@ public class TaxInvoiceService : ITaxInvoiceService
         var entity = await _db.Queryable<TaxInvoice>().FirstAsync(i => i.Id == id) ?? throw new NotFoundException("发票不存在");
         entity.IsVerified = 1;
         await _db.Updateable(entity).UpdateColumns(i => i.IsVerified).ExecuteCommandAsync();
+    }
+}
+
+/// <summary>税务报表服务实现</summary>
+public class TaxReportService : ITaxReportService
+{
+    private readonly ISqlSugarClient _db;
+    public TaxReportService(ISqlSugarClient db) => _db = db;
+
+    public async Task<object> GetSummaryAsync(int year)
+    {
+        var declarations = await _db.Queryable<TaxDeclaration>()
+            .Where(d => d.DeclarePeriod.StartsWith(year.ToString()))
+            .ToListAsync();
+        var totalTaxAmount = declarations.Sum(d => d.TaxAmount);
+        var totalPaid = declarations.Sum(d => d.ActualPaidAmount);
+        var unpaid = declarations.Where(d => d.Status == 1).Sum(d => d.TaxAmount);
+        var categories = await _db.Queryable<TaxCategory>().Where(c => c.IsEnabled == 1).ToListAsync();
+        var byCategory = categories.Select(c => new
+        {
+            taxName = c.TaxName,
+            taxAmount = declarations.Where(d => d.TaxCategoryId == c.Id).Sum(d => d.TaxAmount),
+            paidAmount = declarations.Where(d => d.TaxCategoryId == c.Id).Sum(d => d.ActualPaidAmount)
+        }).ToList();
+        return new { year, totalTaxAmount, totalPaid, unpaid, byCategory };
+    }
+
+    public async Task<List<object>> GetByCategoryAsync(int year, int? month)
+    {
+        var query = _db.Queryable<TaxDeclaration>().Where(d => d.DeclarePeriod.StartsWith(year.ToString()));
+        if (month.HasValue) query = query.Where(d => d.DeclarePeriod == $"{year}-{month.Value:D2}");
+        var declarations = await query.ToListAsync();
+        var categories = await _db.Queryable<TaxCategory>().Where(c => c.IsEnabled == 1).ToListAsync();
+        return categories.Select(c =>
+        {
+            var related = declarations.Where(d => d.TaxCategoryId == c.Id).ToList();
+            return (object)new
+            {
+                categoryId = c.Id, taxName = c.TaxName, taxCode = c.TaxCode,
+                totalAmount = related.Sum(d => d.TaxAmount),
+                paidAmount = related.Sum(d => d.ActualPaidAmount),
+                count = related.Count
+            };
+        }).ToList();
+    }
+}
+
+/// <summary>税务日历服务实现</summary>
+public class TaxCalendarService : ITaxCalendarService
+{
+    private readonly ISqlSugarClient _db;
+    public TaxCalendarService(ISqlSugarClient db) => _db = db;
+
+    public async Task<List<object>> GetCalendarAsync(int year, int month)
+    {
+        var categories = await _db.Queryable<TaxCategory>().Where(c => c.IsEnabled == 1).ToListAsync();
+        var period = $"{year}-{month:D2}";
+        var existingDeclarations = await _db.Queryable<TaxDeclaration>()
+            .Where(d => d.DeclarePeriod == period)
+            .ToListAsync();
+        return categories.Select(c =>
+        {
+            var existing = existingDeclarations.FirstOrDefault(d => d.TaxCategoryId == c.Id);
+            int deadline = c.DeclareCycle switch { 1 => 15, 3 => month % 3 == 0 ? 15 : 0, _ => 15 };
+            if (deadline <= 0) return null;
+            return (object)new
+            {
+                categoryId = c.Id, taxName = c.TaxName, taxCode = c.TaxCode,
+                deadline = new DateTime(year, month, deadline),
+                status = existing?.Status ?? -1,
+                taxAmount = existing?.TaxAmount ?? 0,
+                paidAmount = existing?.ActualPaidAmount ?? 0
+            };
+        }).Where(x => x != null).Cast<object>().ToList();
     }
 }

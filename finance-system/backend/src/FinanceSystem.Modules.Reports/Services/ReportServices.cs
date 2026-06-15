@@ -299,9 +299,30 @@ public class SubjectBalanceReportService : ISubjectBalanceReportService
         var balances = await _db.Queryable<SubjectBalance>()
             .Where(b => b.PeriodId == period.Id).ToListAsync();
 
+        // 查询本期已审核凭证分录的发生额
+        var currentEntries = await _db.Queryable<VoucherEntry>()
+            .LeftJoin<Voucher>((e, v) => e.VoucherId == v.Id)
+            .Where((e, v) => v.PeriodId == period.Id && v.Status == 1)
+            .Select((e, v) => new { e.SubjectId, e.DebitAmount, e.CreditAmount })
+            .ToListAsync();
+
+        // 查询年初到本期累计发生额
+        var yearPeriodIds = await _db.Queryable<AccountingPeriod>()
+            .Where(p => p.PeriodYear == period.PeriodYear && p.PeriodMonth <= period.PeriodMonth)
+            .Select(p => p.Id).ToListAsync();
+        var yearEntries = await _db.Queryable<VoucherEntry>()
+            .LeftJoin<Voucher>((e, v) => e.VoucherId == v.Id)
+            .Where((e, v) => yearPeriodIds.Contains(v.PeriodId) && v.Status == 1)
+            .Select((e, v) => new { e.SubjectId, e.DebitAmount, e.CreditAmount })
+            .ToListAsync();
+
+        var subjectIds = subjects.Select(s => s.Id).ToHashSet();
+
         var result = subjects.Select(s =>
         {
             var b = balances.FirstOrDefault(x => x.SubjectId == s.Id);
+            var current = currentEntries.Where(e => e.SubjectId == s.Id);
+            var year = yearEntries.Where(e => e.SubjectId == s.Id);
             return new
             {
                 SubjectCode = s.SubjectCode,
@@ -309,12 +330,12 @@ public class SubjectBalanceReportService : ISubjectBalanceReportService
                 Level = s.SubjectLevel,
                 BeginDebit = b?.BeginDebit ?? 0,
                 BeginCredit = b?.BeginCredit ?? 0,
-                CurrentDebit = 0m,
-                CurrentCredit = 0m,
+                CurrentDebit = current.Sum(e => e.DebitAmount),
+                CurrentCredit = current.Sum(e => e.CreditAmount),
                 EndDebit = b?.EndDebit ?? 0,
                 EndCredit = b?.EndCredit ?? 0,
-                YearDebit = 0m,
-                YearCredit = 0m
+                YearDebit = year.Sum(e => e.DebitAmount),
+                YearCredit = year.Sum(e => e.CreditAmount)
             };
         }).ToList();
 
@@ -604,14 +625,21 @@ public class CompareService : ICompareService
             var period = await ParsePeriodAsync(periodStr);
             if (period == null) continue;
 
+            var subjects = await _db.Queryable<AccountSubject>()
+                .Where(s => s.IsEnabled == 1).ToListAsync();
+
             var entryList = await _db.Queryable<VoucherEntry>()
                 .LeftJoin<Voucher>((e, v) => e.VoucherId == v.Id)
                 .Where((e, v) => v.PeriodId == period.Id && v.Status == 1)
-                .Select((e, v) => new { e.DebitAmount, e.CreditAmount })
+                .Select((e, v) => new { e.SubjectId, e.DebitAmount, e.CreditAmount })
                 .ToListAsync();
 
-            decimal revenue = entryList.Sum(e => e.CreditAmount);
-            decimal cost = entryList.Sum(e => e.DebitAmount);
+            // 按科目编码过滤收入/成本/费用
+            var revenueIds = subjects.Where(s => new[] { "6001", "6051", "6101", "6111" }.Any(c => s.SubjectCode.StartsWith(c))).Select(s => s.Id).ToHashSet();
+            var costIds = subjects.Where(s => new[] { "6401", "6402", "6403", "6601", "6602", "6603", "6801" }.Any(c => s.SubjectCode.StartsWith(c))).Select(s => s.Id).ToHashSet();
+
+            decimal revenue = entryList.Where(e => revenueIds.Contains(e.SubjectId)).Sum(e => e.CreditAmount);
+            decimal cost = entryList.Where(e => costIds.Contains(e.SubjectId)).Sum(e => e.DebitAmount);
             decimal profit = revenue - cost;
 
             result.Items[0].Values[periodStr] = revenue;

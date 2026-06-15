@@ -63,3 +63,30 @@ public class TaxInvoiceController : ControllerBase
     [HttpPost("{id}/verify")]
     public async Task<ApiResult<bool>> Verify(long id) { await _service.VerifyAsync(id); return ApiResult<bool>.Success(true); }
 }
+
+/// <summary>税务报表控制器</summary>
+[ApiController]
+[Route("api/tax/report")]
+public class TaxReportController : ControllerBase
+{
+    private readonly ITaxReportService _service;
+    public TaxReportController(ITaxReportService service) => _service = service;
+
+    [HttpGet("summary")]
+    public async Task<ApiResult<object>> Summary([FromQuery] int year) => ApiResult<object>.Success(await _service.GetSummaryAsync(year));
+
+    [HttpGet("by-category")]
+    public async Task<ApiResult<List<object>>> ByCategory([FromQuery] int year, [FromQuery] int? month) => ApiResult<List<object>>.Success(await _service.GetByCategoryAsync(year, month));
+}
+
+/// <summary>税务日历控制器</summary>
+[ApiController]
+[Route("api/tax/calendar")]
+public class TaxCalendarController : ControllerBase
+{
+    private readonly ITaxCalendarService _service;
+    public TaxCalendarController(ITaxCalendarService service) => _service = service;
+
+    [HttpGet]
+    public async Task<ApiResult<List<object>>> Calendar([FromQuery] int year, [FromQuery] int month) => ApiResult<List<object>>.Success(await _service.GetCalendarAsync(year, month));
+}
