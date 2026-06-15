@@ -9,7 +9,7 @@ namespace FinanceSystem.Modules.Expense.Services;
 /// <summary>费用类型服务接口</summary>
 public interface IExpenseTypeService { Task<List<ExpenseType>> GetListAsync(); Task<long> CreateAsync(ExpenseTypeRequest request); Task UpdateAsync(long id, ExpenseTypeRequest request); Task DeleteAsync(long id); }
 /// <summary>费用报销服务接口</summary>
-public interface IExpenseClaimService { Task<PageResult<ExpenseClaim>> GetListAsync(ExpenseClaimQuery query); Task<ExpenseClaim?> GetByIdAsync(long id); Task<long> CreateAsync(ExpenseClaimRequest request, long currentUserId); Task SubmitAsync(long id, long currentUserId); Task ApproveAsync(long id); Task RejectAsync(long id); Task ConfirmPaymentAsync(long id); }
+public interface IExpenseClaimService { Task<PageResult<ExpenseClaim>> GetListAsync(ExpenseClaimQuery query); Task<ExpenseClaim?> GetByIdAsync(long id); Task<long> CreateAsync(ExpenseClaimRequest request, long currentUserId); Task SubmitAsync(long id, long currentUserId); Task ApproveAsync(long id); Task RejectAsync(long id); Task ConfirmPaymentAsync(long id, long currentUserId); }
 /// <summary>费用统计服务接口</summary>
 public interface IExpenseStatisticsService { Task<List<object>> GetStatisticsAsync(ExpenseStatisticsQuery query); }
 
@@ -117,7 +117,7 @@ public class ExpenseClaimService : IExpenseClaimService
         await _db.Updateable(claim).UpdateColumns(c => c.Status).ExecuteCommandAsync();
     }
 
-    public async Task ConfirmPaymentAsync(long id)
+    public async Task ConfirmPaymentAsync(long id, long currentUserId)
     {
         var claim = await _db.Queryable<ExpenseClaim>().FirstAsync(c => c.Id == id) ?? throw new NotFoundException("报销单不存在");
         if (claim.Status != 2) throw new BusinessException("非已通过状态");
@@ -189,7 +189,7 @@ public class ExpenseClaimService : IExpenseClaimService
                     VoucherDate = DateTime.Now, PeriodId = period.Id, VoucherType = 1,
                     AbstractText = $"费用报销付款-{claim.Title}",
                     Status = 1, TotalDebit = totalDebit, TotalCredit = totalDebit,
-                    PreparedBy = 0, ReviewedBy = 0, ReviewedTime = DateTime.Now,
+                    PreparedBy = currentUserId, ReviewedBy = currentUserId, ReviewedTime = DateTime.Now,
                     Entries = entries
                 };
                 await _db.Insertable(voucher).ExecuteCommandAsync();

@@ -38,7 +38,7 @@ public class TaxDeclarationController : ControllerBase
     public async Task<ApiResult<PageResult<TaxDeclaration>>> GetList([FromQuery] TaxDeclarationQuery query) => ApiResult<PageResult<TaxDeclaration>>.Success(await _service.GetListAsync(query));
 
     [HttpPost("calculate")]
-    public async Task<ApiResult<long>> Calculate([FromBody] TaxCalculateRequest request) => ApiResult<long>.Success(await _service.CalculateAsync(request));
+    public async Task<ApiResult<long>> Calculate([FromBody] TaxCalculateRequest request) => ApiResult<long>.Success(await _service.CalculateAsync(request, HttpContext.GetCurrentUserId()));
 
     [HttpPost("{id}/declare")]
     public async Task<ApiResult<bool>> Declare(long id) { await _service.DeclareAsync(id, HttpContext.GetCurrentUserId()); return ApiResult<bool>.Success(true); }

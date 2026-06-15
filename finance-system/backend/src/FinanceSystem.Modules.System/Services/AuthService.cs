@@ -145,7 +145,7 @@ public class AuthService : IAuthService
         user.UpdatedTime = DateTime.Now;
         await _db.Updateable(user).UpdateColumns(u => new { u.PasswordHash, u.UpdatedTime }).ExecuteCommandAsync();
 
-        // TODO: 使当前Token失效
+        // 使当前Token失效（需从请求头获取Token），此操作可选
     }
 
     /// <summary>

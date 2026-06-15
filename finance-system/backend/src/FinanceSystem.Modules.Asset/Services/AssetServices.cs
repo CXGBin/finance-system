@@ -270,8 +270,7 @@ public class AssetDepreciationService : IAssetDepreciationService
             }
         }
 
-        // TODO: 自动生成折旧凭证
-        // 生成折旧凭证：借记管理费用/制造费用，贷记累计折旧
+        // 自动生成折旧凭证：借记管理费用/制造费用，贷记累计折旧
         var depreciationPeriod = await _db.Queryable<AccountingPeriod>()
             .Where(p => p.BeginDate <= DateTime.Now && p.EndDate >= DateTime.Now && p.IsClosed == 0)
             .FirstAsync();
@@ -338,8 +337,8 @@ public class AssetDepreciationService : IAssetDepreciationService
                     Status = 1,
                     TotalDebit = totalDebit,
                     TotalCredit = totalDebit,
-                    PreparedBy = 0,
-                    ReviewedBy = 0,
+                    PreparedBy = currentUserId,
+                    ReviewedBy = currentUserId,
                     ReviewedTime = DateTime.Now,
                     Entries = entries
                 };

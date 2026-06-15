@@ -53,7 +53,7 @@ public class ExpenseClaimController : ControllerBase
     public async Task<ApiResult<bool>> Reject(long id) { await _service.RejectAsync(id); return ApiResult<bool>.Success(true); }
 
     [HttpPost("{id}/pay")]
-    public async Task<ApiResult<bool>> Pay(long id) { await _service.ConfirmPaymentAsync(id); return ApiResult<bool>.Success(true); }
+    public async Task<ApiResult<bool>> Pay(long id) { await _service.ConfirmPaymentAsync(id, HttpContext.GetCurrentUserId()); return ApiResult<bool>.Success(true); }
 }
 
 [ApiController]

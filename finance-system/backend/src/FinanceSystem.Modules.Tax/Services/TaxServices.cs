@@ -9,7 +9,7 @@ namespace FinanceSystem.Modules.Tax.Services;
 /// <summary>税种服务接口</summary>
 public interface ITaxCategoryService { Task<List<TaxCategory>> GetListAsync(); Task<long> CreateAsync(TaxCategoryRequest request); Task UpdateAsync(long id, TaxCategoryRequest request); Task DeleteAsync(long id); }
 /// <summary>纳税申报服务接口</summary>
-public interface ITaxDeclarationService { Task<PageResult<TaxDeclaration>> GetListAsync(TaxDeclarationQuery query); Task<long> CalculateAsync(TaxCalculateRequest request); Task DeclareAsync(long id, long currentUserId); Task ConfirmPayAsync(long id); }
+public interface ITaxDeclarationService { Task<PageResult<TaxDeclaration>> GetListAsync(TaxDeclarationQuery query); Task<long> CalculateAsync(TaxCalculateRequest request, long currentUserId); Task DeclareAsync(long id, long currentUserId); Task ConfirmPayAsync(long id); }
 /// <summary>发票服务接口</summary>
 public interface ITaxInvoiceService { Task<PageResult<TaxInvoice>> GetListAsync(TaxInvoiceQuery query); Task<long> CreateAsync(TaxInvoiceRequest request); Task VerifyAsync(long id); }
 
@@ -63,7 +63,7 @@ public class TaxDeclarationService : ITaxDeclarationService
         return new PageResult<TaxDeclaration>(total, list);
     }
 
-    public async Task<long> CalculateAsync(TaxCalculateRequest request)
+    public async Task<long> CalculateAsync(TaxCalculateRequest request, long currentUserId)
     {
         var tax = await _db.Queryable<TaxCategory>().FirstAsync(t => t.Id == request.TaxCategoryId)
             ?? throw new NotFoundException("税种不存在");
@@ -108,7 +108,7 @@ public class TaxDeclarationService : ITaxDeclarationService
         var entity = new TaxDeclaration
         {
             TaxCategoryId = request.TaxCategoryId, DeclarePeriod = request.DeclarePeriod,
-            TaxAmount = taxAmount, ActualPaidAmount = 0, Status = 0, DeclaredBy = 0
+            TaxAmount = taxAmount, ActualPaidAmount = 0, Status = 0, DeclaredBy = currentUserId
         };
         await _db.Insertable(entity).ExecuteCommandAsync();
         return entity.Id;

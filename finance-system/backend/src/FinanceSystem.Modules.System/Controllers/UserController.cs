@@ -27,7 +27,10 @@ public class UserController : ControllerBase
     [HttpGet("page")]
     public async Task<ApiResult<PageResult<SysUser>>> GetPage([FromQuery] UserQuery query)
     {
-        return ApiResult<PageResult<SysUser>>.Success(await _userService.GetPageAsync(query));
+        var result = await _userService.GetPageAsync(query);
+        // 脱敏：清除密码哈希，不返回给前端
+        foreach (var user in result.List) user.PasswordHash = null;
+        return ApiResult<PageResult<SysUser>>.Success(result);
     }
 
     /// <summary>
@@ -37,9 +40,10 @@ public class UserController : ControllerBase
     public async Task<ApiResult<SysUser>> GetById(long id)
     {
         var user = await _userService.GetByIdAsync(id);
-        return user == null
-            ? ApiResult<SysUser>.Fail("用户不存在")
-            : ApiResult<SysUser>.Success(user);
+        if (user == null) return ApiResult<SysUser>.Fail("用户不存在");
+        // 脱敏：清除密码哈希
+        user.PasswordHash = null;
+        return ApiResult<SysUser>.Success(user);
     }
 
     /// <summary>
