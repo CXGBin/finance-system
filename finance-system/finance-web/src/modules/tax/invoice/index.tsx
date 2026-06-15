@@ -18,7 +18,7 @@ const TaxInvoice: React.FC = () => {
     { title: '价税合计', dataIndex: 'totalAmount', key: 'totalAmount', align: 'right' },
     { title: '已认证', dataIndex: 'isVerified', key: 'isVerified', render: (v: number) => v === 1 ? <Tag color="success">已认证</Tag> : <Tag color="default">未认证</Tag> },
     {
-      title: '操作', key: 'action', render: (_: any, record: Invoice) => (
+      title: '操作', key: 'action', render: (_: unknown, record: Invoice) => (
         record.isVerified === 0 ? <a onClick={() => taxApi.invoiceRemove(record.id).then(() => window.location.reload())} style={{ color: '#ff4d4f' }}>删除</a> : null
       ),
     },

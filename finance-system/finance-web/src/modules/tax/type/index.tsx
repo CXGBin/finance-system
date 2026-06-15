@@ -27,7 +27,7 @@ const TaxTypeList: React.FC = () => {
     { title: '名称', dataIndex: 'taxName', key: 'taxName' },
     { title: '税率(%)', dataIndex: 'taxRate', key: 'taxRate', align: 'right' },
     { title: '申报周期', dataIndex: 'declareCycle', key: 'declareCycle', render: (v: number) => ['', '月', '季', '年'][v] || '未知' },
-    { title: '操作', key: 'action', render: (_: any, r: TaxType) => (
+    { title: '操作', key: 'action', render: (_: unknown, r: TaxType) => (
       <Space>
         <a onClick={() => { setEditingRecord(r); form.setFieldsValue(r); setModalOpen(true); }}>编辑</a>
         <Popconfirm title="确认删除?" onConfirm={() => taxApi.typeRemove(r.id).then(() => { message.success('删除成功'); loadData(); })}><a style={{ color: '#ff4d4f' }}>删除</a></Popconfirm>

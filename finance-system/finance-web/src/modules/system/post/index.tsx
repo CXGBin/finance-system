@@ -22,7 +22,7 @@ const PostList: React.FC = () => {
     },
     {
       title: '操作', key: 'action',
-      render: (_: any, record: Post) => (
+      render: (_: unknown, record: Post) => (
         <Space>
           <a className="table-action" onClick={() => handleEdit(record as Post)}>编辑</a>
           <Popconfirm title="确认删除该岗位?" onConfirm={() => handleDelete(record)}>

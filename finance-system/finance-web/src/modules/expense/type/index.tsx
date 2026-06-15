@@ -28,7 +28,7 @@ const ExpenseType: React.FC = () => {
     { title: '编码', dataIndex: 'typeCode', key: 'typeCode' },
     { title: '名称', dataIndex: 'typeName', key: 'typeName' },
     { title: '月度限额', dataIndex: 'monthlyLimit', key: 'monthlyLimit', align: 'right' },
-    { title: '操作', key: 'action', render: (_: any, record: ExpenseType) => (
+    { title: '操作', key: 'action', render: (_: unknown, record: ExpenseType) => (
       <Space>
         <a onClick={() => { setEditingRecord(record); form.setFieldsValue(record); setModalOpen(true); }}>编辑</a>
         <Popconfirm title="确认删除?" onConfirm={() => expenseApi.typeRemove(record.id).then(() => { message.success('删除成功'); loadData(); })}><a style={{ color: '#ff4d4f' }}>删除</a></Popconfirm>

@@ -51,7 +51,7 @@ const DeptList: React.FC = () => {
     loadTree();
   };
 
-  const buildTreeNodes = (list: Dept[]): any[] =>
+  const buildTreeNodes = (list: Dept[]): DataNode[] =>
     list.map(item => ({
       key: item.id,
       title: (

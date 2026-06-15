@@ -14,10 +14,10 @@ const TaxCalendar: React.FC = () => {
 
   const dateCellRender = (date: dayjs.Dayjs) => {
     const dayStr = date.format('YYYY-MM-DD');
-    const dayEvents = events.filter((e: any) => e.date === dayStr);
+    const dayEvents = events.filter((e: TaxCalendarEvent) => e.date === dayStr);
     return (
       <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-        {dayEvents.map((e: any, i: number) => (
+        {dayEvents.map((e: TaxCalendarEvent, i: number) => (
           <li key={i}><Badge status={e.isDone ? 'success' : 'processing'} text={e.taxName} /></li>
         ))}
       </ul>

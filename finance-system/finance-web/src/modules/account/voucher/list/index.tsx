@@ -75,7 +75,7 @@ const VoucherList: React.FC = () => {
       },
     },
     {
-      title: '操作', key: 'action', render: (_: any, record: Voucher) => (
+      title: '操作', key: 'action', render: (_: unknown, record: Voucher) => (
         <Space>
           <a onClick={() => navigate(`/account/voucher/${record.id}`)}>查看</a>
           {record.status === 0 && <a onClick={() => navigate(`/account/voucher/add`, { state: record })}>编辑</a>}

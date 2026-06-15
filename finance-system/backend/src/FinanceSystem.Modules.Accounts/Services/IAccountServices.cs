@@ -7,9 +7,6 @@ namespace FinanceSystem.Modules.Accounts.Services;
 /// <summary>
 /// 会计科目服务接口
 /// </summary>
-/// <summary>
-/// 会计科目服务接口
-/// </summary>
 public interface ISubjectService
 {
     /// <summary>
@@ -48,9 +45,6 @@ public interface ISubjectService
 
 /// <summary>
 /// 凭证管理服务接口
-/// </summary>
-/// <summary>
-/// 凭证服务接口
 /// </summary>
 public interface IVoucherService
 {
@@ -118,9 +112,6 @@ public interface IVoucherService
 /// <summary>
 /// 会计期间服务接口
 /// </summary>
-/// <summary>
-/// 会计期间服务接口
-/// </summary>
 public interface IPeriodService
 {
     /// <summary>
@@ -158,9 +149,6 @@ public interface IPeriodService
 /// <summary>
 /// 科目期初余额服务接口
 /// </summary>
-/// <summary>
-/// 科目余额服务接口
-/// </summary>
 public interface ISubjectBalanceService
 {
     /// <summary>
@@ -180,9 +168,6 @@ public interface ISubjectBalanceService
     Task<(bool IsBalanced, decimal DebitTotal, decimal CreditTotal)> TrialBalanceAsync(long periodId);
 }
 
-/// <summary>
-/// 账簿查询服务接口
-/// </summary>
 /// <summary>
 /// 账簿查询服务接口
 /// </summary>
@@ -209,9 +194,6 @@ public interface ILedgerService
     Task<List<SubjectBalance>> GetSubjectSummaryAsync(int year, int month);
 }
 
-/// <summary>
-/// 辅助核算服务接口
-/// </summary>
 /// <summary>
 /// 辅助核算服务接口
 /// </summary>

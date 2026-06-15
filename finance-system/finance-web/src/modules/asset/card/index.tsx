@@ -21,7 +21,7 @@ const AssetCard: React.FC = () => {
       title: '状态', dataIndex: 'status', key: 'status',
       render: (val: number) => <span>{['', '在用', '闲置', '维修中', '已处置', '已报废'][val] || '未知'}</span>,
     },
-    { title: '操作', key: 'action', render: (_: any, record: AssetCard) => <a onClick={() => navigate(`/asset/card/${record.id}`)}>详情</a> },
+    { title: '操作', key: 'action', render: (_: unknown, record: AssetCard) => <a onClick={() => navigate(`/asset/card/${record.id}`)}>详情</a> },
   ];
 
   const handleAdd = () => { form.resetFields(); setModalOpen(true); };

@@ -16,12 +16,16 @@ public class SubjectService : ISubjectService
     private readonly ISqlSugarClient _db;
 
     /// <summary>
-    /// SubjectService方法</summary>
+    /// <summary>
+    /// 科目管理服务
+    /// </summary>
     public SubjectService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetTreeAsync方法</summary>
+    /// <summary>
+    /// 获取科目树
+    /// </summary>
     public async Task<List<AccountSubject>> GetTreeAsync(bool enabledOnly = true)
     {
         var all = await _db.Queryable<AccountSubject>()
@@ -33,7 +37,9 @@ public class SubjectService : ISubjectService
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetByIdAsync方法</summary>
+    /// <summary>
+    /// 获取详情
+    /// </summary>
     public async Task<AccountSubject?> GetByIdAsync(long id)
     {
         return await _db.Queryable<AccountSubject>().FirstAsync(s => s.Id == id);
@@ -41,7 +47,9 @@ public class SubjectService : ISubjectService
 
     /// <inheritdoc/>
     /// <summary>
-    /// CreateAsync方法</summary>
+    /// <summary>
+    /// 创建
+    /// </summary>
     public async Task<long> CreateAsync(SubjectCreateRequest request)
     {
         var exists = await _db.Queryable<AccountSubject>().AnyAsync(s => s.SubjectCode == request.SubjectCode);
@@ -79,7 +87,9 @@ public class SubjectService : ISubjectService
 
     /// <inheritdoc/>
     /// <summary>
-    /// UpdateAsync方法</summary>
+    /// <summary>
+    /// 修改
+    /// </summary>
     public async Task UpdateAsync(long id, SubjectCreateRequest request)
     {
         var subject = await _db.Queryable<AccountSubject>().FirstAsync(s => s.Id == id)
@@ -100,7 +110,9 @@ public class SubjectService : ISubjectService
 
     /// <inheritdoc/>
     /// <summary>
-    /// DeleteAsync方法</summary>
+    /// <summary>
+    /// 删除
+    /// </summary>
     public async Task DeleteAsync(long id)
     {
         var subject = await _db.Queryable<AccountSubject>().FirstAsync(s => s.Id == id)
@@ -117,7 +129,9 @@ public class SubjectService : ISubjectService
 
     /// <inheritdoc/>
     /// <summary>
-    /// ToggleStatusAsync方法</summary>
+    /// <summary>
+    /// 启用/停用
+    /// </summary>
     public async Task ToggleStatusAsync(long id, int isEnabled)
     {
         var subject = await _db.Queryable<AccountSubject>().FirstAsync(s => s.Id == id)

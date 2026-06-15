@@ -44,14 +44,14 @@ export default function ExpenseLoanPage() {
     { title: '借款编号', dataIndex: 'loanNo', width: 120 },
     { title: '借款金额', dataIndex: 'loanAmount', width: 120, render: (v: number) => `¥${v.toFixed(2)}` },
     { title: '已核销金额', dataIndex: 'settledAmount', width: 120, render: (v: number) => `¥${v.toFixed(2)}` },
-    { title: '剩余可核销', width: 120, render: (_: any, r: any) => `¥${(r.loanAmount - r.settledAmount).toFixed(2)}` },
+    { title: '剩余可核销', width: 120, render: (_: unknown, r: ExpenseLoan) => `¥${(r.loanAmount - r.settledAmount).toFixed(2)}` },
     { title: '借款事由', dataIndex: 'reason', ellipsis: true },
     { title: '预计还款日', dataIndex: 'expectedReturnDate', width: 120 },
     { title: '状态', dataIndex: 'status', width: 100, render: (v: number) => <Tag color={statusMap[v]?.color}>{statusMap[v]?.text}</Tag> },
     { title: '创建时间', dataIndex: 'createdTime', width: 160 },
     {
       title: '操作', width: 180, fixed: 'right' as const,
-      render: (_: any, r: any) => (
+      render: (_: unknown, r: ExpenseLoan) => (
         <Space>
           {r.status === 0 && (
             <>

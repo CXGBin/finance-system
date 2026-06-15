@@ -29,7 +29,7 @@ const VoucherAdd: React.FC = () => {
     setEntries(entries.filter(e => e.id !== rowId));
   };
 
-  const updateEntry = (rowId: number, field: string, value: any) => {
+  const updateEntry = (rowId: number, field: string, value: string | number) => {
     setEntries(entries.map(e => e.id === rowId ? { ...e, [field]: value } : e));
   };
 
@@ -59,20 +59,20 @@ const VoucherAdd: React.FC = () => {
   };
 
   const entryColumns = [
-    { title: '科目', dataIndex: 'subjectId', render: (val: number, record: any) => (
+    { title: '科目', dataIndex: 'subjectId', render: (val: number, record: VoucherEntry) => (
       <Select style={{ width: 200 }} value={val} onChange={(v) => updateEntry(record.id, 'subjectId', v)}
         showSearch optionFilterProp="label" options={subjects.map(s => ({ label: `${s.subjectCode} ${s.subjectName}`, value: s.id }))} />
     )},
-    { title: '摘要', dataIndex: 'summary', render: (val: string, record: any) => (
+    { title: '摘要', dataIndex: 'summary', render: (val: string, record: VoucherEntry) => (
       <Input value={val} onChange={(e) => updateEntry(record.id, 'summary', e.target.value)} style={{ width: 150 }} />
     )},
-    { title: '借方', dataIndex: 'debit', align: 'right', render: (val: number, record: any) => (
+    { title: '借方', dataIndex: 'debit', align: 'right', render: (val: number, record: VoucherEntry) => (
       <InputNumber value={val} onChange={(v) => updateEntry(record.id, 'debit', v)} style={{ width: 120 }} min={0} />
     )},
-    { title: '贷方', dataIndex: 'credit', align: 'right', render: (val: number, record: any) => (
+    { title: '贷方', dataIndex: 'credit', align: 'right', render: (val: number, record: VoucherEntry) => (
       <InputNumber value={val} onChange={(v) => updateEntry(record.id, 'credit', v)} style={{ width: 120 }} min={0} />
     )},
-    { title: '操作', render: (_: any, record: any) => <Button type="link" danger onClick={() => removeEntry(record.id)}>删除</Button> },
+    { title: '操作', render: (_: unknown, record: VoucherEntry) => <Button type="link" danger onClick={() => removeEntry(record.id)}>删除</Button> },
   ];
 
   const totalDebit = entries.reduce((s, e) => s + (e.debit || 0), 0);

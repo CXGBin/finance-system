@@ -12,7 +12,7 @@ export default function AssetDisposePage() {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    assetApi.card.page({ pageIndex: 1, pageSize: 100, status: 1 }).then((res: any) => setAssets(res.list || [])).catch(() => {});
+    assetApi.card.page({ pageIndex: 1, pageSize: 100, status: 1 }).then((res: { list?: AssetCard[] }) => setAssets(res.list || [])).catch(() => {});
   }, []);
 
   const handleDispose = async () => {
@@ -35,11 +35,11 @@ export default function AssetDisposePage() {
     { title: '资产名称', dataIndex: 'assetName', width: 150 },
     { title: '原值', dataIndex: 'originalValue', width: 120, render: (v: number) => `¥${v.toFixed(2)}` },
     { title: '累计折旧', dataIndex: 'accumulatedDepreciation', width: 120, render: (v: number) => `¥${v.toFixed(2)}` },
-    { title: '净值', width: 120, render: (_: any, r: any) => `¥${(r.originalValue - r.accumulatedDepreciation).toFixed(2)}` },
+    { title: '净值', width: 120, render: (_: unknown, r: AssetCard) => `¥${(r.originalValue - r.accumulatedDepreciation).toFixed(2)}` },
     { title: '状态', dataIndex: 'status', width: 80, render: (v: number) => <Tag color={v === 1 ? 'green' : 'orange'}>{v === 1 ? '使用中' : '闲置'}</Tag> },
     {
       title: '操作', width: 100, fixed: 'right' as const,
-      render: (_: any, r: any) => (
+      render: (_: unknown, r: AssetCard) => (
         <Button size="small" type="primary" danger onClick={() => { setSelectedAsset(r); setModalVisible(true); form.resetFields(); }}>处置</Button>
       ),
     },

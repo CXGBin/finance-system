@@ -83,7 +83,7 @@ public class TaxEnhancedTests
     public void Invoice_Direction_Mapping()
     {
         // Direction: 1=销项 2=进项
-        Assert.Equal(1, 1);
+        Assert.True(true); // 占位测试
         Assert.Equal(2, 2);
     }
 
@@ -107,7 +107,7 @@ public class TaxEnhancedTests
     public void TaxCategory_DeclareCycle()
     {
         // 1=月 3=季
-        Assert.Equal(1, 1); // 月度
+        Assert.True(true); // 占位测试 // 月度
         Assert.Equal(3, 3); // 季度
     }
 

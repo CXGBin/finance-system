@@ -14,7 +14,7 @@ const PendingApproval: React.FC = () => {
     { title: '发起人', dataIndex: 'initiatorName', key: 'initiatorName' },
     { title: '发起时间', dataIndex: 'createdTime', key: 'createdTime' },
     {
-      title: '操作', key: 'action', render: (_: any, record: ApprovalInstance) => (
+      title: '操作', key: 'action', render: (_: unknown, record: ApprovalInstance) => (
         <Space>
           <a onClick={() => navigate(`/approval/${record.id}`)}>详情</a>
           <a onClick={() => approvalApi.approve(record.id, '同意').then(() => window.location.reload())}>通过</a>

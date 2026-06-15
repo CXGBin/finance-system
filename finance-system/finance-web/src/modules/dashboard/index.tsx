@@ -110,7 +110,7 @@ const DashboardPage: React.FC = () => {
         </Col>
         <Col span={12}>
           <Card title="系统公告" size="small">
-            {notices.length > 0 ? notices.map((n: any) => (
+            {notices.length > 0 ? notices.map((n: SysNotice) => (
               <div key={n.id} style={{ padding: '4px 0', borderBottom: '1px solid #f0f0f0' }}>
                 <Typography.Text strong>{n.title}</Typography.Text>
                 <br />

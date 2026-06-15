@@ -16,12 +16,16 @@ public class BudgetYearService : IBudgetYearService
     private readonly ISqlSugarClient _db;
 
     /// <summary>
-    /// BudgetYearService方法</summary>
+    /// <summary>
+    /// 预算年度服务
+    /// </summary>
     public BudgetYearService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetListAsync方法</summary>
+    /// <summary>
+    /// 获取盘点列表
+    /// </summary>
     public async Task<List<BudgetYear>> GetListAsync(BudgetYearQuery query)
     {
         return await _db.Queryable<BudgetYear>()
@@ -33,7 +37,9 @@ public class BudgetYearService : IBudgetYearService
 
     /// <inheritdoc/>
     /// <summary>
-    /// CreateAsync方法</summary>
+    /// <summary>
+    /// 创建
+    /// </summary>
     public async Task<long> CreateAsync(BudgetYearRequest request, long currentUserId)
     {
         var exists = await _db.Queryable<BudgetYear>().AnyAsync(y => y.Year == request.Year);
@@ -52,7 +58,7 @@ public class BudgetYearService : IBudgetYearService
 
     /// <inheritdoc/>
     /// <summary>
-    /// UpdateStatusAsync方法</summary>
+    /// <inheritdoc/>
     public async Task UpdateStatusAsync(long id, int status)
     {
         var year = await _db.Queryable<BudgetYear>().FirstAsync(y => y.Id == id)
@@ -73,12 +79,16 @@ public class BudgetSubjectService : IBudgetSubjectService
     private readonly ISqlSugarClient _db;
 
     /// <summary>
-    /// BudgetSubjectService方法</summary>
+    /// <summary>
+    /// 预算科目服务
+    /// </summary>
     public BudgetSubjectService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetListAsync方法</summary>
+    /// <summary>
+    /// 获取盘点列表
+    /// </summary>
     public async Task<PageResult<BudgetSubject>> GetListAsync(long yearId, int pageIndex = 1, int pageSize = 20)
     {
         RefAsync<int> total = 0;
@@ -91,7 +101,9 @@ public class BudgetSubjectService : IBudgetSubjectService
 
     /// <inheritdoc/>
     /// <summary>
-    /// CreateAsync方法</summary>
+    /// <summary>
+    /// 创建
+    /// </summary>
     public async Task<long> CreateAsync(BudgetSubjectRequest request)
     {
         var year = await _db.Queryable<BudgetYear>().FirstAsync(y => y.Id == request.BudgetYearId);
@@ -111,7 +123,9 @@ public class BudgetSubjectService : IBudgetSubjectService
 
     /// <inheritdoc/>
     /// <summary>
-    /// UpdateAsync方法</summary>
+    /// <summary>
+    /// 修改
+    /// </summary>
     public async Task UpdateAsync(long id, BudgetSubjectRequest request)
     {
         var entity = await _db.Queryable<BudgetSubject>().FirstAsync(s => s.Id == id)
@@ -125,7 +139,9 @@ public class BudgetSubjectService : IBudgetSubjectService
 
     /// <inheritdoc/>
     /// <summary>
-    /// DeleteAsync方法</summary>
+    /// <summary>
+    /// 删除
+    /// </summary>
     public async Task DeleteAsync(long id)
     {
         await _db.Deleteable<BudgetSubject>().Where(s => s.Id == id).ExecuteCommandAsync();
@@ -143,12 +159,14 @@ public class BudgetMonthlyService : IBudgetMonthlyService
     private readonly ISqlSugarClient _db;
 
     /// <summary>
-    /// BudgetMonthlyService方法</summary>
+    /// <summary>
+    /// 月度预算服务
+    /// </summary>
     public BudgetMonthlyService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetBySubjectAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<List<BudgetMonthly>> GetBySubjectAsync(long budgetSubjectId)
     {
         return await _db.Queryable<BudgetMonthly>()
@@ -159,7 +177,9 @@ public class BudgetMonthlyService : IBudgetMonthlyService
 
     /// <inheritdoc/>
     /// <summary>
-    /// SaveAsync方法</summary>
+    /// <summary>
+    /// 保存
+    /// </summary>
     public async Task SaveAsync(BudgetMonthlySaveRequest request)
     {
         var subject = await _db.Queryable<BudgetSubject>().FirstAsync(s => s.Id == request.BudgetSubjectId)
@@ -187,7 +207,7 @@ public class BudgetMonthlyService : IBudgetMonthlyService
 
     /// <inheritdoc/>
     /// <summary>
-    /// AutoSplitAsync方法</summary>
+    /// <inheritdoc/>
     public async Task AutoSplitAsync(long budgetSubjectId)
     {
         var subject = await _db.Queryable<BudgetSubject>().FirstAsync(s => s.Id == budgetSubjectId)
@@ -224,12 +244,14 @@ public class BudgetExecutionService : IBudgetExecutionService
     private readonly ISqlSugarClient _db;
 
     /// <summary>
-    /// BudgetExecutionService方法</summary>
+    /// <summary>
+    /// 预算执行分析服务
+    /// </summary>
     public BudgetExecutionService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetExecutionAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<List<BudgetExecutionItem>> GetExecutionAsync(BudgetExecutionQuery query)
     {
         var subjects = await _db.Queryable<BudgetSubject>()
@@ -304,12 +326,16 @@ public class BudgetAdjustService : IBudgetAdjustService
     private readonly ISqlSugarClient _db;
 
     /// <summary>
-    /// BudgetAdjustService方法</summary>
+    /// <summary>
+    /// 预算调整服务
+    /// </summary>
     public BudgetAdjustService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
     /// <summary>
-    /// CreateAdjustAsync方法</summary>
+    /// <summary>
+    /// 创建预算调整
+    /// </summary>
     public async Task<long> CreateAdjustAsync(BudgetAdjustRequest request, long currentUserId)
     {
         var subject = await _db.Queryable<BudgetSubject>().FirstAsync(s => s.Id == request.BudgetSubjectId)
@@ -337,7 +363,7 @@ public class BudgetAdjustService : IBudgetAdjustService
 
     /// <inheritdoc/>
     /// <summary>
-    /// ApproveAdjustAsync方法</summary>
+    /// <inheritdoc/>
     public async Task ApproveAdjustAsync(long id, int action, long currentUserId)
     {
         var adj = await _db.Queryable<BudgetAdjustment>().FirstAsync(a => a.Id == id)
@@ -369,12 +395,14 @@ public class BudgetAlertService : IBudgetAlertService
     private readonly ISqlSugarClient _db;
 
     /// <summary>
-    /// BudgetAlertService方法</summary>
+    /// <summary>
+    /// 预算预警服务
+    /// </summary>
     public BudgetAlertService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetConfigAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<BudgetAlertConfig?> GetConfigAsync(long budgetYearId)
     {
         return await _db.Queryable<BudgetAlertConfig>().FirstAsync(c => c.BudgetYearId == budgetYearId);
@@ -382,7 +410,7 @@ public class BudgetAlertService : IBudgetAlertService
 
     /// <inheritdoc/>
     /// <summary>
-    /// SaveConfigAsync方法</summary>
+    /// <inheritdoc/>
     public async Task SaveConfigAsync(BudgetAlertConfigRequest request)
     {
         var existing = await _db.Queryable<BudgetAlertConfig>()
@@ -409,7 +437,7 @@ public class BudgetAlertService : IBudgetAlertService
 
     /// <inheritdoc/>
     /// <summary>
-    /// CheckAlertsAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<List<BudgetExecutionItem>> CheckAlertsAsync(long budgetYearId)
     {
         var config = await GetConfigAsync(budgetYearId);
@@ -432,11 +460,13 @@ public class BudgetAnalysisService : IBudgetAnalysisService
 {
     private readonly ISqlSugarClient _db;
     /// <summary>
-    /// BudgetAnalysisService方法</summary>
+    /// <inheritdoc/>
     public BudgetAnalysisService(ISqlSugarClient db) => _db = db;
 
     /// <summary>
-    /// GetSubjectCompareAsync方法</summary>
+    /// <summary>
+    /// 科目对比分析
+    /// </summary>
     public async Task<List<object>> GetSubjectCompareAsync(int year)
     {
         var budgetYear = await _db.Queryable<BudgetYear>().FirstAsync(y => y.Year == year);
@@ -455,7 +485,9 @@ public class BudgetAnalysisService : IBudgetAnalysisService
     }
 
     /// <summary>
-    /// GetMonthlyTrendAsync方法</summary>
+    /// <summary>
+    /// 月度趋势分析
+    /// </summary>
     public async Task<List<object>> GetMonthlyTrendAsync(int year)
     {
         var budgetYear = await _db.Queryable<BudgetYear>().FirstAsync(y => y.Year == year);
@@ -469,7 +501,9 @@ public class BudgetAnalysisService : IBudgetAnalysisService
     }
 
     /// <summary>
-    /// GetExpenseTop10Async方法</summary>
+    /// <summary>
+    /// 费用TOP10分析
+    /// </summary>
     public async Task<List<object>> GetExpenseTop10Async(int year)
     {
         var budgetYear = await _db.Queryable<BudgetYear>().FirstAsync(y => y.Year == year);
@@ -480,7 +514,9 @@ public class BudgetAnalysisService : IBudgetAnalysisService
     }
 
     /// <summary>
-    /// GetOverviewAsync方法</summary>
+    /// <summary>
+    /// 预算概览
+    /// </summary>
     public async Task<object> GetOverviewAsync(int year)
     {
         var budgetYear = await _db.Queryable<BudgetYear>().FirstAsync(y => y.Year == year);

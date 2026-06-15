@@ -86,7 +86,7 @@ const DictList: React.FC = () => {
   const typeColumns = [
     { title: '字典名称', dataIndex: 'dictName', key: 'dictName' },
     { title: '字典类型', dataIndex: 'dictType', key: 'dictType' },
-    { title: '操作', key: 'action', render: (_: any, record: DictType) => (
+    { title: '操作', key: 'action', render: (_: unknown, record: DictType) => (
       <Space>
         <a onClick={() => handleEditType(record as DictType)}>编辑</a>
         <Popconfirm title="确认删除?" onConfirm={() => dictApi.typeRemove(record.id).then(() => { message.success('删除成功'); loadTypes(); })}>
@@ -100,7 +100,7 @@ const DictList: React.FC = () => {
     { title: '字典标签', dataIndex: 'dictLabel', key: 'dictLabel' },
     { title: '字典键值', dataIndex: 'dictValue', key: 'dictValue' },
     { title: '排序', dataIndex: 'sortOrder', key: 'sortOrder' },
-    { title: '操作', key: 'action', render: (_: any, record: DictItem) => (
+    { title: '操作', key: 'action', render: (_: unknown, record: DictItem) => (
       <Space>
         <a onClick={() => handleEditItem(record as DictItem)}>编辑</a>
         <Popconfirm title="确认删除?" onConfirm={() => dictApi.itemRemove(record.id).then(() => { message.success('删除成功'); if (selectedType) loadItems(selectedType); })}>

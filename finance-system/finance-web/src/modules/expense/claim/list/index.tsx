@@ -22,7 +22,7 @@ const ExpenseClaimList: React.FC = () => {
     },
     { title: '提交时间', dataIndex: 'createdTime', key: 'createdTime' },
     {
-      title: '操作', key: 'action', render: (_: any, record: ExpenseClaim) => (
+      title: '操作', key: 'action', render: (_: unknown, record: ExpenseClaim) => (
         <Space>
           <a onClick={() => navigate(`/expense/claim/${record.id}`)}>查看</a>
           {record.status === 0 && <a onClick={() => navigate('/expense/claim/add', { state: record })}>编辑</a>}

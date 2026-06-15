@@ -27,7 +27,7 @@ const RoleList: React.FC = () => {
     { title: '创建时间', dataIndex: 'createdTime', key: 'createdTime' },
     {
       title: '操作', key: 'action',
-      render: (_: any, record: SysRole) => (
+      render: (_: unknown, record: SysRole) => (
         <Space>
           <a className="table-action" onClick={() => handleEdit(record as SysRole)}>编辑</a>
           <a className="table-action" onClick={() => handlePerm(record as SysRole)}>权限</a>

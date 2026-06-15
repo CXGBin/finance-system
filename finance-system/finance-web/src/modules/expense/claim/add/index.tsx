@@ -36,7 +36,7 @@ const ExpenseClaimAdd: React.FC = () => {
 
   const addItem = () => setItems((prev) => [...prev, { key: String(Date.now()), expenseDate: '', expenseTypeName: '', expenseTypeId: 0, description: '', amount: 0 }]);
   const removeItem = (key: string) => setItems((prev) => prev.filter((i) => i.key !== key));
-  const updateItem = (key: string, field: keyof ClaimItem, value: any) =>
+  const updateItem = (key: string, field: keyof ClaimItem, value: string | number) =>
     setItems((prev) => prev.map((i) => (i.key === key ? { ...i, [field]: value } : i)));
 
   const handleSubmit = async () => {
@@ -103,7 +103,7 @@ const ExpenseClaimAdd: React.FC = () => {
     },
     {
       title: '操作', width: 50,
-      render: (_: any, record: ClaimItem) =>
+      render: (_: unknown, record: ClaimItem) =>
         items.length > 1 ? <MinusCircleOutlined onClick={() => removeItem(record.key)} style={{ color: '#ff4d4f', cursor: 'pointer' }} /> : null,
     },
   ];

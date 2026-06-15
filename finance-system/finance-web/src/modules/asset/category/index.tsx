@@ -39,7 +39,7 @@ const AssetCategory: React.FC = () => {
     } catch {}
   };
 
-  const buildNodes = (list: AssetCategory[]): any[] => list.map(item => ({
+  const buildNodes = (list: AssetCategory[]): DataNode[] => list.map(item => ({
     key: item.id, title: <span>{item.categoryName} <Button type="link" size="small" onClick={(e) => { e.stopPropagation(); handleAdd(item); }}>新增</Button></span>,
     children: item.children ? buildNodes(item.children) : [],
   }));

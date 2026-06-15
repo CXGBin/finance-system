@@ -50,7 +50,7 @@ const PeriodList: React.FC = () => {
     { title: '结账时间', dataIndex: 'closedTime', key: 'closedTime' },
     {
       title: '操作', key: 'action',
-      render: (_: any, record: AccountingPeriod) => (
+      render: (_: unknown, record: AccountingPeriod) => (
         <Space>
           {record.isClosed === 0 && (
             <>

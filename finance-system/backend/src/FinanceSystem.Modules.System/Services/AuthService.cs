@@ -70,6 +70,7 @@ public class AuthService : IAuthService
         // 生成Token
         var accessToken = GenerateToken(user);
         var refreshToken = GenerateRefreshToken();
+        _refreshTokenStore[refreshToken] = user.Id; // 登录成功后更新为真实userId
         var expiresIn = int.Parse(_config["JwtSettings:AccessTokenExpireMinutes"] ?? "120");
 
         var userInfo = await BuildUserInfoAsync(user);

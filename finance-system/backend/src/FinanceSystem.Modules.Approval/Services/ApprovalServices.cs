@@ -69,12 +69,16 @@ public class ApprovalFlowService : IApprovalFlowService
     private readonly ISqlSugarClient _db;
 
     /// <summary>
-    /// ApprovalFlowService方法</summary>
+    /// <summary>
+    /// 审批流程模板服务
+    /// </summary>
     public ApprovalFlowService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetListAsync方法</summary>
+    /// <summary>
+    /// 获取盘点列表
+    /// </summary>
     public async Task<List<ApprovalFlow>> GetListAsync(string? moduleType = null)
     {
         return await _db.Queryable<ApprovalFlow>()
@@ -85,7 +89,9 @@ public class ApprovalFlowService : IApprovalFlowService
 
     /// <inheritdoc/>
     /// <summary>
-    /// CreateAsync方法</summary>
+    /// <summary>
+    /// 创建
+    /// </summary>
     public async Task<long> CreateAsync(ApprovalFlowRequest request)
     {
         var exists = await _db.Queryable<ApprovalFlow>().AnyAsync(f => f.FlowCode == request.FlowCode);
@@ -111,7 +117,9 @@ public class ApprovalFlowService : IApprovalFlowService
 
     /// <inheritdoc/>
     /// <summary>
-    /// UpdateAsync方法</summary>
+    /// <summary>
+    /// 修改
+    /// </summary>
     public async Task UpdateAsync(long id, ApprovalFlowRequest request)
     {
         var entity = await _db.Queryable<ApprovalFlow>().FirstAsync(f => f.Id == id)
@@ -126,7 +134,9 @@ public class ApprovalFlowService : IApprovalFlowService
 
     /// <inheritdoc/>
     /// <summary>
-    /// DeleteAsync方法</summary>
+    /// <summary>
+    /// 删除
+    /// </summary>
     public async Task DeleteAsync(long id)
     {
         await _db.Deleteable<ApprovalFlow>().Where(f => f.Id == id).ExecuteCommandAsync();
@@ -144,12 +154,16 @@ public class ApprovalInstanceService : IApprovalInstanceService
     private readonly ISqlSugarClient _db;
 
     /// <summary>
-    /// ApprovalInstanceService方法</summary>
+    /// <summary>
+    /// 审批实例服务
+    /// </summary>
     public ApprovalInstanceService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetListAsync方法</summary>
+    /// <summary>
+    /// 获取盘点列表
+    /// </summary>
     public async Task<PageResult<ApprovalInstance>> GetListAsync(ApprovalInstanceQuery query)
     {
         RefAsync<int> total = 0;
@@ -172,7 +186,7 @@ public class ApprovalInstanceService : IApprovalInstanceService
 
     /// <inheritdoc/>
     /// <summary>
-    /// StartAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<long> StartAsync(ApprovalStartRequest request, long currentUserId)
     {
         var flow = await _db.Queryable<ApprovalFlow>().FirstAsync(f => f.Id == request.FlowId)
@@ -201,7 +215,7 @@ public class ApprovalInstanceService : IApprovalInstanceService
 
     /// <inheritdoc/>
     /// <summary>
-    /// ActionAsync方法</summary>
+    /// <inheritdoc/>
     public async Task ActionAsync(ApprovalActionRequest request, long currentUserId)
     {
         var instance = await _db.Queryable<ApprovalInstance>().FirstAsync(i => i.Id == request.InstanceId)
@@ -251,7 +265,7 @@ public class ApprovalInstanceService : IApprovalInstanceService
 
     /// <inheritdoc/>
     /// <summary>
-    /// WithdrawAsync方法</summary>
+    /// <inheritdoc/>
     public async Task WithdrawAsync(long instanceId, long currentUserId)
     {
         var instance = await _db.Queryable<ApprovalInstance>().FirstAsync(i => i.Id == instanceId)
@@ -280,7 +294,7 @@ public class ApprovalInstanceService : IApprovalInstanceService
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetRecordsAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<List<ApprovalRecord>> GetRecordsAsync(long instanceId)
     {
         return await _db.Queryable<ApprovalRecord>()
@@ -291,7 +305,7 @@ public class ApprovalInstanceService : IApprovalInstanceService
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetMyPendingAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<List<ApprovalInstance>> GetMyPendingAsync(long userId, string? moduleType = null)
     {
         // 查询已审批记录的实例ID，排除已处理的
@@ -314,7 +328,7 @@ public class ApprovalInstanceService : IApprovalInstanceService
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetMyDoneAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<List<ApprovalInstance>> GetMyDoneAsync(long userId, string? moduleType = null)
     {
         var instanceIds = await _db.Queryable<ApprovalRecord>()
@@ -336,7 +350,7 @@ public class ApprovalInstanceService : IApprovalInstanceService
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetMyInitiatedAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<PageResult<ApprovalInstance>> GetMyInitiatedAsync(long userId, ApprovalInstanceQuery query)
     {
         RefAsync<int> total = 0;
@@ -351,7 +365,9 @@ public class ApprovalInstanceService : IApprovalInstanceService
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetStatisticsAsync方法</summary>
+    /// <summary>
+    /// 获取统计
+    /// </summary>
     public async Task<object> GetStatisticsAsync(long userId)
     {
         var pendingCount = await _db.Queryable<ApprovalRecord>()
@@ -376,7 +392,7 @@ public class ApprovalInstanceService : IApprovalInstanceService
 
     /// <inheritdoc/>
     /// <summary>
-    /// BatchActionAsync方法</summary>
+    /// <inheritdoc/>
     public async Task BatchActionAsync(List<ApprovalActionRequest> requests, long currentUserId)
     {
         foreach (var req in requests)
@@ -387,7 +403,7 @@ public class ApprovalInstanceService : IApprovalInstanceService
 
     /// <inheritdoc/>
     /// <summary>
-    /// TransferAsync方法</summary>
+    /// <inheritdoc/>
     public async Task TransferAsync(long instanceId, long targetUserId, string? comment, long currentUserId)
     {
         var instance = await _db.Queryable<ApprovalInstance>().FirstAsync(i => i.Id == instanceId)

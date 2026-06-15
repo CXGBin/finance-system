@@ -21,7 +21,7 @@ const MyApproval: React.FC = () => {
     },
     { title: '提交时间', dataIndex: 'createdTime', key: 'createdTime' },
     {
-      title: '操作', key: 'action', render: (_: any, record: ApprovalInstance) => (
+      title: '操作', key: 'action', render: (_: unknown, record: ApprovalInstance) => (
         <Space>
           <a onClick={() => navigate(`/approval/${record.id}`)}>详情</a>
           {record.status === 0 && <a onClick={() => approvalApi.withdraw(record.id).then(() => window.location.reload())}>撤回</a>}

@@ -135,10 +135,30 @@ public class UserProfile
     /// 真实姓名
     /// </summary>
     public string RealName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 邮箱
+    /// </summary>
     public string? Email { get; set; }
+
+    /// <summary>
+    /// 手机号
+    /// </summary>
     public string? Phone { get; set; }
+
+    /// <summary>
+    /// 头像URL
+    /// </summary>
     public string? Avatar { get; set; }
+
+    /// <summary>
+    /// 所属部门ID
+    /// </summary>
     public long? DeptId { get; set; }
+
+    /// <summary>
+    /// 所属部门名称
+    /// </summary>
     public string? DeptName { get; set; }
 
     /// <summary>

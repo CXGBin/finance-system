@@ -64,11 +64,15 @@ public class AssetCategoryService : IAssetCategoryService
 {
     private readonly ISqlSugarClient _db;
     /// <summary>
-    /// AssetCategoryService方法</summary>
+    /// <summary>
+    /// 资产分类服务
+    /// </summary>
     public AssetCategoryService(ISqlSugarClient db) => _db = db;
 
     /// <summary>
-    /// GetTreeAsync方法</summary>
+    /// <summary>
+    /// 获取科目树
+    /// </summary>
     public async Task<List<AssetCategory>> GetTreeAsync()
     {
         var all = await _db.Queryable<AssetCategory>().OrderBy(c => c.SortOrder).ToListAsync();
@@ -76,7 +80,9 @@ public class AssetCategoryService : IAssetCategoryService
     }
 
     /// <summary>
-    /// CreateAsync方法</summary>
+    /// <summary>
+    /// 创建
+    /// </summary>
     public async Task<long> CreateAsync(AssetCategoryRequest request)
     {
         var entity = new AssetCategory
@@ -91,7 +97,9 @@ public class AssetCategoryService : IAssetCategoryService
     }
 
     /// <summary>
-    /// UpdateAsync方法</summary>
+    /// <summary>
+    /// 修改
+    /// </summary>
     public async Task UpdateAsync(long id, AssetCategoryRequest request)
     {
         var entity = await _db.Queryable<AssetCategory>().FirstAsync(c => c.Id == id)
@@ -104,7 +112,9 @@ public class AssetCategoryService : IAssetCategoryService
     }
 
     /// <summary>
-    /// DeleteAsync方法</summary>
+    /// <summary>
+    /// 删除
+    /// </summary>
     public async Task DeleteAsync(long id)
     {
         var hasAsset = await _db.Queryable<AssetCard>().AnyAsync(a => a.CategoryId == id);
@@ -121,11 +131,15 @@ public class AssetCardService : IAssetCardService
 {
     private readonly ISqlSugarClient _db;
     /// <summary>
-    /// AssetCardService方法</summary>
+    /// <summary>
+    /// 资产卡片服务
+    /// </summary>
     public AssetCardService(ISqlSugarClient db) => _db = db;
 
     /// <summary>
-    /// GetPageAsync方法</summary>
+    /// <summary>
+    /// 分页查询凭证
+    /// </summary>
     public async Task<PageResult<AssetCard>> GetPageAsync(AssetCardQuery query)
     {
         RefAsync<int> total = 0;
@@ -141,14 +155,18 @@ public class AssetCardService : IAssetCardService
     }
 
     /// <summary>
-    /// GetByIdAsync方法</summary>
+    /// <summary>
+    /// 获取详情
+    /// </summary>
     public async Task<AssetCard?> GetByIdAsync(long id)
     {
         return await _db.Queryable<AssetCard>().FirstAsync(a => a.Id == id);
     }
 
     /// <summary>
-    /// CreateAsync方法</summary>
+    /// <summary>
+    /// 创建
+    /// </summary>
     public async Task<long> CreateAsync(AssetCardRequest request)
     {
         var category = await _db.Queryable<AssetCategory>().FirstAsync(c => c.Id == request.CategoryId)
@@ -175,7 +193,9 @@ public class AssetCardService : IAssetCardService
     }
 
     /// <summary>
-    /// UpdateAsync方法</summary>
+    /// <summary>
+    /// 修改
+    /// </summary>
     public async Task UpdateAsync(long id, AssetCardRequest request)
     {
         var entity = await _db.Queryable<AssetCard>().FirstAsync(a => a.Id == id)
@@ -204,7 +224,7 @@ public class AssetCardService : IAssetCardService
     }
 
     /// <summary>
-    /// ChangeStatusAsync方法</summary>
+    /// <inheritdoc/>
     public async Task ChangeStatusAsync(long id, int changeType, AssetChangeRequest request, long currentUserId)
     {
         var asset = await _db.Queryable<AssetCard>().FirstAsync(a => a.Id == id)
@@ -226,7 +246,7 @@ public class AssetCardService : IAssetCardService
     }
 
     /// <summary>
-    /// GetDepreciableListAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<List<AssetCard>> GetDepreciableListAsync(int month)
     {
         return await _db.Queryable<AssetCard>()
@@ -235,7 +255,9 @@ public class AssetCardService : IAssetCardService
     }
 
     /// <summary>
-    /// DisposeAsync方法</summary>
+    /// <summary>
+    /// 处置资产
+    /// </summary>
     public async Task<long> DisposeAsync(long id, AssetDisposeRequest request, long currentUserId)
     {
         return await AssetDisposeHelper.DisposeAssetAsync(_db, id, request, currentUserId);
@@ -246,7 +268,9 @@ public class AssetCardService : IAssetCardService
 public static class AssetDisposeHelper
 {
     /// <summary>
-    /// DisposeAssetAsync方法</summary>
+    /// <summary>
+    /// 执行资产处置
+    /// </summary>
     public static async Task<long> DisposeAssetAsync(ISqlSugarClient db, long id, AssetDisposeRequest request, long currentUserId)
     {
         var card = await db.Queryable<AssetCard>().FirstAsync(c => c.Id == id)
@@ -363,11 +387,15 @@ public class AssetDepreciationService : IAssetDepreciationService
 {
     private readonly ISqlSugarClient _db;
     /// <summary>
-    /// AssetDepreciationService方法</summary>
+    /// <summary>
+    /// 资产折旧服务
+    /// </summary>
     public AssetDepreciationService(ISqlSugarClient db) => _db = db;
 
     /// <summary>
-    /// CalculateAsync方法</summary>
+    /// <summary>
+    /// 计算折旧
+    /// </summary>
     public async Task<List<AssetDepreciation>> CalculateAsync(int year, int month)
     {
         var period = await _db.Queryable<FinanceSystem.Modules.Accounts.Entities.AccountingPeriod>()
@@ -411,7 +439,7 @@ public class AssetDepreciationService : IAssetDepreciationService
     }
 
     /// <summary>
-    /// ConfirmDepreciationAsync方法</summary>
+    /// <inheritdoc/>
     public async Task ConfirmDepreciationAsync(int year, int month, long currentUserId)
     {
         var period = await _db.Queryable<FinanceSystem.Modules.Accounts.Entities.AccountingPeriod>()
@@ -521,7 +549,9 @@ public class AssetDepreciationService : IAssetDepreciationService
     }
 
     /// <summary>
-    /// GetSummaryAsync方法</summary>
+    /// <summary>
+    /// 获取汇总
+    /// </summary>
     public async Task<List<object>> GetSummaryAsync(int year)
     {
         var list = await _db.Queryable<AssetCard>()
@@ -574,11 +604,15 @@ public class AssetInventoryService : IAssetInventoryService
 {
     private readonly ISqlSugarClient _db;
     /// <summary>
-    /// AssetInventoryService方法</summary>
+    /// <summary>
+    /// 资产盘点服务
+    /// </summary>
     public AssetInventoryService(ISqlSugarClient db) => _db = db;
 
     /// <summary>
-    /// CreateAsync方法</summary>
+    /// <summary>
+    /// 创建
+    /// </summary>
     public async Task<long> CreateAsync(AssetInventoryRequest request)
     {
         var entity = new AssetInventory
@@ -593,7 +627,9 @@ public class AssetInventoryService : IAssetInventoryService
     }
 
     /// <summary>
-    /// GetListAsync方法</summary>
+    /// <summary>
+    /// 获取盘点列表
+    /// </summary>
     public async Task<PageResult<AssetInventory>> GetListAsync(PageRequest query)
     {
         RefAsync<int> total = 0;
@@ -604,7 +640,9 @@ public class AssetInventoryService : IAssetInventoryService
     }
 
     /// <summary>
-    /// CompleteAsync方法</summary>
+    /// <summary>
+    /// 完成盘点
+    /// </summary>
     public async Task CompleteAsync(long id)
     {
         var entity = await _db.Queryable<AssetInventory>().FirstAsync(i => i.Id == id) ?? throw new NotFoundException("盘点单不存在");
@@ -618,11 +656,11 @@ public class AssetReportService : IAssetReportService
 {
     private readonly ISqlSugarClient _db;
     /// <summary>
-    /// AssetReportService方法</summary>
+    /// <inheritdoc/>
     public AssetReportService(ISqlSugarClient db) => _db = db;
 
     /// <summary>
-    /// GetLedgerAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<PageResult<object>> GetLedgerAsync(AssetReportQuery query)
     {
         RefAsync<int> total = 0;
@@ -638,7 +676,7 @@ public class AssetReportService : IAssetReportService
     }
 
     /// <summary>
-    /// GetDepreciationSummaryAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<List<object>> GetDepreciationSummaryAsync(int year)
     {
         var cards = await _db.Queryable<AssetCard>().Where(c => c.Status != 5).ToListAsync();
@@ -654,7 +692,7 @@ public class AssetReportService : IAssetReportService
     }
 
     /// <summary>
-    /// GetValueStatsAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<object> GetValueStatsAsync()
     {
         var cards = await _db.Queryable<AssetCard>().ToListAsync();

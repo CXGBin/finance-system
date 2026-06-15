@@ -52,7 +52,7 @@ const MenuList: React.FC = () => {
     loadTree();
   };
 
-  const buildTreeNodes = (list: Menu[]): any[] =>
+  const buildTreeNodes = (list: Menu[]): DataNode[] =>
     list.map(item => ({
       key: item.id,
       title: (

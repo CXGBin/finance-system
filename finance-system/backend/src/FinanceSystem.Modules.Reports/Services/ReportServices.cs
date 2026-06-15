@@ -20,12 +20,16 @@ public class BalanceSheetService : IBalanceSheetService
     private readonly ISqlSugarClient _db;
 
     /// <summary>
-    /// BalanceSheetService方法</summary>
+    /// <summary>
+    /// 资产负债表服务
+    /// </summary>
     public BalanceSheetService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
     /// <summary>
-    /// GenerateAsync方法</summary>
+    /// <summary>
+    /// 生成报表
+    /// </summary>
     public async Task<BalanceSheetResult> GenerateAsync(ReportQuery query)
     {
         if (string.IsNullOrEmpty(query.Period)) throw new BusinessException("请选择会计期间");
@@ -151,12 +155,16 @@ public class IncomeStatementService : IIncomeStatementService
     private readonly ISqlSugarClient _db;
 
     /// <summary>
-    /// IncomeStatementService方法</summary>
+    /// <summary>
+    /// 利润表服务
+    /// </summary>
     public IncomeStatementService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
     /// <summary>
-    /// GenerateAsync方法</summary>
+    /// <summary>
+    /// 生成报表
+    /// </summary>
     public async Task<IncomeStatementResult> GenerateAsync(IncomeStatementQuery query)
     {
         if (string.IsNullOrEmpty(query.Period)) throw new BusinessException("请选择会计期间");
@@ -245,12 +253,16 @@ public class CashFlowService : ICashFlowService
     private readonly ISqlSugarClient _db;
 
     /// <summary>
-    /// CashFlowService方法</summary>
+    /// <summary>
+    /// 现金流量表服务
+    /// </summary>
     public CashFlowService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
     /// <summary>
-    /// GenerateAsync方法</summary>
+    /// <summary>
+    /// 生成报表
+    /// </summary>
     public async Task<CashFlowResult> GenerateAsync(ReportQuery query)
     {
         if (string.IsNullOrEmpty(query.Period)) throw new BusinessException("请选择会计期间");
@@ -358,12 +370,12 @@ public class SubjectBalanceReportService : ISubjectBalanceReportService
     private readonly ISqlSugarClient _db;
 
     /// <summary>
-    /// SubjectBalanceReportService方法</summary>
+    /// <inheritdoc/>
     public SubjectBalanceReportService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetReportAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<object> GetReportAsync(SubjectBalanceReportQuery query)
     {
         if (string.IsNullOrEmpty(query.Period)) throw new BusinessException("请选择会计期间");
@@ -447,12 +459,12 @@ public class CustomReportService : ICustomReportService
     private readonly ISqlSugarClient _db;
 
     /// <summary>
-    /// CustomReportService方法</summary>
+    /// <inheritdoc/>
     public CustomReportService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetTemplatesAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<PageResult<object>> GetTemplatesAsync(int pageIndex = 1, int pageSize = 20)
     {
         RefAsync<int> total = 0;
@@ -464,7 +476,7 @@ public class CustomReportService : ICustomReportService
 
     /// <inheritdoc/>
     /// <summary>
-    /// CreateTemplateAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<long> CreateTemplateAsync(ReportTemplateRequest request, long currentUserId)
     {
         var template = new ReportTemplate
@@ -480,7 +492,7 @@ public class CustomReportService : ICustomReportService
 
     /// <inheritdoc/>
     /// <summary>
-    /// UpdateTemplateAsync方法</summary>
+    /// <inheritdoc/>
     public async Task UpdateTemplateAsync(long id, ReportTemplateRequest request)
     {
         var template = await _db.Queryable<ReportTemplate>().FirstAsync(t => t.Id == id)
@@ -496,7 +508,7 @@ public class CustomReportService : ICustomReportService
 
     /// <inheritdoc/>
     /// <summary>
-    /// DeleteTemplateAsync方法</summary>
+    /// <inheritdoc/>
     public async Task DeleteTemplateAsync(long id)
     {
         await _db.Deleteable<ReportTemplate>().Where(t => t.Id == id).ExecuteCommandAsync();
@@ -504,7 +516,7 @@ public class CustomReportService : ICustomReportService
 
     /// <inheritdoc/>
     /// <summary>
-    /// GenerateCustomReportAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<object> GenerateCustomReportAsync(long templateId, string period)
     {
         var template = await _db.Queryable<ReportTemplate>().FirstAsync(t => t.Id == templateId)
@@ -601,12 +613,12 @@ public class ReportExportService : IReportExportService
     private readonly IConfiguration _config;
 
     /// <summary>
-    /// ReportExportService方法</summary>
+    /// <inheritdoc/>
     public ReportExportService(ISqlSugarClient db, IConfiguration config) { _db = db; _config = config; }
 
     /// <inheritdoc/>
     /// <summary>
-    /// ExportAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<string> ExportAsync(ExportQuery query)
     {
         var exportDir = _config["Export:Path"] ?? "/tmp/exports";
@@ -705,12 +717,12 @@ public class CompareService : ICompareService
     private readonly ISqlSugarClient _db;
 
     /// <summary>
-    /// CompareService方法</summary>
+    /// <inheritdoc/>
     public CompareService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
     /// <summary>
-    /// CompareAsync方法</summary>
+    /// <inheritdoc/>
     public async Task<CompareResult> CompareAsync(CompareQuery query)
     {
         if (query.Periods.Count < 2 || query.Periods.Count > 4)

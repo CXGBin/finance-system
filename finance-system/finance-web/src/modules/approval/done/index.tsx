@@ -17,7 +17,7 @@ const DoneApproval: React.FC = () => {
       render: (val: number) => val === 1 ? <Tag color="success">通过</Tag> : <Tag color="error">驳回</Tag>,
     },
     { title: '处理时间', dataIndex: 'handleTime', key: 'handleTime' },
-    { title: '操作', key: 'action', render: (_: any, record: ApprovalInstance) => <a onClick={() => navigate(`/approval/${record.id}`)}>查看</a> },
+    { title: '操作', key: 'action', render: (_: unknown, record: ApprovalInstance) => <a onClick={() => navigate(`/approval/${record.id}`)}>查看</a> },
   ];
   return <ProTable columns={columns} fetchData={(params) => approvalApi.done(params as any)} />;
 };

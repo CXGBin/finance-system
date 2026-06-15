@@ -16,12 +16,16 @@ public class VoucherService : IVoucherService
     private readonly ISqlSugarClient _db;
 
     /// <summary>
-    /// VoucherService方法</summary>
+    /// <summary>
+    /// 凭证管理服务
+    /// </summary>
     public VoucherService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetPageAsync方法</summary>
+    /// <summary>
+    /// 分页查询凭证
+    /// </summary>
     public async Task<PageResult<Voucher>> GetPageAsync(VoucherQuery query)
     {
         RefAsync<int> total = 0;
@@ -60,7 +64,9 @@ public class VoucherService : IVoucherService
 
     /// <inheritdoc/>
     /// <summary>
-    /// GetByIdAsync方法</summary>
+    /// <summary>
+    /// 获取详情
+    /// </summary>
     public async Task<Voucher?> GetByIdAsync(long id)
     {
         var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id);
@@ -85,7 +91,9 @@ public class VoucherService : IVoucherService
 
     /// <inheritdoc/>
     /// <summary>
-    /// CreateAsync方法</summary>
+    /// <summary>
+    /// 创建
+    /// </summary>
     public async Task<long> CreateAsync(VoucherCreateRequest request, long currentUserId)
     {
         if (request.Entries == null || request.Entries.Count < 2)
@@ -134,7 +142,9 @@ public class VoucherService : IVoucherService
 
     /// <inheritdoc/>
     /// <summary>
-    /// UpdateAsync方法</summary>
+    /// <summary>
+    /// 修改
+    /// </summary>
     public async Task UpdateAsync(long id, VoucherCreateRequest request)
     {
         var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id)
@@ -171,7 +181,9 @@ public class VoucherService : IVoucherService
 
     /// <inheritdoc/>
     /// <summary>
-    /// AuditAsync方法</summary>
+    /// <summary>
+    /// 审核凭证
+    /// </summary>
     public async Task AuditAsync(long id, long currentUserId)
     {
         var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id)
@@ -191,7 +203,9 @@ public class VoucherService : IVoucherService
 
     /// <inheritdoc/>
     /// <summary>
-    /// UnAuditAsync方法</summary>
+    /// <summary>
+    /// 反审核凭证
+    /// </summary>
     public async Task UnAuditAsync(long id)
     {
         var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id)
@@ -214,7 +228,9 @@ public class VoucherService : IVoucherService
 
     /// <inheritdoc/>
     /// <summary>
-    /// VoidAsync方法</summary>
+    /// <summary>
+    /// 作废凭证
+    /// </summary>
     public async Task VoidAsync(long id)
     {
         var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id)

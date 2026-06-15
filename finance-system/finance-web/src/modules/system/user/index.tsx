@@ -25,7 +25,7 @@ const UserList: React.FC = () => {
     { title: '创建时间', dataIndex: 'createdTime', key: 'createdTime', sorter: true },
     {
       title: '操作', key: 'action',
-      render: (_: any, record: User) => (
+      render: (_: unknown, record: User) => (
         <Space>
           <a className="table-action" onClick={() => handleEdit(record as User)}>编辑</a>
           <a className="table-action" onClick={() => handleResetPassword(record)}>重置密码</a>

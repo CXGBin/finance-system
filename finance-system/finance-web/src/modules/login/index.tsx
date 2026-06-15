@@ -19,7 +19,7 @@ const LoginPage: React.FC = () => {
       await login(values.username, values.password, values.remember);
       message.success('登录成功');
       navigate(from, { replace: true });
-    } catch (err: any) {
+    } catch (err: unknown) {
       message.error(err.message || '登录失败');
     } finally {
       setLoading(false);

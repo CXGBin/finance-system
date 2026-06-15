@@ -18,16 +18,22 @@ public class ExpenseTypeService : IExpenseTypeService
 {
     private readonly ISqlSugarClient _db;
     /// <summary>
-    /// ExpenseTypeService方法</summary>
+    /// <summary>
+    /// 费用类型服务
+    /// </summary>
     public ExpenseTypeService(ISqlSugarClient db) => _db = db;
 
     /// <summary>
-    /// GetListAsync方法</summary>
+    /// <summary>
+    /// 获取盘点列表
+    /// </summary>
     public async Task<List<ExpenseType>> GetListAsync()
         => await _db.Queryable<ExpenseType>().Where(t => t.IsEnabled == 1).OrderBy(t => t.SortOrder).ToListAsync();
 
     /// <summary>
-    /// CreateAsync方法</summary>
+    /// <summary>
+    /// 创建
+    /// </summary>
     public async Task<long> CreateAsync(ExpenseTypeRequest request)
     {
         var entity = new ExpenseType
@@ -40,7 +46,9 @@ public class ExpenseTypeService : IExpenseTypeService
     }
 
     /// <summary>
-    /// UpdateAsync方法</summary>
+    /// <summary>
+    /// 修改
+    /// </summary>
     public async Task UpdateAsync(long id, ExpenseTypeRequest request)
     {
         var entity = await _db.Queryable<ExpenseType>().FirstAsync(t => t.Id == id) ?? throw new NotFoundException("费用类型不存在");
@@ -50,7 +58,9 @@ public class ExpenseTypeService : IExpenseTypeService
     }
 
     /// <summary>
-    /// DeleteAsync方法</summary>
+    /// <summary>
+    /// 删除
+    /// </summary>
     public async Task DeleteAsync(long id) => await _db.Deleteable<ExpenseType>().Where(t => t.Id == id).ExecuteCommandAsync();
 }
 
@@ -59,11 +69,15 @@ public class ExpenseClaimService : IExpenseClaimService
 {
     private readonly ISqlSugarClient _db;
     /// <summary>
-    /// ExpenseClaimService方法</summary>
+    /// <summary>
+    /// 费用报销服务
+    /// </summary>
     public ExpenseClaimService(ISqlSugarClient db) => _db = db;
 
     /// <summary>
-    /// GetListAsync方法</summary>
+    /// <summary>
+    /// 获取盘点列表
+    /// </summary>
     public async Task<PageResult<ExpenseClaim>> GetListAsync(ExpenseClaimQuery query)
     {
         RefAsync<int> total = 0;
@@ -77,14 +91,18 @@ public class ExpenseClaimService : IExpenseClaimService
     }
 
     /// <summary>
-    /// GetByIdAsync方法</summary>
+    /// <summary>
+    /// 获取详情
+    /// </summary>
     public async Task<ExpenseClaim?> GetByIdAsync(long id)
     {
         return await _db.Queryable<ExpenseClaim>().FirstAsync(c => c.Id == id);
     }
 
     /// <summary>
-    /// CreateAsync方法</summary>
+    /// <summary>
+    /// 创建
+    /// </summary>
     public async Task<long> CreateAsync(ExpenseClaimRequest request, long currentUserId)
     {
         if (request.Items == null || !request.Items.Any()) throw new BusinessException("报销单至少包含一条费用明细");
@@ -137,7 +155,9 @@ public class ExpenseClaimService : IExpenseClaimService
     }
 
     /// <summary>
-    /// SubmitAsync方法</summary>
+    /// <summary>
+    /// 提交审批
+    /// </summary>
     public async Task SubmitAsync(long id, long currentUserId)
     {
         var claim = await _db.Queryable<ExpenseClaim>().FirstAsync(c => c.Id == id) ?? throw new NotFoundException("报销单不存在");
@@ -147,7 +167,9 @@ public class ExpenseClaimService : IExpenseClaimService
     }
 
     /// <summary>
-    /// ApproveAsync方法</summary>
+    /// <summary>
+    /// 审批通过
+    /// </summary>
     public async Task ApproveAsync(long id)
     {
         var claim = await _db.Queryable<ExpenseClaim>().FirstAsync(c => c.Id == id) ?? throw new NotFoundException("报销单不存在");
@@ -176,7 +198,9 @@ public class ExpenseClaimService : IExpenseClaimService
     }
 
     /// <summary>
-    /// RejectAsync方法</summary>
+    /// <summary>
+    /// 审批驳回
+    /// </summary>
     public async Task RejectAsync(long id)
     {
         var claim = await _db.Queryable<ExpenseClaim>().FirstAsync(c => c.Id == id) ?? throw new NotFoundException("报销单不存在");
@@ -186,7 +210,9 @@ public class ExpenseClaimService : IExpenseClaimService
     }
 
     /// <summary>
-    /// ConfirmPaymentAsync方法</summary>
+    /// <summary>
+    /// 确认付款
+    /// </summary>
     public async Task ConfirmPaymentAsync(long id, long currentUserId)
     {
         var claim = await _db.Queryable<ExpenseClaim>().FirstAsync(c => c.Id == id) ?? throw new NotFoundException("报销单不存在");
@@ -275,11 +301,13 @@ public class ExpenseStatisticsService : IExpenseStatisticsService
 {
     private readonly ISqlSugarClient _db;
     /// <summary>
-    /// ExpenseStatisticsService方法</summary>
+    /// <inheritdoc/>
     public ExpenseStatisticsService(ISqlSugarClient db) => _db = db;
 
     /// <summary>
-    /// GetStatisticsAsync方法</summary>
+    /// <summary>
+    /// 获取统计
+    /// </summary>
     public async Task<List<object>> GetStatisticsAsync(ExpenseStatisticsQuery query)
     {
         var startDate = DateTime.Parse(query.StartDate);
@@ -316,11 +344,15 @@ public class ExpenseAllocateService : IExpenseAllocateService
 {
     private readonly ISqlSugarClient _db;
     /// <summary>
-    /// ExpenseAllocateService方法</summary>
+    /// <summary>
+    /// 费用分摊服务
+    /// </summary>
     public ExpenseAllocateService(ISqlSugarClient db) => _db = db;
 
     /// <summary>
-    /// CreateAsync方法</summary>
+    /// <summary>
+    /// 创建
+    /// </summary>
     public async Task<long> CreateAsync(ExpenseAllocateRequest request)
     {
         var entity = new ExpenseAllocate
@@ -338,7 +370,9 @@ public class ExpenseAllocateService : IExpenseAllocateService
     }
 
     /// <summary>
-    /// GetListAsync方法</summary>
+    /// <summary>
+    /// 获取盘点列表
+    /// </summary>
     public async Task<PageResult<ExpenseAllocate>> GetListAsync(PageRequest query)
     {
         RefAsync<int> total = 0;
@@ -366,11 +400,15 @@ public class ExpenseLoanService : IExpenseLoanService
 {
     private readonly ISqlSugarClient _db;
     /// <summary>
-    /// ExpenseLoanService方法</summary>
+    /// <summary>
+    /// 借款管理服务
+    /// </summary>
     public ExpenseLoanService(ISqlSugarClient db) => _db = db;
 
     /// <summary>
-    /// GetListAsync方法</summary>
+    /// <summary>
+    /// 获取盘点列表
+    /// </summary>
     public async Task<PageResult<ExpenseLoan>> GetListAsync(ExpenseLoanQuery query)
     {
         var q = _db.Queryable<ExpenseLoan>();
@@ -383,14 +421,18 @@ public class ExpenseLoanService : IExpenseLoanService
     }
 
     /// <summary>
-    /// GetByIdAsync方法</summary>
+    /// <summary>
+    /// 获取详情
+    /// </summary>
     public async Task<ExpenseLoan?> GetByIdAsync(long id)
     {
         return await _db.Queryable<ExpenseLoan>().FirstAsync(l => l.Id == id);
     }
 
     /// <summary>
-    /// CreateAsync方法</summary>
+    /// <summary>
+    /// 创建
+    /// </summary>
     public async Task<long> CreateAsync(ExpenseLoanRequest request, long currentUserId)
     {
         if (request.LoanAmount <= 0) throw new BusinessException("借款金额必须大于0");
@@ -410,7 +452,9 @@ public class ExpenseLoanService : IExpenseLoanService
     }
 
     /// <summary>
-    /// ApproveAsync方法</summary>
+    /// <summary>
+    /// 审批通过
+    /// </summary>
     public async Task ApproveAsync(long id, long currentUserId)
     {
         var loan = await _db.Queryable<ExpenseLoan>().FirstAsync(l => l.Id == id) ?? throw new NotFoundException("借款申请不存在");
@@ -420,7 +464,9 @@ public class ExpenseLoanService : IExpenseLoanService
     }
 
     /// <summary>
-    /// RejectAsync方法</summary>
+    /// <summary>
+    /// 审批驳回
+    /// </summary>
     public async Task RejectAsync(long id)
     {
         var loan = await _db.Queryable<ExpenseLoan>().FirstAsync(l => l.Id == id) ?? throw new NotFoundException("借款申请不存在");
