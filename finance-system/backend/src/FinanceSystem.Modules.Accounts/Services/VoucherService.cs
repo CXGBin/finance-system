@@ -1,0 +1,223 @@
+using FinanceSystem.Core.Common;
+
+using FinanceSystem.Core.Common;
+using FinanceSystem.Modules.Accounts.DTOs;
+using FinanceSystem.Modules.Accounts.Entities;
+using SqlSugar;
+
+namespace FinanceSystem.Modules.Accounts.Services;
+
+/// <summary>
+/// 凭证管理服务实现
+/// </summary>
+public class VoucherService : IVoucherService
+{
+    private readonly ISqlSugarClient _db;
+
+    public VoucherService(ISqlSugarClient db) => _db = db;
+
+    /// <inheritdoc/>
+    public async Task<PageResult<Voucher>> GetPageAsync(VoucherQuery query)
+    {
+        RefAsync<int> total = 0;
+        var queryable = _db.Queryable<Voucher>()
+            .WhereIF(!string.IsNullOrEmpty(query.VoucherNo), v => v.VoucherNo.Contains(query.VoucherNo!))
+            .WhereIF(query.DateStart.HasValue, v => v.VoucherDate >= query.DateStart)
+            .WhereIF(query.DateEnd.HasValue, v => v.VoucherDate <= query.DateEnd)
+            .WhereIF(query.VoucherType.HasValue, v => v.VoucherType == query.VoucherType)
+            .WhereIF(query.Status.HasValue, v => v.Status == query.Status);
+
+        // 按摘要关键词筛选（需子查询凭证分录）
+        if (!string.IsNullOrEmpty(query.Keyword))
+        {
+            var voucherIds = await _db.Queryable<VoucherEntry>()
+                .Where(e => e.Summary != null && e.Summary.Contains(query.Keyword))
+                .Select(e => e.VoucherId).ToListAsync();
+            queryable = queryable.Where(v => voucherIds.Contains(v.Id));
+        }
+
+        // 按科目筛选
+        if (query.SubjectId.HasValue)
+        {
+            var voucherIds2 = await _db.Queryable<VoucherEntry>()
+                .Where(e => e.SubjectId == query.SubjectId.Value)
+                .Select(e => e.VoucherId).ToListAsync();
+            queryable = queryable.Where(v => voucherIds2.Contains(v.Id));
+        }
+
+        var list = await queryable
+            .OrderBy(v => v.VoucherDate, OrderByType.Desc)
+            .OrderBy(v => v.VoucherNo)
+            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+
+        return new PageResult<Voucher>(total, list);
+    }
+
+    /// <inheritdoc/>
+    public async Task<Voucher?> GetByIdAsync(long id)
+    {
+        var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id);
+        if (voucher != null)
+        {
+            voucher.Entries = await _db.Queryable<VoucherEntry>()
+                .Where(e => e.VoucherId == id)
+                .OrderBy(e => e.Id)
+                .ToListAsync();
+
+            var subjectIds = voucher.Entries.Select(e => e.SubjectId).Distinct().ToList();
+            var subjects = await _db.Queryable<AccountSubject>()
+                .Where(s => subjectIds.Contains(s.Id))
+                .ToListAsync();
+            foreach (var entry in voucher.Entries)
+            {
+                entry.Subject = subjects.FirstOrDefault(s => s.Id == entry.SubjectId);
+            }
+        }
+        return voucher;
+    }
+
+    /// <inheritdoc/>
+    public async Task<long> CreateAsync(VoucherCreateRequest request, long currentUserId)
+    {
+        if (request.Entries == null || request.Entries.Count < 2)
+            throw new BusinessException("凭证至少包含2条分录");
+
+        var totalDebit = request.Entries.Sum(e => e.DebitAmount);
+        var totalCredit = request.Entries.Sum(e => e.CreditAmount);
+        if (Math.Abs(totalDebit - totalCredit) > 0.01m)
+            throw new BusinessException($"借贷不平衡，借方合计{totalDebit}，贷方合计{totalCredit}");
+
+        var period = await _db.Queryable<AccountingPeriod>()
+            .FirstAsync(p => p.BeginDate <= request.VoucherDate && p.EndDate >= request.VoucherDate && p.IsClosed == 0)
+            ?? throw new BusinessException("凭证日期不在当前未关闭的会计期间内");
+
+        var voucherNo = await GenerateVoucherNoAsync(period.Id, request.VoucherType);
+
+        var voucher = new Voucher
+        {
+            VoucherNo = voucherNo,
+            VoucherDate = request.VoucherDate,
+            PeriodId = period.Id,
+            VoucherType = request.VoucherType,
+            AbstractText = request.AbstractText,
+            Status = 0,
+            TotalDebit = totalDebit,
+            TotalCredit = totalCredit,
+            PreparedBy = currentUserId
+        };
+
+        await _db.Insertable(voucher).ExecuteCommandAsync();
+
+        var entries = request.Entries.Select(e => new VoucherEntry
+        {
+            VoucherId = voucher.Id,
+            Summary = e.Summary,
+            SubjectId = e.SubjectId,
+            DebitAmount = e.DebitAmount,
+            CreditAmount = e.CreditAmount,
+            AuxiliaryId = e.AuxiliaryId,
+            AuxiliaryType = e.AuxiliaryType
+        }).ToList();
+        await _db.Insertable(entries).ExecuteCommandAsync();
+
+        return voucher.Id;
+    }
+
+    /// <inheritdoc/>
+    public async Task UpdateAsync(long id, VoucherCreateRequest request)
+    {
+        var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id)
+            ?? throw new NotFoundException("凭证不存在");
+
+        if (voucher.Status != 0) throw new BusinessException("仅草稿状态的凭证可修改");
+
+        var totalDebit = request.Entries.Sum(e => e.DebitAmount);
+        var totalCredit = request.Entries.Sum(e => e.CreditAmount);
+        if (Math.Abs(totalDebit - totalCredit) > 0.01m)
+            throw new BusinessException($"借贷不平衡，借方合计{totalDebit}，贷方合计{totalCredit}");
+
+        voucher.VoucherDate = request.VoucherDate;
+        voucher.VoucherType = request.VoucherType;
+        voucher.AbstractText = request.AbstractText;
+        voucher.TotalDebit = totalDebit;
+        voucher.TotalCredit = totalCredit;
+
+        await _db.Updateable(voucher).ExecuteCommandAsync();
+
+        await _db.Deleteable<VoucherEntry>().Where(e => e.VoucherId == id).ExecuteCommandAsync();
+        var entries = request.Entries.Select(e => new VoucherEntry
+        {
+            VoucherId = id,
+            Summary = e.Summary,
+            SubjectId = e.SubjectId,
+            DebitAmount = e.DebitAmount,
+            CreditAmount = e.CreditAmount,
+            AuxiliaryId = e.AuxiliaryId,
+            AuxiliaryType = e.AuxiliaryType
+        }).ToList();
+        await _db.Insertable(entries).ExecuteCommandAsync();
+    }
+
+    /// <inheritdoc/>
+    public async Task AuditAsync(long id, long currentUserId)
+    {
+        var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id)
+            ?? throw new NotFoundException("凭证不存在");
+
+        if (voucher.Status != 0) throw new BusinessException("仅草稿状态的凭证可审核");
+        if (voucher.PreparedBy == currentUserId) throw new BusinessException("制单人与审核人不可为同一人");
+
+        voucher.Status = 1;
+        voucher.ReviewedBy = currentUserId;
+        voucher.ReviewedTime = DateTime.Now;
+
+        await _db.Updateable(voucher)
+            .UpdateColumns(v => new { v.Status, v.ReviewedBy, v.ReviewedTime })
+            .ExecuteCommandAsync();
+    }
+
+    /// <inheritdoc/>
+    public async Task UnAuditAsync(long id)
+    {
+        var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id)
+            ?? throw new NotFoundException("凭证不存在");
+
+        if (voucher.Status != 1) throw new BusinessException("仅已审核的凭证可反审核");
+
+        var period = await _db.Queryable<AccountingPeriod>().FirstAsync(p => p.Id == voucher.PeriodId);
+        if (period != null && period.IsClosed == 1)
+            throw new BusinessException("凭证所在会计期间已结账，不可反审核");
+
+        voucher.Status = 0;
+        voucher.ReviewedBy = null;
+        voucher.ReviewedTime = null;
+
+        await _db.Updateable(voucher)
+            .UpdateColumns(v => new { v.Status, v.ReviewedBy, v.ReviewedTime })
+            .ExecuteCommandAsync();
+    }
+
+    /// <inheritdoc/>
+    public async Task VoidAsync(long id)
+    {
+        var voucher = await _db.Queryable<Voucher>().FirstAsync(v => v.Id == id)
+            ?? throw new NotFoundException("凭证不存在");
+
+        if (voucher.Status == 2) throw new BusinessException("凭证已作废，不可重复作废");
+
+        voucher.Status = 2;
+        await _db.Updateable(voucher).UpdateColumns(v => v.Status).ExecuteCommandAsync();
+    }
+
+    /// <summary>
+    /// 生成凭证号（按期间+类型递增）
+    /// </summary>
+    private async Task<string> GenerateVoucherNoAsync(long periodId, int voucherType)
+    {
+        var prefix = voucherType switch { 1 => "SK", 2 => "FK", _ => "ZZ" };
+        var count = await _db.Queryable<Voucher>()
+            .Where(v => v.PeriodId == periodId && v.VoucherType == voucherType)
+            .CountAsync() + 1;
+        return $"{prefix}-{count:D4}";
+    }
+}
