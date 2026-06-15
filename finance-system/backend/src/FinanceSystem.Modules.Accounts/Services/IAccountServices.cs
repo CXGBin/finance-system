@@ -83,6 +83,16 @@ public interface IVoucherService
     /// 作废凭证
     /// </summary>
     Task VoidAsync(long id);
+
+    /// <summary>
+    /// 批量审核凭证
+    /// </summary>
+    Task BatchAuditAsync(List<long> ids, long currentUserId);
+
+    /// <summary>
+    /// 批量作废凭证
+    /// </summary>
+    Task BatchVoidAsync(List<long> ids);
 }
 
 /// <summary>

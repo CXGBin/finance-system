@@ -134,3 +134,10 @@ public class ApprovalNodeDef
     /// </summary>
     public bool IsFinal { get; set; }
 }
+
+/// <summary>转办请求</summary>
+public class TransferRequest
+{
+    public long TargetUserId { get; set; }
+    public string? Comment { get; set; }
+}

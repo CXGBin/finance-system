@@ -203,6 +203,26 @@ public class VoucherController : ControllerBase
     }
 
     /// <summary>
+    /// 批量审核凭证
+    /// </summary>
+    [HttpPost("batch-audit")]
+    public async Task<ApiResult<bool>> BatchAudit([FromBody] List<long> ids)
+    {
+        await _voucherService.BatchAuditAsync(ids, HttpContext.GetCurrentUserId());
+        return ApiResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// 批量作废凭证
+    /// </summary>
+    [HttpPost("batch-void")]
+    public async Task<ApiResult<bool>> BatchVoid([FromBody] List<long> ids)
+    {
+        await _voucherService.BatchVoidAsync(ids);
+        return ApiResult<bool>.Success(true);
+    }
+
+    /// <summary>
     /// 获取凭证打印数据（返回凭证详情+分录，供前端渲染PDF/打印）
     /// </summary>
     [HttpGet("{id}/print-data")]

@@ -105,6 +105,25 @@ public class ExpenseClaimService : IExpenseClaimService
     {
         var claim = await _db.Queryable<ExpenseClaim>().FirstAsync(c => c.Id == id) ?? throw new NotFoundException("报销单不存在");
         if (claim.Status != 1) throw new BusinessException("非审批中状态");
+
+        // 费用类型预算校验：检查是否超过月度限额
+        var expenseItems = await _db.Queryable<ExpenseItem>().Where(i => i.ClaimId == claim.Id).ToListAsync();
+        var typeIds = expenseItems.Select(i => i.ExpenseTypeId).Distinct().ToList();
+        var types = await _db.Queryable<ExpenseType>().Where(t => typeIds.Contains(t.Id)).ToListAsync();
+
+        var now = DateTime.Now;
+        foreach (var type in types.Where(t => t.MonthlyLimit > 0))
+        {
+            var monthStart = new DateTime(now.Year, now.Month, 1);
+            var monthTotal = await _db.Queryable<ExpenseItem>()
+                .LeftJoin<ExpenseClaim>((i, c) => i.ClaimId == c.Id)
+                .Where((i, c) => i.ExpenseTypeId == type.Id && c.Status >= 2 && c.CreatedTime >= monthStart)
+                .SumAsync((i, c) => i.Amount);
+            var thisClaimAmount = expenseItems.Where(i => i.ExpenseTypeId == type.Id).Sum(i => i.Amount);
+            if (monthTotal + thisClaimAmount > type.MonthlyLimit)
+                throw new BusinessException($"费用类型[{type.TypeName}]本月累计报销{monthTotal + thisClaimAmount}元，超出月度限额{type.MonthlyLimit}元");
+        }
+
         claim.Status = 2;
         await _db.Updateable(claim).UpdateColumns(c => c.Status).ExecuteCommandAsync();
     }

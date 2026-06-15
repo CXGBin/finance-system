@@ -45,6 +45,15 @@ public class TaxDeclarationController : ControllerBase
 
     [HttpPost("{id}/pay")]
     public async Task<ApiResult<bool>> Pay(long id) { await _service.ConfirmPayAsync(id); return ApiResult<bool>.Success(true); }
+
+    /// <summary>
+    /// 自动计算附加税
+    /// </summary>
+    [HttpPost("surcharges")]
+    public async Task<ApiResult<List<TaxDeclaration>>> CalculateSurcharges([FromBody] SurchargeRequest request)
+    {
+        return ApiResult<List<TaxDeclaration>>.Success(await _service.CalculateSurchargesAsync(request.DeclarePeriod, request.VatDeclarationId, HttpContext.GetCurrentUserId()));
+    }
 }
 
 [ApiController]

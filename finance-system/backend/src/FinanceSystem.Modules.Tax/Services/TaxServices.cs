@@ -9,7 +9,7 @@ namespace FinanceSystem.Modules.Tax.Services;
 /// <summary>税种服务接口</summary>
 public interface ITaxCategoryService { Task<List<TaxCategory>> GetListAsync(); Task<long> CreateAsync(TaxCategoryRequest request); Task UpdateAsync(long id, TaxCategoryRequest request); Task DeleteAsync(long id); }
 /// <summary>纳税申报服务接口</summary>
-public interface ITaxDeclarationService { Task<PageResult<TaxDeclaration>> GetListAsync(TaxDeclarationQuery query); Task<long> CalculateAsync(TaxCalculateRequest request, long currentUserId); Task DeclareAsync(long id, long currentUserId); Task ConfirmPayAsync(long id); }
+public interface ITaxDeclarationService { Task<PageResult<TaxDeclaration>> GetListAsync(TaxDeclarationQuery query); Task<long> CalculateAsync(TaxCalculateRequest request, long currentUserId); Task DeclareAsync(long id, long currentUserId); Task ConfirmPayAsync(long id); Task<List<TaxDeclaration>> CalculateSurchargesAsync(string declarePeriod, long vatDeclarationId, long currentUserId); }
 /// <summary>发票服务接口</summary>
 public interface ITaxInvoiceService { Task<PageResult<TaxInvoice>> GetListAsync(TaxInvoiceQuery query); Task<long> CreateAsync(TaxInvoiceRequest request); Task VerifyAsync(long id); }
 
@@ -144,6 +144,54 @@ public class TaxDeclarationService : ITaxDeclarationService
         if (entity.Status != 1) throw new BusinessException("非已申报状态");
         entity.Status = 2; entity.ActualPaidAmount = entity.TaxAmount;
         await _db.Updateable(entity).UpdateColumns(d => new { d.Status, d.ActualPaidAmount }).ExecuteCommandAsync();
+    }
+
+    /// <summary>
+    /// 根据增值税申报自动计算附加税（城建税7%+教育费附加3%+地方教育附加2%）
+    /// </summary>
+    public async Task<List<TaxDeclaration>> CalculateSurchargesAsync(string declarePeriod, long vatDeclarationId, long currentUserId)
+    {
+        var vatDecl = await _db.Queryable<TaxDeclaration>().FirstAsync(d => d.Id == vatDeclarationId)
+            ?? throw new NotFoundException("增值税申报记录不存在");
+
+        // 附加税税率：城建税7%（市区）/5%（县城） + 教育费附加3% + 地方教育附加2%
+        var surcharges = new[]
+        {
+            new { Name = "城市维护建设税", Code = "CJCS", Rate = 7m },
+            new { Name = "教育费附加", Code = "JYFJ", Rate = 3m },
+            new { Name = "地方教育附加", Code = "DFJYFJ", Rate = 2m }
+        };
+
+        var results = new List<TaxDeclaration>();
+        foreach (var sc in surcharges)
+        {
+            var taxCategory = await _db.Queryable<TaxCategory>().FirstAsync(t => t.TaxCode == sc.Code);
+            if (taxCategory == null)
+            {
+                // 自动创建附加税种
+                taxCategory = new TaxCategory
+                {
+                    TaxCode = sc.Code, TaxName = sc.Name, TaxRate = sc.Rate,
+                    CalculationMethod = 1, DeclareCycle = 1
+                };
+                await _db.Insertable(taxCategory).ExecuteCommandAsync();
+            }
+
+            decimal surchargeAmount = Math.Round(vatDecl.TaxAmount * sc.Rate / 100, 2);
+
+            var hasExisting = await _db.Queryable<TaxDeclaration>()
+                .AnyAsync(d => d.TaxCategoryId == taxCategory.Id && d.DeclarePeriod == declarePeriod);
+            if (hasExisting) continue;
+
+            var entity = new TaxDeclaration
+            {
+                TaxCategoryId = taxCategory.Id, DeclarePeriod = declarePeriod,
+                TaxAmount = surchargeAmount, ActualPaidAmount = 0, Status = 0, DeclaredBy = currentUserId
+            };
+            await _db.Insertable(entity).ExecuteCommandAsync();
+            results.Add(entity);
+        }
+        return results;
     }
 }
 

@@ -154,4 +154,24 @@ public class ApprovalInstanceController : ControllerBase
         var userId = HttpContext.GetCurrentUserId();
         return ApiResult<object>.Success(await _instanceService.GetStatisticsAsync(userId));
     }
+
+    /// <summary>
+    /// 批量审批
+    /// </summary>
+    [HttpPost("batch-action")]
+    public async Task<ApiResult<bool>> BatchAction([FromBody] List<ApprovalActionRequest> requests)
+    {
+        await _instanceService.BatchActionAsync(requests, HttpContext.GetCurrentUserId());
+        return ApiResult<bool>.Success(true);
+    }
+
+    /// <summary>
+    /// 转办
+    /// </summary>
+    [HttpPost("{instanceId}/transfer")]
+    public async Task<ApiResult<bool>> Transfer(long instanceId, [FromBody] TransferRequest request)
+    {
+        await _instanceService.TransferAsync(instanceId, request.TargetUserId, request.Comment, HttpContext.GetCurrentUserId());
+        return ApiResult<bool>.Success(true);
+    }
 }

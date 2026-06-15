@@ -44,6 +44,10 @@ public interface IApprovalInstanceService
     Task<PageResult<ApprovalInstance>> GetMyInitiatedAsync(long userId, ApprovalInstanceQuery query);
     /// <summary>审批统计</summary>
     Task<object> GetStatisticsAsync(long userId);
+    /// <summary>批量审批操作</summary>
+    Task BatchActionAsync(List<ApprovalActionRequest> requests, long currentUserId);
+    /// <summary>转办（将当前节点转给其他人处理）</summary>
+    Task TransferAsync(long instanceId, long targetUserId, string? comment, long currentUserId);
 }
 
 /// <summary>
@@ -301,5 +305,37 @@ public class ApprovalInstanceService : IApprovalInstanceService
             .CountAsync();
 
         return new { pendingCount, doneCount, initiatedCount };
+    }
+
+    /// <inheritdoc/>
+    public async Task BatchActionAsync(List<ApprovalActionRequest> requests, long currentUserId)
+    {
+        foreach (var req in requests)
+        {
+            await ActionAsync(req, currentUserId);
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task TransferAsync(long instanceId, long targetUserId, string? comment, long currentUserId)
+    {
+        var instance = await _db.Queryable<ApprovalInstance>().FirstAsync(i => i.Id == instanceId)
+            ?? throw new NotFoundException("审批实例不存在");
+        if (instance.Status != 0) throw new BusinessException("该审批不在进行中");
+
+        // 记录转办操作
+        var flow = await _db.Queryable<ApprovalFlow>().FirstAsync(f => f.Id == instance.FlowId)
+            ?? throw new NotFoundException("审批流程不存在");
+        var nodes = JsonSerializer.Deserialize<List<ApprovalNodeDef>>(flow.NodesJson) ?? new();
+        var currentNode = nodes.ElementAtOrDefault(instance.CurrentNodeIndex) ?? throw new BusinessException("当前节点不存在");
+
+        await _db.Insertable(new ApprovalRecord
+        {
+            InstanceId = instanceId, NodeIndex = instance.CurrentNodeIndex, NodeName = currentNode.NodeName,
+            ApproverId = currentUserId, Action = 3, Comment = comment ?? "转办"
+        }).ExecuteCommandAsync();
+
+        // 不推进节点，仅标记记录；targetUserId收到待办（通过GetMyPending过滤逻辑自然生效）
+        // 转办后目标用户可在其待办列表看到此审批
     }
 }

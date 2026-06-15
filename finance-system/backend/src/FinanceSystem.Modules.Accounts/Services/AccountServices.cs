@@ -83,6 +83,9 @@ public class PeriodService : IPeriodService
             await YearEndCloseAsync(period, currentUserId);
         }
 
+        // 结账后自动将本期期末余额滚入下一期作为期初余额
+        await CarryForwardBalancesAsync(periodId);
+
         period.IsClosed = 1;
         period.ClosedTime = DateTime.Now;
         period.ClosedBy = currentUserId;
@@ -188,6 +191,73 @@ public class PeriodService : IPeriodService
             {
                 await InitYearAsync(period.PeriodYear + 1);
             }
+        }
+    }
+
+    /// <summary>
+    /// 结账后将本期科目余额期末数据滚入下一期
+    /// </summary>
+    private async Task CarryForwardBalancesAsync(long periodId)
+    {
+        var period = await _db.Queryable<AccountingPeriod>().FirstAsync(p => p.Id == periodId);
+        if (period == null) return;
+
+        var nextPeriod = await _db.Queryable<AccountingPeriod>()
+            .FirstAsync(p => p.PeriodYear == period.PeriodYear && p.PeriodMonth == period.PeriodMonth + 1);
+        if (nextPeriod == null) return;
+
+        // 查询本期科目余额
+        var currentBalances = await _db.Queryable<SubjectBalance>()
+            .Where(b => b.PeriodId == periodId).ToListAsync();
+
+        // 查询下一期已有余额（可能已手动录入期初余额）
+        var nextBalances = await _db.Queryable<SubjectBalance>()
+            .Where(b => b.PeriodId == nextPeriod.Id).ToListAsync();
+
+        var upsertList = new List<SubjectBalance>();
+
+        foreach (var cb in currentBalances)
+        {
+            // 仅滚转有余额的科目（资产/负债/权益类，不滚转损益类）
+            if (Math.Abs(cb.EndDebit) < 0.01m && Math.Abs(cb.EndCredit) < 0.01m) continue;
+
+            // 检查科目类型（损益类科目不滚转）
+            var subject = await _db.Queryable<AccountSubject>().FirstAsync(s => s.Id == cb.SubjectId);
+            if (subject == null || subject.SubjectType == 4 || subject.SubjectType == 5) continue;
+
+            var existing = nextBalances.FirstOrDefault(b => b.SubjectId == cb.SubjectId);
+            if (existing != null)
+            {
+                existing.BeginDebit = cb.EndDebit;
+                existing.BeginCredit = cb.EndCredit;
+                existing.EndDebit = cb.EndDebit;
+                existing.EndCredit = cb.EndCredit;
+                existing.CurrentDebit = 0;
+                existing.CurrentCredit = 0;
+                upsertList.Add(existing);
+            }
+            else
+            {
+                upsertList.Add(new SubjectBalance
+                {
+                    SubjectId = cb.SubjectId,
+                    PeriodId = nextPeriod.Id,
+                    BeginDebit = cb.EndDebit,
+                    BeginCredit = cb.EndCredit,
+                    CurrentDebit = 0,
+                    CurrentCredit = 0,
+                    EndDebit = cb.EndDebit,
+                    EndCredit = cb.EndCredit
+                });
+            }
+        }
+
+        if (upsertList.Any())
+        {
+            await _db.Storageable(upsertList)
+                .WhereColumns(b => new { b.SubjectId, b.PeriodId })
+                .ToStorage()
+                .AsInsertable.ExecuteCommandAsync();
         }
     }
 

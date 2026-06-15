@@ -210,6 +210,38 @@ public class VoucherService : IVoucherService
     }
 
     /// <summary>
+    /// 批量审核凭证
+    /// </summary>
+    public async Task BatchAuditAsync(List<long> ids, long currentUserId)
+    {
+        var vouchers = await _db.Queryable<Voucher>().Where(v => ids.Contains(v.Id)).ToListAsync();
+        var errors = new List<string>();
+
+        foreach (var voucher in vouchers)
+        {
+            if (voucher.Status != 0) { errors.Add($"凭证{voucher.VoucherNo}非草稿状态"); continue; }
+            if (voucher.PreparedBy == currentUserId) { errors.Add($"凭证{voucher.VoucherNo}制单人与审核人相同"); continue; }
+            voucher.Status = 1;
+            voucher.ReviewedBy = currentUserId;
+            voucher.ReviewedTime = DateTime.Now;
+        }
+
+        if (errors.Any()) throw new BusinessException(string.Join("；", errors));
+        if (vouchers.Any()) await _db.Updateable(vouchers).ExecuteCommandAsync();
+    }
+
+    /// <summary>
+    /// 批量作废凭证
+    /// </summary>
+    public async Task BatchVoidAsync(List<long> ids)
+    {
+        var vouchers = await _db.Queryable<Voucher>().Where(v => ids.Contains(v.Id) && v.Status == 2).ToListAsync();
+        if (vouchers.Any()) throw new BusinessException("存在已作废凭证，不可重复作废");
+        await _db.Updateable<Voucher>().SetColumns(v => v.Status == 2)
+            .Where(v => ids.Contains(v.Id) && v.Status != 2).ExecuteCommandAsync();
+    }
+
+    /// <summary>
     /// 生成凭证号（按期间+类型递增）
     /// </summary>
     private async Task<string> GenerateVoucherNoAsync(long periodId, int voucherType)

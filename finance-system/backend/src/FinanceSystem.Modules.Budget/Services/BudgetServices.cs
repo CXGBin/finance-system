@@ -210,12 +210,12 @@ public class BudgetExecutionService : IBudgetExecutionService
         var yearPeriod = await _db.Queryable<FinanceSystem.Modules.Accounts.Entities.AccountingPeriod>()
             .FirstAsync(p => p.PeriodYear == query.BudgetYearId);
 
-        // 简化：从凭证分录获取实际发生额
+        // 获取全年所有期间的凭证发生额
         var periodIds = new List<long>();
         if (yearPeriod != null)
         {
             periodIds = (await _db.Queryable<FinanceSystem.Modules.Accounts.Entities.AccountingPeriod>()
-                .Where(p => p.PeriodYear == yearPeriod.PeriodYear && p.IsClosed == 0)
+                .Where(p => p.PeriodYear == yearPeriod.PeriodYear)
                 .Select(p => p.Id).ToListAsync());
         }
 
