@@ -46,4 +46,15 @@ public class PageResult<T>
     /// 总页数
     /// </summary>
     public int TotalPages => PageSize > 0 ? (int)Math.Ceiling((double)Total / PageSize) : 0;
+
+    /// <summary>
+    /// 创建分页结果
+    /// </summary>
+    /// <param name="total">总记录数</param>
+    /// <param name="list">数据列表</param>
+    public PageResult(int total, List<T> list)
+    {
+        Total = total;
+        List = list;
+    }
 }
