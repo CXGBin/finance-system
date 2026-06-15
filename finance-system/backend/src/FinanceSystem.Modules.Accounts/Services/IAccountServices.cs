@@ -98,6 +98,11 @@ public interface IVoucherService
     /// 批量作废凭证
     /// </summary>
     Task BatchVoidAsync(List<long> ids);
+
+    /// <summary>
+    /// 红字冲销凭证（生成原凭证的借贷反向红字凭证）
+    /// </summary>
+    Task<long> ReverseAsync(long originalId, long currentUserId);
 }
 
 /// <summary>

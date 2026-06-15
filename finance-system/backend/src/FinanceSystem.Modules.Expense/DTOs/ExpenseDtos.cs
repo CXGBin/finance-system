@@ -58,3 +58,20 @@ public class ExpenseAllocateRequest
     public int PeriodYear { get; set; }
     public int PeriodMonth { get; set; }
 }
+
+/// <summary>借款申请请求</summary>
+public class ExpenseLoanRequest
+{
+    public decimal LoanAmount { get; set; }
+    public string? Reason { get; set; }
+    public DateTime? ExpectedReturnDate { get; set; }
+}
+
+/// <summary>借款查询条件</summary>
+public class ExpenseLoanQuery
+{
+    public int PageIndex { get; set; } = 1;
+    public int PageSize { get; set; } = 20;
+    public int? Status { get; set; }
+    public string? Keyword { get; set; }
+}

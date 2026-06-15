@@ -86,6 +86,10 @@ public class TaxReportController : ControllerBase
 
     [HttpGet("by-category")]
     public async Task<ApiResult<List<object>>> ByCategory([FromQuery] int year, [FromQuery] int? month) => ApiResult<List<object>>.Success(await _service.GetByCategoryAsync(year, month));
+
+    /// <summary>税负率分析</summary>
+    [HttpGet("burden")]
+    public async Task<ApiResult<object>> Burden([FromQuery] int year, [FromQuery] int? quarter) => ApiResult<object>.Success(await _service.GetTaxBurdenAsync(year, quarter));
 }
 
 /// <summary>税务日历控制器</summary>

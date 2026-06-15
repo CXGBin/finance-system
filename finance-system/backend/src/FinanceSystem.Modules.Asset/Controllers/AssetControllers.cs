@@ -102,3 +102,17 @@ public class AssetReportController : ControllerBase
     [HttpGet("value-stats")]
     public async Task<ApiResult<object>> ValueStats() => ApiResult<object>.Success(await _service.GetValueStatsAsync());
 }
+
+/// <summary>资产处置控制器</summary>
+public class AssetDisposeController : ControllerBase
+{
+    private readonly IAssetCardService _cardService;
+    public AssetDisposeController(IAssetCardService cardService) => _cardService = cardService;
+
+    /// <summary>资产处置（报废/出售）并生成凭证</summary>
+    [HttpPost("card/{id}/dispose")]
+    public async Task<ApiResult<long>> Dispose(long id, [FromBody] AssetDisposeRequest request)
+    {
+        return ApiResult<long>.Success(await _cardService.DisposeAsync(id, request, HttpContext.GetCurrentUserId()));
+    }
+}

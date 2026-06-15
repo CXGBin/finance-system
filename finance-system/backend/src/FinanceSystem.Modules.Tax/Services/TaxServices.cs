@@ -20,6 +20,8 @@ public interface ITaxReportService
     Task<object> GetSummaryAsync(int year);
     /// <summary>获取分税种申报汇总</summary>
     Task<List<object>> GetByCategoryAsync(int year, int? month);
+    /// <summary>税负率分析（增值税税负率 + 综合税负率）</summary>
+    Task<object> GetTaxBurdenAsync(int year, int? quarter);
 }
 
 /// <summary>税务日历服务接口</summary>
@@ -277,6 +279,62 @@ public class TaxReportService : ITaxReportService
                 count = related.Count
             };
         }).ToList();
+    }
+
+    /// <summary>税负率分析</summary>
+    public async Task<object> GetTaxBurdenAsync(int year, int? quarter)
+    {
+        var query = _db.Queryable<TaxDeclaration>()
+            .Where(d => d.DeclarePeriod.StartsWith(year.ToString()) && d.Status >= 1);
+
+        List<TaxDeclaration> declarations;
+        if (quarter.HasValue)
+        {
+            var qv = quarter.Value;
+            var startMonth = (qv - 1) * 3 + 1;
+            var endMonth = qv * 3;
+            var allDecls = await query.ToListAsync();
+            declarations = allDecls.Where(d =>
+            {
+                var parts = d.DeclarePeriod.Split('-');
+                return parts.Length == 2 && int.TryParse(parts[1], out var m)
+                    && m >= startMonth && m <= endMonth;
+            }).ToList();
+        }
+        else
+        {
+            declarations = await query.ToListAsync();
+        }
+
+        var totalTaxPaid = declarations.Sum(d => d.ActualPaidAmount);
+
+        var periodIds = await _db.Queryable<AccountingPeriod>()
+            .Where(p => p.PeriodYear == year).Select(p => p.Id).ToListAsync();
+        var revenueSubjectIds = await _db.Queryable<AccountSubject>()
+            .Where(s => s.SubjectCode.StartsWith("6001") || s.SubjectCode.StartsWith("6051"))
+            .Select(s => s.Id).ToListAsync();
+
+        decimal revenue = 0;
+        if (periodIds.Any() && revenueSubjectIds.Any())
+        {
+            revenue = (await _db.Queryable<VoucherEntry>()
+                .LeftJoin<Voucher>((e, v) => e.VoucherId == v.Id)
+                .Where((e, v) => periodIds.Contains(v.PeriodId) && v.Status == 1 && revenueSubjectIds.Contains(e.SubjectId))
+                .Select((e, v) => e.CreditAmount).ToListAsync()).Sum();
+        }
+
+        var vatCategory = await _db.Queryable<TaxCategory>().FirstAsync(t => t.TaxName.Contains("增值税"));
+        decimal vatPaid = 0;
+        if (vatCategory != null)
+            vatPaid = declarations.Where(d => d.TaxCategoryId == vatCategory.Id).Sum(d => d.ActualPaidAmount);
+
+        return new
+        {
+            Year = year, Quarter = quarter,
+            TotalRevenue = revenue, TotalTaxPaid = totalTaxPaid, VatPaid = vatPaid,
+            VatBurdenRate = revenue > 0 ? Math.Round(vatPaid / revenue * 100, 2) : 0,
+            TotalBurdenRate = revenue > 0 ? Math.Round(totalTaxPaid / revenue * 100, 2) : 0
+        };
     }
 }
 

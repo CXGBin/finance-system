@@ -81,3 +81,37 @@ public class ExpenseAllocateController : ControllerBase
     [HttpPost]
     public async Task<ApiResult<long>> Create([FromBody] ExpenseAllocateRequest request) => ApiResult<long>.Success(await _service.CreateAsync(request));
 }
+
+/// <summary>借款申请控制器</summary>
+[ApiController]
+[Route("api/expense/loan")]
+public class ExpenseLoanController : ControllerBase
+{
+    private readonly IExpenseLoanService _service;
+    public ExpenseLoanController(IExpenseLoanService service) => _service = service;
+
+    [HttpGet]
+    public async Task<ApiResult<PageResult<ExpenseLoan>>> GetList([FromQuery] ExpenseLoanQuery query) => ApiResult<PageResult<ExpenseLoan>>.Success(await _service.GetListAsync(query));
+
+    [HttpGet("{id}")]
+    public async Task<ApiResult<ExpenseLoan?>> GetById(long id) => ApiResult<ExpenseLoan?>.Success(await _service.GetByIdAsync(id));
+
+    [HttpPost]
+    public async Task<ApiResult<long>> Create([FromBody] ExpenseLoanRequest request) => ApiResult<long>.Success(await _service.CreateAsync(request, HttpContext.GetCurrentUserId()));
+
+    [HttpPost("{id}/approve")]
+    public async Task<ApiResult<bool>> Approve(long id) { await _service.ApproveAsync(id, HttpContext.GetCurrentUserId()); return ApiResult<bool>.Success(true); }
+
+    [HttpPost("{id}/reject")]
+    public async Task<ApiResult<bool>> Reject(long id) { await _service.RejectAsync(id); return ApiResult<bool>.Success(true); }
+
+    [HttpPost("{id}/settle")]
+    public async Task<ApiResult<bool>> Settle(long id, [FromBody] SettleRequest request) { await _service.SettleAsync(id, request.Amount, request.ClaimId); return ApiResult<bool>.Success(true); }
+}
+
+/// <summary>核销请求</summary>
+public class SettleRequest
+{
+    public decimal Amount { get; set; }
+    public long ClaimId { get; set; }
+}

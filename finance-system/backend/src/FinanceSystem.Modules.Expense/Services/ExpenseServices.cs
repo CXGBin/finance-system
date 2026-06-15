@@ -287,3 +287,84 @@ public class ExpenseAllocateService : IExpenseAllocateService
         return new PageResult<ExpenseAllocate>(total, list);
     }
 }
+
+/// <summary>借款服务接口</summary>
+public interface IExpenseLoanService
+{
+    Task<PageResult<ExpenseLoan>> GetListAsync(ExpenseLoanQuery query);
+    Task<ExpenseLoan?> GetByIdAsync(long id);
+    Task<long> CreateAsync(ExpenseLoanRequest request, long currentUserId);
+    Task ApproveAsync(long id, long currentUserId);
+    Task RejectAsync(long id);
+    /// <summary>核销借款（从报销单中抵扣）</summary>
+    Task SettleAsync(long loanId, decimal amount, long claimId);
+}
+
+/// <summary>借款服务实现</summary>
+public class ExpenseLoanService : IExpenseLoanService
+{
+    private readonly ISqlSugarClient _db;
+    public ExpenseLoanService(ISqlSugarClient db) => _db = db;
+
+    public async Task<PageResult<ExpenseLoan>> GetListAsync(ExpenseLoanQuery query)
+    {
+        var q = _db.Queryable<ExpenseLoan>();
+        q = q.WhereIF(query.Status.HasValue, l => l.Status == query.Status);
+        q = q.WhereIF(!string.IsNullOrEmpty(query.Keyword), l => l.LoanNo.Contains(query.Keyword) || (l.Reason ?? "").Contains(query.Keyword));
+        var total = await q.CountAsync();
+        var list = await q.OrderByDescending(l => l.Id).ToPageListAsync(query.PageIndex, query.PageSize);
+        return new PageResult<ExpenseLoan>(total, list);
+    }
+
+    public async Task<ExpenseLoan?> GetByIdAsync(long id)
+    {
+        return await _db.Queryable<ExpenseLoan>().FirstAsync(l => l.Id == id);
+    }
+
+    public async Task<long> CreateAsync(ExpenseLoanRequest request, long currentUserId)
+    {
+        if (request.LoanAmount <= 0) throw new BusinessException("借款金额必须大于0");
+        var count = await _db.Queryable<ExpenseLoan>().CountAsync();
+        var loan = new ExpenseLoan
+        {
+            LoanNo = $"JK-{count + 1:D4}",
+            ApplicantId = currentUserId,
+            LoanAmount = request.LoanAmount,
+            SettledAmount = 0,
+            Reason = request.Reason,
+            ExpectedReturnDate = request.ExpectedReturnDate,
+            Status = 0
+        };
+        await _db.Insertable(loan).ExecuteCommandAsync();
+        return loan.Id;
+    }
+
+    public async Task ApproveAsync(long id, long currentUserId)
+    {
+        var loan = await _db.Queryable<ExpenseLoan>().FirstAsync(l => l.Id == id) ?? throw new NotFoundException("借款申请不存在");
+        if (loan.Status != 0) throw new BusinessException("非待审批状态");
+        loan.Status = 1; // 已借出
+        await _db.Updateable(loan).UpdateColumns(l => l.Status).ExecuteCommandAsync();
+    }
+
+    public async Task RejectAsync(long id)
+    {
+        var loan = await _db.Queryable<ExpenseLoan>().FirstAsync(l => l.Id == id) ?? throw new NotFoundException("借款申请不存在");
+        if (loan.Status != 0) throw new BusinessException("非待审批状态");
+        loan.Status = 3;
+        await _db.Updateable(loan).UpdateColumns(l => l.Status).ExecuteCommandAsync();
+    }
+
+    /// <summary>核销借款（从报销单抵扣）</summary>
+    public async Task SettleAsync(long loanId, decimal amount, long claimId)
+    {
+        var loan = await _db.Queryable<ExpenseLoan>().FirstAsync(l => l.Id == loanId) ?? throw new NotFoundException("借款记录不存在");
+        if (loan.Status != 1) throw new BusinessException("仅已借出状态可核销");
+        if (amount <= 0 || amount > loan.LoanAmount - loan.SettledAmount)
+            throw new BusinessException($"核销金额无效，剩余可核销{loan.LoanAmount - loan.SettledAmount}");
+
+        loan.SettledAmount += amount;
+        if (loan.SettledAmount >= loan.LoanAmount) loan.Status = 2; // 已核销
+        await _db.Updateable(loan).UpdateColumns(l => new { l.SettledAmount, l.Status }).ExecuteCommandAsync();
+    }
+}

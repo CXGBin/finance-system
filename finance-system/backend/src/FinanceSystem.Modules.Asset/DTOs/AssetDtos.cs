@@ -80,3 +80,16 @@ public class AssetReportQuery : PageRequest
     public long? CategoryId { get; set; }
     public int? Status { get; set; }
 }
+
+/// <summary>资产处置请求</summary>
+public class AssetDisposeRequest
+{
+    /// <summary>处置方式：5=报废 4=处置出售</summary>
+    public int DisposeType { get; set; }
+    /// <summary>处置收入（出售时填写）</summary>
+    public decimal DisposalIncome { get; set; }
+    /// <summary>处置原因</summary>
+    public string Reason { get; set; } = string.Empty;
+    /// <summary>处置日期</summary>
+    public DateTime DisposeDate { get; set; }
+}

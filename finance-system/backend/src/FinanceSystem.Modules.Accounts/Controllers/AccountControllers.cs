@@ -223,6 +223,15 @@ public class VoucherController : ControllerBase
     }
 
     /// <summary>
+    /// 红字冲销凭证
+    /// </summary>
+    [HttpPost("{id}/reverse")]
+    public async Task<ApiResult<long>> Reverse(long id)
+    {
+        return ApiResult<long>.Success(await _voucherService.ReverseAsync(id, HttpContext.GetCurrentUserId()));
+    }
+
+    /// <summary>
     /// 获取凭证打印数据（返回凭证详情+分录，供前端渲染PDF/打印）
     /// </summary>
     [HttpGet("{id}/print-data")]

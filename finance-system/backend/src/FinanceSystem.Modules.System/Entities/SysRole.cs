@@ -38,6 +38,12 @@ public class SysRole : BaseEntity
     public int Status { get; set; } = 1;
 
     /// <summary>
+    /// 数据范围：1=全部数据 2=本部门数据 3=本部门及以下 4=仅本人数据
+    /// </summary>
+    [SugarColumn(IsNullable = false, ColumnDescription = "数据范围")]
+    public int DataScope { get; set; } = 1;
+
+    /// <summary>
     /// 角色关联菜单ID列表（导航属性，不映射到数据库）
     /// </summary>
     [SugarColumn(IsIgnore = true)]

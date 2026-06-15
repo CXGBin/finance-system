@@ -24,6 +24,8 @@ public interface IAssetCardService
     Task UpdateAsync(long id, AssetCardRequest request);
     Task ChangeStatusAsync(long id, int changeType, AssetChangeRequest request, long currentUserId);
     Task<List<AssetCard>> GetDepreciableListAsync(int month);
+    /// <summary>资产处置（报废/出售）并自动生成凭证</summary>
+    Task<long> DisposeAsync(long id, AssetDisposeRequest request, long currentUserId);
 }
 
 /// <summary>资产折旧服务接口</summary>
@@ -193,6 +195,125 @@ public class AssetCardService : IAssetCardService
         return await _db.Queryable<AssetCard>()
             .Where(a => a.Status == 1 && a.AccumulatedDepreciation < (a.OriginalValue - a.ResidualValue))
             .ToListAsync();
+    }
+
+    public async Task<long> DisposeAsync(long id, AssetDisposeRequest request, long currentUserId)
+    {
+        return await AssetDisposeHelper.DisposeAssetAsync(_db, id, request, currentUserId);
+    }
+}
+
+/// <summary>资产处置服务</summary>
+public static class AssetDisposeHelper
+{
+    public static async Task<long> DisposeAssetAsync(ISqlSugarClient db, long id, AssetDisposeRequest request, long currentUserId)
+    {
+        var card = await db.Queryable<AssetCard>().FirstAsync(c => c.Id == id)
+            ?? throw new NotFoundException("资产卡片不存在");
+        if (card.Status != 1 && card.Status != 2)
+            throw new BusinessException("仅使用中或闲置资产可处置");
+
+        card.Status = request.DisposeType;
+        card.UpdatedTime = DateTime.Now;
+        await db.Updateable(card).UpdateColumns(c => new { c.Status, c.UpdatedTime }).ExecuteCommandAsync();
+
+        decimal netValue = card.OriginalValue - card.AccumulatedDepreciation;
+        decimal disposalIncome = request.DisposalIncome;
+        decimal lossOrGain = disposalIncome - netValue;
+
+        var now = request.DisposeDate;
+        var period = await db.Queryable<AccountingPeriod>()
+            .FirstAsync(p => p.PeriodYear == now.Year && p.PeriodMonth == now.Month);
+        if (period == null) throw new BusinessException("当前月份会计期间不存在");
+
+        // 查找固定资产科目（1601）
+        var fixedAssetSubject = await db.Queryable<AccountSubject>().FirstAsync(s => s.SubjectCode == "1601");
+        if (fixedAssetSubject == null) throw new BusinessException("固定资产科目(1601)不存在");
+
+        var entries = new List<VoucherEntry>();
+
+        // 转出累计折旧
+        if (card.AccumulatedDepreciation > 0)
+        {
+            var accSubj = await db.Queryable<AccountSubject>().FirstAsync(s => s.SubjectCode == "1602");
+            if (accSubj != null)
+            {
+                entries.Add(new VoucherEntry
+                {
+                    SubjectId = accSubj.Id, Summary = $"处置资产{card.AssetName}转出累计折旧",
+                    DebitAmount = card.AccumulatedDepreciation, CreditAmount = 0
+                });
+                entries.Add(new VoucherEntry
+                {
+                    SubjectId = fixedAssetSubject.Id, Summary = $"处置资产{card.AssetName}转出原值",
+                    DebitAmount = 0, CreditAmount = card.AccumulatedDepreciation
+                });
+            }
+        }
+
+        // 处置收入
+        if (disposalIncome > 0)
+        {
+            var bankSubject = await db.Queryable<AccountSubject>().FirstAsync(s => s.IsBank == 1);
+            if (bankSubject != null)
+            {
+                entries.Add(new VoucherEntry
+                {
+                    SubjectId = bankSubject.Id, Summary = $"处置资产{card.AssetName}收入",
+                    DebitAmount = disposalIncome, CreditAmount = 0
+                });
+            }
+        }
+
+        // 处置损益（净收益→营业外收入，净损失→营业外支出）
+        if (lossOrGain > 0)
+        {
+            var incSubj = await db.Queryable<AccountSubject>().FirstAsync(s => s.SubjectCode == "6301");
+            if (incSubj != null)
+            {
+                entries.Add(new VoucherEntry
+                {
+                    SubjectId = fixedAssetSubject.Id, Summary = $"处置资产{card.AssetName}结转",
+                    DebitAmount = 0, CreditAmount = netValue
+                });
+                entries.Add(new VoucherEntry
+                {
+                    SubjectId = incSubj.Id, Summary = $"处置资产{card.AssetName}净收益",
+                    DebitAmount = 0, CreditAmount = lossOrGain
+                });
+            }
+        }
+        else if (lossOrGain < 0)
+        {
+            var expSubj = await db.Queryable<AccountSubject>().FirstAsync(s => s.SubjectCode == "6711");
+            if (expSubj != null)
+            {
+                entries.Add(new VoucherEntry
+                {
+                    SubjectId = fixedAssetSubject.Id, Summary = $"处置资产{card.AssetName}结转",
+                    DebitAmount = 0, CreditAmount = netValue
+                });
+                entries.Add(new VoucherEntry
+                {
+                    SubjectId = expSubj.Id, Summary = $"处置资产{card.AssetName}净损失",
+                    DebitAmount = Math.Abs(lossOrGain), CreditAmount = 0
+                });
+            }
+        }
+
+        if (!entries.Any()) return 0;
+
+        // 生成处置凭证
+        var voucherCount = await db.Queryable<Voucher>().Where(v => v.PeriodId == period.Id).CountAsync();
+        var voucher = new Voucher
+        {
+            VoucherNo = $"ZZ-{voucherCount + 1:D4}", VoucherType = 0, PeriodId = period.Id, VoucherDate = now,
+            AbstractText = $"资产处置-{card.AssetName}", PreparedBy = currentUserId, Status = 0
+        };
+        await db.Insertable(voucher).ExecuteCommandAsync();
+        foreach (var e in entries) e.VoucherId = voucher.Id;
+        await db.Insertable(entries).ExecuteCommandAsync();
+        return voucher.Id;
     }
 }
 

@@ -219,6 +219,20 @@ public class ApprovalInstanceService : IApprovalInstanceService
 
         instance.Status = 3; // 已撤回
         await _db.Updateable(instance).UpdateColumns(i => i.Status).ExecuteCommandAsync();
+
+        // 记录撤回操作
+        var currentNode = instance.CurrentNodeIndex;
+        var flow = await _db.Queryable<ApprovalFlow>().FirstAsync(f => f.Id == instance.FlowId);
+        if (flow != null)
+        {
+            var nodes = JsonSerializer.Deserialize<List<ApprovalNodeDef>>(flow.NodesJson) ?? new();
+            var nodeName = nodes.ElementAtOrDefault(currentNode)?.NodeName ?? "未知节点";
+            await _db.Insertable(new ApprovalRecord
+            {
+                InstanceId = instanceId, NodeIndex = currentNode, NodeName = nodeName,
+                ApproverId = currentUserId, Action = 4, Comment = "发起人撤回"
+            }).ExecuteCommandAsync();
+        }
     }
 
     /// <inheritdoc/>

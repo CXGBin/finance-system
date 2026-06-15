@@ -242,6 +242,44 @@ public class VoucherService : IVoucherService
     }
 
     /// <summary>
+    /// 红字冲销：生成原凭证的借贷反向凭证，摘要标注冲销来源
+    /// </summary>
+    public async Task<long> ReverseAsync(long originalId, long currentUserId)
+    {
+        var original = await _db.Queryable<Voucher>()
+            .Includes(v => v.Entries)
+            .FirstAsync(v => v.Id == originalId)
+            ?? throw new NotFoundException("原凭证不存在");
+        if (original.Status != 2) throw new BusinessException("仅能冲销已作废的凭证");
+
+        var reversalVoucher = new Voucher
+        {
+            VoucherNo = await GenerateVoucherNoAsync(original.PeriodId, original.VoucherType),
+            VoucherType = original.VoucherType,
+            PeriodId = original.PeriodId,
+            VoucherDate = DateTime.Now,
+            AbstractText = $"冲销凭证{original.VoucherNo}",
+            PreparedBy = currentUserId,
+            Status = 0
+        };
+        await _db.Insertable(reversalVoucher).ExecuteCommandAsync();
+
+        var reversalEntries = original.Entries.Select(e => new VoucherEntry
+        {
+            VoucherId = reversalVoucher.Id,
+            SubjectId = e.SubjectId,
+            Summary = $"冲销：{e.Summary}",
+            DebitAmount = e.CreditAmount,
+            CreditAmount = e.DebitAmount,
+            AuxiliaryId = e.AuxiliaryId,
+            AuxiliaryType = e.AuxiliaryType
+        }).ToList();
+        await _db.Insertable(reversalEntries).ExecuteCommandAsync();
+
+        return reversalVoucher.Id;
+    }
+
+    /// <summary>
     /// 生成凭证号（按期间+类型递增）
     /// </summary>
     private async Task<string> GenerateVoucherNoAsync(long periodId, int voucherType)
