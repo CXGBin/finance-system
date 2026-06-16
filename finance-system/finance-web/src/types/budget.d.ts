@@ -1,31 +1,28 @@
-/** 预算项 */
+/** 预算项 - 与后端 BudgetSubject 对齐 */
 export interface BudgetItem {
   id: number;
-  year: number;
-  subjectId: number;
-  subjectCode?: string;
-  subjectName?: string;
-  deptId?: number;
-  deptName?: string;
-  month: number;
-  amount: number;
-  description?: string;
+  budgetYearId: number; // 后端 BudgetYearId
+  subjectId: number; // 后端 SubjectId
+  deptId?: number; // 后端 DeptId
+  annualAmount: number; // 后端 AnnualAmount
+  remark?: string;
+  createdTime?: string;
 }
 
-/** 预算执行记录 */
+/** 预算执行记录 - 与后端 BudgetExecutionItem 对齐 */
 export interface BudgetExecution {
-  budgetId: number;
-  budgetAmount: number;
-  actualAmount: number;
+  budgetSubjectId: number; // 后端 BudgetSubjectId
+  subjectName?: string;
+  annualBudget: number;
+  totalActual: number;
   executionRate: number;
   remainAmount: number;
-  alertLevel?: 'normal' | 'warning' | 'danger';
 }
 
-/** 预算月度数据 */
+/** 预算月度数据 - 与后端 BudgetMonthly 对齐 */
 export interface BudgetMonthly {
   id: number;
-  budgetSubjectId: number;
+  budgetSubjectId: number; // 后端 BudgetSubjectId
   month: number;
   amount: number;
 }
@@ -36,25 +33,25 @@ export interface BudgetMonthlySaveRequest {
   items: BudgetMonthly[];
 }
 
-/** 预算调整 */
+/** 预算调整 - 与后端 BudgetAdjustment 对齐 */
 export interface BudgetAdjust {
   id: number;
-  budgetId: number;
-  adjustAmount: number;
+  budgetSubjectId?: number;
+  adjustType: string; // 后端 AdjustType
+  beforeAmount: number; // 后端 BeforeAmount
+  afterAmount: number; // 后端 AfterAmount
   reason: string;
-  status: number;
+  approveStatus: number; // 后端 ApproveStatus
+  applyDeptId?: number;
+  applyBy?: number;
   createTime?: string;
 }
 
-/** 预算预警 */
+/** 预算预警 - 与后端 BudgetAlertConfig/BudgetAlertCheck 对齐 */
 export interface BudgetAlert {
   id: number;
-  subjectName: string;
-  deptName: string;
-  budgetAmount: number;
-  actualAmount: number;
-  executionRate: number;
-  threshold: number;
-  level: 'warning' | 'danger';
-  createTime: string;
+  budgetYearId: number; // 后端 BudgetYearId
+  alertThreshold: number; // 后端 AlertThreshold
+  isEnabled: number; // 后端 IsEnabled
+  alertMethod?: string; // 后端 AlertMethod
 }

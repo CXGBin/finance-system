@@ -12,8 +12,8 @@ const UserList: React.FC = () => {
 
   /** 列定义 */
   const columns = [
-    { title: '用户名', dataIndex: 'userName', key: 'userName', search: true },
-    { title: '昵称', dataIndex: 'nickName', key: 'nickName' },
+    { title: '用户名', dataIndex: 'username', key: 'username', search: true },
+    { title: '真实姓名', dataIndex: 'realName', key: 'realName' },
     { title: '手机号', dataIndex: 'phone', key: 'phone' },
     { title: '邮箱', dataIndex: 'email', key: 'email' },
     {
@@ -102,10 +102,10 @@ const UserList: React.FC = () => {
         width={600}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="userName" label="用户名" rules={[{ required: true, message: '请输入用户名' }]}>
+          <Form.Item name="username" label="用户名" rules={[{ required: true, message: '请输入用户名' }]}>
             <Input disabled={!!editingRecord} />
           </Form.Item>
-          <Form.Item name="nickName" label="昵称" rules={[{ required: true, message: '请输入昵称' }]}>
+          <Form.Item name="realName" label="真实姓名" rules={[{ required: true, message: '请输入真实姓名' }]}>
             <Input />
           </Form.Item>
           {!editingRecord && (

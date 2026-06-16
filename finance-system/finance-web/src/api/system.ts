@@ -84,7 +84,7 @@ export const dictApi = {
   /** 删除字典类型 */
   typeRemove: (id: number) => del(`/system/dict/type/${id}`),
   /** 获取某类型下所有字典项 */
-  dataByType: (dictType: string) => get<DictItem[]>(`/system/dict/data/${dictType}`),
+  itemList: (dictType: string) => get<DictItem[]>(`/system/dict/data/${dictType}`),
   /** 新增字典项 */
   itemAdd: (data: Partial<DictItem>) => post('/system/dict/data', data),
   /** 编辑字典项 */
@@ -93,7 +93,6 @@ export const dictApi = {
   itemRemove: (id: number) => del(`/system/dict/data/${id}`),
   /** 兼容旧调用（别名） */
   typeList: () => get<DictType[]>('/system/dict/type/page', { pageIndex: 1, pageSize: 999 }),
-  itemList: (dictId: number) => get<DictItem[]>(`/system/dict/data/${dictId}`),
 };
 
 // 操作日志

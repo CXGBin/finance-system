@@ -5,39 +5,35 @@ export interface LoginParams {
   remember?: boolean;
 }
 
-/** 登录响应 */
+/** 登录响应 - 与后端 LoginResponse 对齐 */
 export interface LoginResult {
-  token: string;
+  accessToken: string;
   refreshToken: string;
+  expiresIn: number;
   userInfo: UserInfo;
+  mustChangePassword: boolean;
 }
 
-/** 用户信息 */
+/** 用户信息 - 与后端 UserInfoDto 对齐 */
 export interface UserInfo {
   id: number;
   username: string;
-  nickname: string;
+  realName: string;
   avatar?: string;
-  email?: string;
-  phone?: string;
-  roles: Role[];
+  roles: string[]; // 后端返回角色编码列表
   permissions: string[];
-  modules: ModuleItem[];
+  modules: string[]; // 后端返回模块标识列表
 }
 
-/** 角色 */
+/** 角色（用于角色管理页面） */
 export interface Role {
   id: number;
-  name: string;
-  code: string;
-}
-
-/** 模块项 */
-export interface ModuleItem {
-  id: number;
-  name: string;
-  code: string;
-  icon?: string;
-  enabled: boolean;
-  sort?: number;
+  roleName: string;
+  roleCode: string;
+  description?: string;
+  sortOrder?: number;
+  status: number;
+  dataScope?: number;
+  menuIds?: number[];
+  createTime?: string;
 }

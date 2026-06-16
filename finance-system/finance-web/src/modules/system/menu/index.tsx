@@ -82,10 +82,10 @@ const MenuList: React.FC = () => {
           <Form.Item name="component" label="组件路径"><Input /></Form.Item>
           <Form.Item name="icon" label="图标"><Input /></Form.Item>
           <Form.Item name="menuType" label="类型" rules={[{ required: true }]}>
-            <Select options={[{ label: '目录', value: 'M' }, { label: '菜单', value: 'C' }, { label: '按钮', value: 'F' }]} />
+            <Select options={[{ label: '目录', value: 1 }, { label: '菜单', value: 2 }, { label: '按钮', value: 3 }]} />
           </Form.Item>
           <Form.Item name="sortOrder" label="排序" initialValue={0}><InputNumber /></Form.Item>
-          <Form.Item name="status" label="状态" valuePropName="checked" initialValue={true}>
+          <Form.Item name="status" label="状态" initialValue={1}>
             <Select options={[{ label: '正常', value: 1 }, { label: '停用', value: 0 }]} />
           </Form.Item>
         </Form>

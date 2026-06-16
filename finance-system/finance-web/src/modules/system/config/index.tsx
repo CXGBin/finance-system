@@ -37,7 +37,7 @@ const ConfigList: React.FC = () => {
         <Row gutter={24}>
           {configs.map((config: SysConfig, index: number) => (
             <Col span={8} key={config.id || index}>
-              <Form.Item name={config.key || config.configKey} label={config.configName || config.configKey}>
+              <Form.Item name={config.configKey} label={config.configName || config.configKey}>
                 <Input placeholder={`请输入${config.configName || config.configKey}`} />
               </Form.Item>
             </Col>

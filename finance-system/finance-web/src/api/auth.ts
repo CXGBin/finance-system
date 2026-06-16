@@ -13,7 +13,7 @@ export function logout() {
 
 /** 刷新Token */
 export function refreshToken(refreshToken: string) {
-  return post<{ token: string; refreshToken: string }>('/auth/refresh-token', { refreshToken });
+  return post<{ accessToken: string; refreshToken: string }>('/auth/refresh-token', { refreshToken });
 }
 
 /** 获取当前用户信息 */
@@ -22,6 +22,6 @@ export function getUserInfo() {
 }
 
 /** 修改密码 */
-export function changePassword(data: { oldPassword: string; newPassword: string }) {
+export function changePassword(data: { oldPassword: string; newPassword: string; confirmPassword: string }) {
   return put('/auth/password', data);
 }

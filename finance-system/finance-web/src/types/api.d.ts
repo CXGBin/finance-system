@@ -5,17 +5,17 @@ export interface ApiResponse<T = unknown> {
   data: T;
 }
 
-/** 分页结果 */
+/** 分页结果 - 与后端 PageResult 对齐 */
 export interface PagedResult<T> {
-  list: T[];
+  list: T[]; // JSON序列化后小写
   total: number;
-  page: number;
-  pageSize: number;
+  pageIndex?: number;
+  pageSize?: number;
 }
 
-/** 分页请求参数 */
+/** 分页请求参数 - 与后端 PageRequest 对齐 */
 export interface PageParams {
-  page: number;
+  pageIndex: number;
   pageSize: number;
 }
 

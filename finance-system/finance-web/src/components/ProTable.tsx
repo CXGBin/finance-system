@@ -33,7 +33,7 @@ function ProTable<T extends Record<string, unknown>>({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
-  const [pageParams, setPageParams] = useState<PageParams>({ page: 1, pageSize: defaultPageSize });
+  const [pageParams, setPageParams] = useState<PageParams>({ pageIndex: 1, pageSize: defaultPageSize });
   const [searchExpanded, setSearchExpanded] = useState(false);
 
   const loadData = useCallback(async () => {
@@ -56,16 +56,16 @@ function ProTable<T extends Record<string, unknown>>({
   }, [loadData]);
 
   const handleSearch = () => {
-    setPageParams((p) => ({ ...p, page: 1 }));
+    setPageParams((p) => ({ ...p, pageIndex: 1 }));
   };
 
   const handleReset = () => {
     form.resetFields();
-    setPageParams((p) => ({ ...p, page: 1 }));
+    setPageParams((p) => ({ ...p, pageIndex: 1 }));
   };
 
   const handlePageChange = (page: number, pageSize: number) => {
-    setPageParams({ page, pageSize });
+    setPageParams({ pageIndex: page, pageSize });
   };
 
   const searchColumns = columns.filter((col) => col.search);
@@ -83,7 +83,7 @@ function ProTable<T extends Record<string, unknown>>({
         dataSource={data}
         loading={loading}
         pagination={{
-          current: pageParams.page,
+          current: pageParams.pageIndex,
           pageSize: pageParams.pageSize,
           total,
           showSizeChanger: true,

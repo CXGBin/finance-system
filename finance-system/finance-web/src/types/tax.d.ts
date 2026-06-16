@@ -1,39 +1,42 @@
-/** 税种 */
+/** 税种 - 与后端 TaxCategory 对齐 */
 export interface TaxType {
   id: number;
-  name: string;
-  code: string;
-  rate: number;
-  type: 'vat' | 'income' | 'property' | 'stamp' | 'other';
-  status: number;
-  description?: string;
+  taxCode: string; // 后端 TaxCode
+  taxName: string; // 后端 TaxName
+  taxRate: number; // 后端 TaxRate
+  calculationMethod?: string; // 后端 CalculationMethod
+  declareCycle?: string; // 后端 DeclareCycle
+  subjectId?: number;
+  isEnabled: number; // 后端 IsEnabled
+  remark?: string;
 }
 
-/** 纳税申报 */
+/** 纳税申报 - 与后端 TaxDeclaration 对齐 */
 export interface TaxDeclaration {
   id: number;
-  taxTypeId: number;
-  taxTypeName?: string;
-  period: string;
-  taxAmount: number;
-  status: 'draft' | 'submitted' | 'paid';
-  declareDate?: string;
-  createTime: string;
+  taxCategoryId: number; // 后端 TaxCategoryId
+  declarePeriod: string; // 后端 DeclarePeriod
+  taxAmount: number; // 后端 TaxAmount
+  actualPaidAmount: number; // 后端 ActualPaidAmount
+  status: number; // 0草稿 1已申报 2已缴纳
+  declaredBy?: number; // 后端 DeclaredBy
+  remark?: string;
+  createTime?: string;
 }
 
-/** 发票 */
+/** 发票 - 与后端 TaxInvoice 对齐 */
 export interface Invoice {
   id: number;
-  invoiceNo: string;
-  invoiceType: string;
-  invoiceDate: string;
-  amount: number;
-  tax: number;
-  totalAmount: number;
-  direction: 'in' | 'out';
-  status: 'normal' | 'red' | 'void';
-  vendor?: string;
-  remark?: string;
+  invoiceType: string; // 后端 InvoiceType
+  invoiceNo: string; // 后端 InvoiceNo
+  invoiceDate: string; // 后端 InvoiceDate
+  counterpartyName?: string; // 后端 CounterpartyName
+  taxAmount: number; // 后端 TaxAmount
+  amountWithoutTax: number; // 后端 AmountWithoutTax
+  totalAmount: number; // 后端 TotalAmount
+  direction: string; // 后端 Direction
+  voucherId?: number;
+  isVerified?: boolean; // 后端 IsVerified
 }
 
 /** 税务报表 */

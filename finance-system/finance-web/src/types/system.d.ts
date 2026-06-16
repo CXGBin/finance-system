@@ -1,55 +1,57 @@
-/** 用户 */
+/** 用户 - 与后端 SysUser/UserProfile 对齐 */
 export interface User {
   id: number;
   username: string;
-  nickname: string;
+  realName: string; // 后端 RealName
   email?: string;
   phone?: string;
   avatar?: string;
   status: number; // 0禁用 1启用
   deptId?: number;
   deptName?: string;
-  postIds?: number[];
+  postId?: number; // 后端返回单个岗位ID
   roleIds: number[];
   roleNames?: string[];
-  createTime?: string;
+  createdTime?: string; // 后端 CreatedTime
   remark?: string;
 }
 
-/** 角色 */
+/** 角色 - 与后端 SysRole 对齐 */
 export interface SysRole {
   id: number;
-  name: string;
-  code: string;
-  sort?: number;
+  roleName: string; // 后端 RoleName
+  roleCode: string; // 后端 RoleCode
+  description?: string;
+  sortOrder?: number;
   status: number;
-  remark?: string;
+  dataScope?: number;
   menuIds?: number[];
-  createTime?: string;
+  createdTime?: string; // 后端 CreatedTime
 }
 
-/** 菜单 */
+/** 菜单 - 与后端 SysMenu 对齐 */
 export interface Menu {
   id: number;
   parentId: number;
-  name: string;
+  menuName: string; // 后端 MenuName
   path?: string;
   component?: string;
   icon?: string;
-  sort: number;
-  type: number; // 0目录 1菜单 2按钮
+  permission?: string;
+  moduleId?: string;
+  sortOrder: number; // 后端 SortOrder
+  menuType: number; // 后端 MenuType (1目录 2菜单 3按钮)
+  visible: number; // 后端 Visible (0隐藏 1显示)
   status: number;
   children?: Menu[];
-  permission?: string;
-  visible?: boolean;
 }
 
-/** 部门 */
+/** 部门 - 与后端 SysDept 对齐 */
 export interface Dept {
   id: number;
   parentId: number;
-  name: string;
-  sort: number;
+  deptName: string; // 后端 DeptName
+  sortOrder: number; // 后端 SortOrder
   leader?: string;
   phone?: string;
   email?: string;
@@ -57,42 +59,44 @@ export interface Dept {
   children?: Dept[];
 }
 
-/** 岗位 */
+/** 岗位 - 与后端 SysPost 对齐 */
 export interface Post {
   id: number;
-  code: string;
-  name: string;
-  sort: number;
+  deptId: number;
+  postCode: string; // 后端 PostCode
+  postName: string; // 后端 PostName
+  sortOrder: number; // 后端 SortOrder
   status: number;
-  createTime?: string;
+  remark?: string;
+  createdTime?: string;
 }
 
-/** 数据字典类型 */
+/** 数据字典类型 - 与后端 SysDictType 对齐 */
 export interface DictType {
   id: number;
-  name: string;
-  code: string;
+  dictName: string; // 后端 DictName
+  dictType: string; // 后端 DictType
   status: number;
   remark?: string;
-  createTime?: string;
+  createdTime?: string;
 }
 
-/** 数据字典项 */
+/** 数据字典项 - 与后端 SysDictData 对齐 */
 export interface DictItem {
   id: number;
-  dictId: number;
-  label: string;
-  value: string;
-  sort: number;
+  dictType: string; // 后端 DictType (string类型)
+  dictLabel: string; // 后端 DictLabel
+  dictValue: string; // 后端 DictValue
+  sortOrder: number; // 后端 SortOrder
   status: number;
   remark?: string;
 }
 
-/** 操作日志 */
+/** 操作日志 - 与后端 SysLog 对齐 */
 export interface OperLog {
   id: number;
   userId: number;
-  userName?: string;
+  userName: string; // 后端 UserName
   module?: string;
   action?: string;
   description?: string;
@@ -102,26 +106,25 @@ export interface OperLog {
   requestBody?: string;
   responseCode?: number;
   durationMs: number;
-  createdTime: string;
+  createdTime: string; // 后端 CreatedTime
 }
 
-/** 模块配置 */
+/** 模块配置 - 与后端 SysModule 对齐 */
 export interface SysModule {
   id: number;
-  name: string;
-  code: string;
-  icon?: string;
-  enabled: boolean;
-  sort?: number;
+  moduleId: string; // 后端 ModuleId
+  moduleName: string; // 后端 ModuleName
   description?: string;
+  isEnabled: boolean; // 后端 IsEnabled
+  isCore: boolean; // 后端 IsCore
+  sortOrder?: number;
 }
 
-/** 系统配置项 */
+/** 系统配置项 - 与后端 SysConfig 对齐 */
 export interface SysConfig {
-  key: string;
-  value: string;
-  label: string;
-  group: string;
-  type: 'input' | 'number' | 'switch' | 'select';
-  options?: { label: string; value: string }[];
+  configKey: string; // 后端 ConfigKey
+  configValue: string; // 后端 ConfigValue
+  configName: string; // 后端 ConfigName
+  configGroup: string; // 后端 ConfigGroup
+  remark?: string;
 }

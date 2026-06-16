@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Form, Input, TreeSelect, message, Popconfirm, Space } from 'antd';
+import { Modal, Form, Input, InputNumber, TreeSelect, message, Popconfirm, Space } from 'antd';
 import type { SysRole } from '@/types/system.d';
 import { roleApi, menuApi } from '@/api/system';
 import ProTable from '@/components/ProTable';
@@ -16,7 +16,7 @@ const RoleList: React.FC = () => {
 
   const columns = [
     { title: '角色名称', dataIndex: 'roleName', key: 'roleName', search: true },
-    { title: '角色标识', dataIndex: 'roleKey', key: 'roleKey' },
+    { title: '角色标识', dataIndex: 'roleCode', key: 'roleCode' },
     { title: '排序', dataIndex: 'sortOrder', key: 'sortOrder' },
     {
       title: '状态', dataIndex: 'status', key: 'status',
@@ -80,7 +80,7 @@ const RoleList: React.FC = () => {
   /** 保存权限配置 */
   const handleSavePerm = async () => {
     if (!currentRole) return;
-    await roleApi.update({ ...currentRole, menuIds: checkedKeys } as Partial<SysRole>);
+    await roleApi.saveMenus(currentRole.id, checkedKeys);
     message.success('权限配置已保存');
     setPermModalOpen(false);
   };
@@ -103,25 +103,29 @@ const RoleList: React.FC = () => {
           <Form.Item name="roleName" label="角色名称" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="roleKey" label="角色标识" rules={[{ required: true }]}>
+          <Form.Item name="roleCode" label="角色标识" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
           <Form.Item name="sortOrder" label="排序" initialValue={0}>
             <Input type="number" />
           </Form.Item>
-          <Form.Item name="status" label="状态" valuePropName="checked" initialValue={true}>
-            <Input type="number" />
+          <Form.Item name="status" label="状态" initialValue={1}>
+            <InputNumber min={0} max={1} />
           </Form.Item>
         </Form>
       </Modal>
       <Modal title={`权限配置 - ${currentRole?.roleName}`} open={permModalOpen} onOk={handleSavePerm} onCancel={() => setPermModalOpen(false)} width={500}>
         <TreeSelect
           treeData={menuTree}
+          fieldNames={{ label: 'menuName', value: 'id', children: 'children' }}
           value={checkedKeys}
           onChange={(keys) => setCheckedKeys(keys as number[])}
           treeCheckable
+          treeNodeFilterProp="menuName"
+          showCheckedStrategy={TreeSelect.SHOW_CHILD}
           style={{ width: '100%' }}
           placeholder="选择菜单权限"
+          dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
         />
       </Modal>
     </div>

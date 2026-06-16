@@ -22,9 +22,9 @@ const DictList: React.FC = () => {
     setTypes(res.data || []);
   };
 
-  const loadItems = async (dictId: number) => {
-    setSelectedType(dictId);
-    const res = await dictApi.itemList(dictId);
+  const loadItems = async (dictTypeCode: string) => {
+    setSelectedType(dictTypeCode as any);
+    const res = await dictApi.itemList(dictTypeCode);
     setItems(res.data || []);
   };
 
@@ -117,7 +117,7 @@ const DictList: React.FC = () => {
         dataSource={types}
         columns={typeColumns}
         rowKey="id"
-        onRow={(record) => ({ onClick: () => loadItems(record.id), style: { cursor: selectedType === record.id ? 'default' : 'pointer', background: selectedType === record.id ? '#e6f7ff' : undefined } })}
+        onRow={(record) => ({ onClick: () => loadItems(record.dictType), style: { cursor: selectedType === record.dictType ? 'default' : 'pointer', background: selectedType === record.dictType ? '#e6f7ff' : undefined } })}
       />
       {selectedType && (
         <div style={{ marginTop: 24 }}>
@@ -134,7 +134,7 @@ const DictList: React.FC = () => {
       </Modal>
       <Modal title={editingItem ? '编辑字典项' : '新增字典项'} open={itemModalOpen} onOk={handleSaveItem} onCancel={() => setItemModalOpen(false)}>
         <Form form={itemForm} layout="vertical">
-          <Form.Item name="dictId" label="字典ID" hidden><Input /></Form.Item>
+          <Form.Item name="dictType" label="字典类型" hidden><Input /></Form.Item>
           <Form.Item name="dictLabel" label="字典标签" rules={[{ required: true }]}><Input /></Form.Item>
           <Form.Item name="dictValue" label="字典键值" rules={[{ required: true }]}><Input /></Form.Item>
           <Form.Item name="sortOrder" label="排序" initialValue={0}><InputNumber /></Form.Item>

@@ -4,34 +4,43 @@ import { useSearchParams } from 'react-router-dom';
 import { auxiliaryApi } from '@/api/account';
 
 /** 辅助核算类型配置 */
-const TYPE_CONFIG: Record<string, { label: string; columns: Array<{ title: string; dataIndex: string; search?: boolean }> }> = {
+const TYPE_CONFIG: Record<string, { label: string; codeField: string; nameField: string; columns: Array<{ title: string; dataIndex: string; search?: boolean }> }> = {
   customer: {
     label: '客户',
+    codeField: 'customerCode',
+    nameField: 'customerName',
     columns: [
-      { title: '编码', dataIndex: 'code', search: true },
-      { title: '客户名称', dataIndex: 'name', search: true },
+      { title: '编码', dataIndex: 'customerCode', search: true },
+      { title: '客户名称', dataIndex: 'customerName', search: true },
       { title: '联系人', dataIndex: 'contact' },
       { title: '联系电话', dataIndex: 'phone' },
       { title: '地址', dataIndex: 'address' },
+      { title: '税号', dataIndex: 'taxNo' },
     ],
   },
   supplier: {
     label: '供应商',
+    codeField: 'supplierCode',
+    nameField: 'supplierName',
     columns: [
-      { title: '编码', dataIndex: 'code', search: true },
-      { title: '供应商名称', dataIndex: 'name', search: true },
+      { title: '编码', dataIndex: 'supplierCode', search: true },
+      { title: '供应商名称', dataIndex: 'supplierName', search: true },
       { title: '联系人', dataIndex: 'contact' },
       { title: '联系电话', dataIndex: 'phone' },
       { title: '地址', dataIndex: 'address' },
+      { title: '税号', dataIndex: 'taxNo' },
     ],
   },
   project: {
     label: '项目',
+    codeField: 'projectCode',
+    nameField: 'projectName',
     columns: [
-      { title: '项目编码', dataIndex: 'code', search: true },
-      { title: '项目名称', dataIndex: 'name', search: true },
+      { title: '项目编码', dataIndex: 'projectCode', search: true },
+      { title: '项目名称', dataIndex: 'projectName', search: true },
       { title: '负责人', dataIndex: 'manager' },
-      { title: '开始日期', dataIndex: 'startDate' },
+      { title: '开始日期', dataIndex: 'beginDate' },
+      { title: '结束日期', dataIndex: 'endDate' },
       { title: '状态', dataIndex: 'status' },
     ],
   },
@@ -48,6 +57,7 @@ const AuxiliaryPage: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<Record<string, unknown> | null>(null);
   const [searchValues, setSearchValues] = useState<Record<string, string>>({});
+
   const [form] = Form.useForm();
 
   const loadData = useCallback(async () => {
@@ -56,11 +66,15 @@ const AuxiliaryPage: React.FC = () => {
       const res = await auxiliaryApi.list(type);
       let list = res.data || [];
       // 前端过滤搜索
-      if (searchValues.code) {
-        list = list.filter((item) => String(item.code || '').includes(searchValues.code));
+      if (searchValues[config.codeField]) {
+        list = list.filter((item: Record<string, unknown>) =>
+          String(item[config.codeField] || '').includes(searchValues[config.codeField])
+        );
       }
-      if (searchValues.name) {
-        list = list.filter((item) => String(item.name || '').includes(searchValues.name));
+      if (searchValues[config.nameField]) {
+        list = list.filter((item: Record<string, unknown>) =>
+          String(item[config.nameField] || '').includes(searchValues[config.nameField])
+        );
       }
       setData(list);
     } catch {
@@ -68,7 +82,7 @@ const AuxiliaryPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [type, searchValues]);
+  }, [type, searchValues, config]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
@@ -135,15 +149,15 @@ const AuxiliaryPage: React.FC = () => {
       <Space style={{ marginBottom: 16 }}>
         <Input
           placeholder="编码"
-          value={searchValues.code}
-          onChange={(e) => setSearchValues({ ...searchValues, code: e.target.value })}
+          value={searchValues[config.codeField] || ''}
+          onChange={(e) => setSearchValues({ ...searchValues, [config.codeField]: e.target.value })}
           allowClear
           style={{ width: 150 }}
         />
         <Input
           placeholder="名称"
-          value={searchValues.name}
-          onChange={(e) => setSearchValues({ ...searchValues, name: e.target.value })}
+          value={searchValues[config.nameField] || ''}
+          onChange={(e) => setSearchValues({ ...searchValues, [config.nameField]: e.target.value })}
           allowClear
           style={{ width: 150 }}
         />
@@ -165,7 +179,7 @@ const AuxiliaryPage: React.FC = () => {
       >
         <Form form={form} layout="vertical">
           {config.columns.map((col) => (
-            <Form.Item key={col.dataIndex} name={col.dataIndex} label={col.title} rules={[{ required: col.dataIndex === 'code' || col.dataIndex === 'name' }]}>
+            <Form.Item key={col.dataIndex} name={col.dataIndex} label={col.title} rules={[{ required: col.dataIndex === config.codeField || col.dataIndex === config.nameField }]}>
               <Input />
             </Form.Item>
           ))}

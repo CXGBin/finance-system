@@ -1,36 +1,40 @@
-/** 资产分类 */
+/** 资产分类 - 与后端 AssetCategory 对齐 */
 export interface AssetCategory {
   id: number;
   parentId?: number;
-  name: string;
-  code: string;
-  depreciationMethod: 'straight' | 'declining' | 'double_declining' | 'sum_years';
-  usefulLife: number;
-  residualRate: number;
+  categoryCode: string; // 后端 CategoryCode
+  categoryName: string; // 后端 CategoryName
+  depreciationMethod: number; // 后端 DepreciationMethod (int)
+  usefulLifeMonths: number; // 后端 UsefulLifeMonths
+  residualRate: number; // 后端 ResidualRate
+  sortOrder: number;
+  isEnabled: number;
   children?: AssetCategory[];
 }
 
-/** 资产卡片 */
+/** 资产卡片 - 与后端 AssetCard 对齐 */
 export interface AssetCard {
   id: number;
-  code: string;
-  name: string;
+  assetCode: string; // 后端 AssetCode
+  assetName: string; // 后端 AssetName
   categoryId?: number;
-  categoryName?: string;
   specification?: string;
-  department?: string;
-  custodian?: string;
-  purchaseDate: string;
-  originalValue: number;
-  residualValue: number;
-  depreciationAmount: number;
-  netValue: number;
-  status: 'in_use' | 'idle' | 'scrapped' | 'transferred';
+  deptId?: number;
+  keeper?: string; // 后端 Keeper
   location?: string;
+  originalValue: number; // 后端 OriginalValue
+  residualRate: number; // 后端 ResidualRate
+  residualValue?: number; // 后端 ResidualValue
+  depreciationMethod: number;
+  usefulLifeMonths: number;
+  acquisitionDate: string; // 后端 AcquisitionDate
+  accumulatedDepreciation: number; // 后端 AccumulatedDepreciation
+  netValue: number; // 后端 NetValue
+  status: number; // 后端 Status (int)
   remark?: string;
 }
 
-/** 折旧记录 */
+/** 折旧记录 - 与后端 AssetDepreciation 对齐 */
 export interface DepreciationRecord {
   id: number;
   assetId: number;
@@ -53,13 +57,10 @@ export interface AssetChange {
   operator: string;
 }
 
-/** 资产盘点 */
+/** 资产盘点 - 与后端 AssetInventory 对齐 */
 export interface AssetInventory {
   id: number;
   name: string;
-  status: 'draft' | 'in_progress' | 'completed';
-  createTime: string;
-  totalCount: number;
-  matchCount: number;
-  differenceCount: number;
+  status: number; // 后端 Status (int)
+  createTime?: string;
 }
