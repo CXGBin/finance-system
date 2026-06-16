@@ -8,21 +8,23 @@ import dayjs from 'dayjs';
 const CashFlow: React.FC = () => {
   const [data, setData] = useState<CashFlowRow[]>([]);
   const [loading, setLoading] = useState(false);
-  const [params, setParams] = useState({ year: dayjs().year(), month: dayjs().month() + 1 });
+  const [year, setYear] = useState(dayjs().year());
+  const [month, setMonth] = useState(dayjs().month() + 1);
+
+  const period = `${year}-${String(month).padStart(2, '0')}`;
 
   const loadData = async () => {
     setLoading(true);
-    try { const res = await reportApi.cashFlow(params as any); setData(res.data || []); } finally { setLoading(false); }
+    try { const res = await reportApi.cashFlow({ period }); setData(res.data || []); } finally { setLoading(false); }
   };
 
-  /** 导出Excel */
   const handleExport = async () => {
     try {
       message.loading({ content: '正在导出...', key: 'export' });
-      const res = await reportExportApi.excel({ reportType: 'cash-flow', year: params.year, month: params.month });
+      const res = await reportExportApi.excel({ reportType: 'cash-flow', period });
       const link = document.createElement('a');
       link.href = res.data as string;
-      link.download = `现金流量表_${params.year}_${params.month}.xlsx`;
+      link.download = `现金流量表_${period}.xlsx`;
       link.click();
       message.success({ content: '导出成功', key: 'export' });
     } catch {
@@ -38,11 +40,11 @@ const CashFlow: React.FC = () => {
   ];
 
   return (
-    <Card title="
+    <Card title="现金流量表">
       <Space style={{ marginBottom: 16 }}>
-        <Select value={params.year} onChange={(v) => setParams({ ...params, year: v })} style={{ width: 100 }} options={Array.from({ length: 5 }, (_, i) => ({ label: String(dayjs().year() - 2 + i), value: dayjs().year() - 2 + i }))} />
+        <Select value={year} onChange={setYear} style={{ width: 100 }} options={Array.from({ length: 5 }, (_, i) => ({ label: String(dayjs().year() - 2 + i), value: dayjs().year() - 2 + i }))} />
         <span>年</span>
-        <Select value={params.month} onChange={(v) => setParams({ ...params, month: v })} style={{ width: 80 }} options={Array.from({ length: 12 }, (_, i) => ({ label: String(i + 1), value: i + 1 }))} />
+        <Select value={month} onChange={setMonth} style={{ width: 80 }} options={Array.from({ length: 12 }, (_, i) => ({ label: String(i + 1), value: i + 1 }))} />
         <span>月</span>
         <Button type="primary" onClick={loadData} loading={loading}>查询</Button>
         <Button onClick={handleExport}>导出Excel</Button>

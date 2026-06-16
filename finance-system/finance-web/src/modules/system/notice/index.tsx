@@ -1,30 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Table, Modal, Form, Input, Select, Space, Button, message, Popconfirm, Tag } from 'antd';
+import React, { useState, useCallback } from 'react';
+import { Card, Modal, Form, Input, Select, Space, Button, message, Popconfirm, Tag } from 'antd';
 import { noticeApi, type SysNotice } from '@/api/system';
+import ProTable from '@/components/ProTable';
+import type { ProTableRef } from '@/components/ProTable';
 
 /** 系统公告管理页面 */
 const NoticeList: React.FC = () => {
-  const [data, setData] = useState<SysNotice[]>([]);
-  const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<SysNotice | null>(null);
   const [form] = Form.useForm();
+  const [tableKey, setTableKey] = useState(0);
+  const tableRef = React.useRef<ProTableRef>(null);
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const res = await noticeApi.list();
-      setData(res.data || []);
-    } catch {
-      message.error('加载公告列表失败');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { loadData(); }, []);
-
-  /** 打开新增/编辑弹窗 */
   const handleOpenModal = (record?: SysNotice) => {
     setEditingRecord(record || null);
     form.setFieldsValue(record ? { title: record.title, content: record.content, noticeType: record.noticeType, status: record.status } : { noticeType: 1, status: 1 });
@@ -44,7 +31,7 @@ const NoticeList: React.FC = () => {
       }
       setModalOpen(false);
       form.resetFields();
-      loadData();
+      tableRef.current?.refresh();
     } catch (err) {
       if (err instanceof Error) message.error(err.message);
     }
@@ -55,7 +42,7 @@ const NoticeList: React.FC = () => {
     try {
       await noticeApi.remove(id);
       message.success('删除成功');
-      loadData();
+      tableRef.current?.refresh();
     } catch {
       message.error('删除失败');
     }
@@ -92,13 +79,19 @@ const NoticeList: React.FC = () => {
 
   return (
     <Card title="系统公告" extra={<Button type="primary" onClick={() => handleOpenModal()}>新增公告</Button>}>
-      <Table
+      <ProTable<SysNotice>
+        ref={tableRef}
         columns={columns}
-        dataSource={data}
-        rowKey="id"
-        loading={loading}
-        locale={{ emptyText: '暂无公告数据' }}
-        pagination={{ showSizeChanger: true, showTotal: (t) => `共 ${t} 条` }}
+        fetchData={async (params) => {
+          const res = await noticeApi.list();
+          const list = res.data || [];
+          const start = (params.pageIndex - 1) * params.pageSize;
+          const pagedList = list.slice(start, start + params.pageSize);
+          return { data: { list: pagedList, total: list.length } };
+        }}
+        tableProps={{
+          locale: { emptyText: '暂无公告数据' },
+        }}
       />
       <Modal
         title={editingRecord ? '编辑公告' : '新增公告'}

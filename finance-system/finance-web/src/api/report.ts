@@ -20,14 +20,14 @@ export interface CompareRow {
 
 export const reportApi = {
   // ========== 标准报表 ==========
-  /** 资产负债表 */
-  balanceSheet: (params: ReportParams) => get<BalanceSheetRow[]>('/report/balance-sheet', params),
-  /** 利润表 */
-  incomeStatement: (params: ReportParams) => get<IncomeStatementRow[]>('/report/income-statement', params),
-  /** 现金流量表 */
-  cashFlow: (params: ReportParams) => get<CashFlowRow[]>('/report/cash-flow', params),
+  /** 资产负债表 - period: '2026-06' */
+  balanceSheet: (params: { period: string; showZero?: boolean }) => get<BalanceSheetRow[]>('/report/balance-sheet', params),
+  /** 利润表 - period: '2026-06' */
+  incomeStatement: (params: { period: string; dataType?: string; comparePeriod?: string }) => get<IncomeStatementRow[]>('/report/income-statement', params),
+  /** 现金流量表 - period: '2026-06' */
+  cashFlow: (params: { period: string; showZero?: boolean }) => get<CashFlowRow[]>('/report/cash-flow', params),
   /** 科目余额表 */
-  subjectBalance: (params: ReportParams & { subjectCode?: string; level?: number }) =>
+  subjectBalance: (params: { period: string; subjectType?: number; level?: number; showNoOccurrence?: boolean }) =>
     get<SubjectBalanceRow[]>('/report/subject-balance', params),
 
   // ========== 自定义报表（后端: api/report/custom）==========
@@ -51,13 +51,13 @@ export const reportApi = {
 // ========== 报表导出 ==========
 export const reportExportApi = {
   /** 导出Excel */
-  excel: (params: { reportType: string; year: number; month: number }) => get<string>('/report/export/excel', params),
+  excel: (params: { reportType: string; period: string }) => get<string>('/report/export/excel', params),
   /** 导出PDF */
-  pdf: (params: { reportType: string; year: number; month: number }) => get<string>('/report/export/pdf', params),
+  pdf: (params: { reportType: string; period: string }) => get<string>('/report/export/pdf', params),
 };
 
 // ========== 多期对比 ==========
 export const reportCompareApi = {
   /** 多期对比分析 */
-  compare: (params: { reportType: string; periods: string[] }) => get<CompareRow[]>('/report/compare', params),
+  compare: (params: { type: string; periods: string[]; displayMode?: string }) => get<CompareRow[]>('/report/compare', params),
 };

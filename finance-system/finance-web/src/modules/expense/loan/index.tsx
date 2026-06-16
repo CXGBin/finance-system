@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, InputNumber, Input, Space, message, Tag, Popconfirm } from 'antd';
+import React, { useState } from 'react';
+import { Card, Button, Modal, Form, InputNumber, Input, Space, message, Tag, Popconfirm } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { loanApi } from '@/api/expense';
+import ProTable from '@/components/ProTable';
+import type { ProTableRef } from '@/components/ProTable';
 
 const statusMap: Record<number, { text: string; color: string }> = {
   0: { text: '待审批', color: 'orange' },
@@ -11,23 +13,9 @@ const statusMap: Record<number, { text: string; color: string }> = {
 };
 
 export default function ExpenseLoanPage() {
-  const [data, setData] = useState<any[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
   const [modalVisible, setModalVisible] = useState(false);
   const [form] = Form.useForm();
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const res = await loanApi.list({ pageIndex: page, pageSize: 20 });
-      setData(res.list || []);
-      setTotal(res.total || 0);
-    } finally { setLoading(false); }
-  };
-
-  useEffect(() => { fetchData(); }, [page]);
+  const tableRef = React.useRef<ProTableRef>(null);
 
   const handleCreate = async () => {
     try {
@@ -36,7 +24,7 @@ export default function ExpenseLoanPage() {
       message.success('借款申请已提交');
       setModalVisible(false);
       form.resetFields();
-      fetchData();
+      tableRef.current?.refresh();
     } catch {}
   };
 
@@ -55,8 +43,8 @@ export default function ExpenseLoanPage() {
         <Space>
           {r.status === 0 && (
             <>
-              <Button size="small" type="primary" onClick={() => loanApi.approve(r.id).then(() => { message.success('已审批'); fetchData(); })}>审批</Button>
-              <Popconfirm title="确认退回？" onConfirm={() => loanApi.reject(r.id).then(() => { message.success('已退回'); fetchData(); })}>
+              <Button size="small" type="primary" onClick={() => loanApi.approve(r.id).then(() => { message.success('已审批'); tableRef.current?.refresh(); })}>审批</Button>
+              <Popconfirm title="确认退回？" onConfirm={() => loanApi.reject(r.id).then(() => { message.success('已退回'); tableRef.current?.refresh(); })}>
                 <Button size="small" danger>退回</Button>
               </Popconfirm>
             </>
@@ -67,12 +55,19 @@ export default function ExpenseLoanPage() {
   ];
 
   return (
-    <div>
+    <Card title="借款管理">
       <div style={{ marginBottom: 16 }}>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalVisible(true)}>申请借款</Button>
       </div>
-      <Table columns={columns} dataSource={data} rowKey="id" loading={loading} scroll={{ x: 1200 }}
-        pagination={{ current: page, total, pageSize: 20, onChange: setPage }} />
+      <ProTable
+        ref={tableRef}
+        columns={columns}
+        fetchData={async (params) => {
+          const res = await loanApi.list({ pageIndex: params.pageIndex, pageSize: params.pageSize });
+          return { data: { list: res.list || [], total: res.total || 0 } };
+        }}
+        tableProps={{ scroll: { x: 1200 } }}
+      />
       <Modal title="申请借款" open={modalVisible} onOk={handleCreate} onCancel={() => setModalVisible(false)}>
         <Form form={form} layout="vertical">
           <Form.Item name="loanAmount" label="借款金额" rules={[{ required: true }]}>
@@ -86,6 +81,6 @@ export default function ExpenseLoanPage() {
           </Form.Item>
         </Form>
       </Modal>
-    </div>
+    </Card>
   );
 }

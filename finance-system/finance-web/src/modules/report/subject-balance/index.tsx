@@ -8,11 +8,19 @@ import dayjs from 'dayjs';
 const SubjectBalance: React.FC = () => {
   const [data, setData] = useState<SubjectBalanceRow[]>([]);
   const [loading, setLoading] = useState(false);
-  const [params, setParams] = useState({ year: dayjs().year(), month: dayjs().month() + 1, subjectCode: '', level: 1 });
+  const [year, setYear] = useState(dayjs().year());
+  const [month, setMonth] = useState(dayjs().month() + 1);
+  const [subjectCode, setSubjectCode] = useState('');
+  const [level, setLevel] = useState(1);
+
+  const period = `${year}-${String(month).padStart(2, '0')}`;
 
   const loadData = async () => {
     setLoading(true);
-    try { const res = await reportApi.subjectBalance(params as any); setData(res.data || []); } finally { setLoading(false); }
+    try {
+      const res = await reportApi.subjectBalance({ period, level });
+      setData(res.data || []);
+    } finally { setLoading(false); }
   };
 
   const columns = [
@@ -27,13 +35,13 @@ const SubjectBalance: React.FC = () => {
   ];
 
   return (
-    <Card title="科目余额表" extra={<Button type="primary" onClick={loadData} loading={loading}>查询</Button>}>
+    <Card title="科目余额表">
       <Space style={{ marginBottom: 16 }}>
-        <Input placeholder="科目编码" value={params.subjectCode} onChange={(e) => setParams({ ...params, subjectCode: e.target.value })} allowClear style={{ width: 150 }} />
-        <Select value={params.level} onChange={(v) => setParams({ ...params, level: v })} style={{ width: 100 }} options={[{ label: '一级', value: 1 }, { label: '全部', value: 0 }]} />
-        <Select value={params.year} onChange={(v) => setParams({ ...params, year: v })} style={{ width: 100 }} options={Array.from({ length: 5 }, (_, i) => ({ label: String(dayjs().year() - 2 + i), value: dayjs().year() - 2 + i }))} />
+        <Input placeholder="科目编码" value={subjectCode} onChange={(e) => setSubjectCode(e.target.value)} allowClear style={{ width: 150 }} />
+        <Select value={level} onChange={setLevel} style={{ width: 100 }} options={[{ label: '一级', value: 1 }, { label: '全部', value: 0 }]} />
+        <Select value={year} onChange={setYear} style={{ width: 100 }} options={Array.from({ length: 5 }, (_, i) => ({ label: String(dayjs().year() - 2 + i), value: dayjs().year() - 2 + i }))} />
         <span>年</span>
-        <Select value={params.month} onChange={(v) => setParams({ ...params, month: v })} style={{ width: 80 }} options={Array.from({ length: 12 }, (_, i) => ({ label: String(i + 1), value: i + 1 }))} />
+        <Select value={month} onChange={setMonth} style={{ width: 80 }} options={Array.from({ length: 12 }, (_, i) => ({ label: String(i + 1), value: i + 1 }))} />
         <span>月</span>
         <Button type="primary" onClick={loadData} loading={loading}>查询</Button>
       </Space>

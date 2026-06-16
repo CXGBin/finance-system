@@ -1,43 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Table, Input, Button, Space, message, Tag, Popconfirm } from 'antd';
-import { DatePicker } from 'antd';
+import React, { useState, useCallback } from 'react';
+import { Card, Input, Button, Space, message, Tag, Popconfirm } from 'antd';
 import { voucherApi, voucherBatchApi } from '@/api/account';
 import type { PageParams } from '@/types/api.d';
 import { useNavigate } from 'react-router-dom';
 import type { Voucher } from '@/types/account.d';
+import ProTable from '@/components/ProTable';
+import type { ProTableRef } from '@/components/ProTable';
 
 /** 凭证列表页面 */
 const VoucherList: React.FC = () => {
-  const [data, setData] = useState<Voucher[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
   const [searchParams, setSearchParams] = useState<Record<string, string>>({});
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
+  const [tableKey, setTableKey] = useState(0);
+  const tableRef = React.useRef<ProTableRef>(null);
   const navigate = useNavigate();
-
-  useEffect(() => { loadData(); }, [page, pageSize]);
-
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const res = await voucherApi.page({ pageIndex: page, pageSize, ...searchParams } as PageParams);
-      setData(res.list || []);
-      setTotal(res.total || 0);
-    } finally { setLoading(false); }
-  };
 
   const handleAudit = async (id: number) => {
     await voucherApi.audit(id);
     message.success('审核成功');
-    loadData();
+    tableRef.current?.refresh();
   };
 
   const handleVoid = async (id: number) => {
     await voucherApi.void(id);
     message.success('已作废');
-    loadData();
+    tableRef.current?.refresh();
   };
 
   /** 批量审核凭证 */
@@ -46,7 +33,7 @@ const VoucherList: React.FC = () => {
       await voucherBatchApi.batchAudit(selectedRowKeys);
       message.success('批量审核成功');
       setSelectedRowKeys([]);
-      loadData();
+      tableRef.current?.refresh();
     } catch { message.error('批量审核失败'); }
   };
 
@@ -64,7 +51,7 @@ const VoucherList: React.FC = () => {
     try {
       await voucherBatchApi.reverse(id);
       message.success('红字冲销凭证已生成');
-      loadData();
+      tableRef.current?.refresh();
     } catch { message.error('冲销失败'); }
   };
 
@@ -99,6 +86,10 @@ const VoucherList: React.FC = () => {
     },
   ];
 
+  const handleSearch = useCallback(() => {
+    setTableKey((k) => k + 1);
+  }, []);
+
   return (
     <Card title="凭证管理" extra={(
       <Space>
@@ -108,11 +99,23 @@ const VoucherList: React.FC = () => {
     )}>
       <Space style={{ marginBottom: 16 }}>
         <Input placeholder="凭证字号" value={searchParams.voucherNo} onChange={(e) => setSearchParams({ ...searchParams, voucherNo: e.target.value })} allowClear style={{ width: 150 }} />
-        <Button type="primary" onClick={() => { setPage(1); loadData(); }}>查询</Button>
+        <Button type="primary" onClick={handleSearch}>查询</Button>
       </Space>
-      <Table columns={columns} dataSource={data} rowKey="id" loading={loading}
-        rowSelection={{ selectedRowKeys, onChange: (keys) => setSelectedRowKeys(keys as number[]) }}
-        pagination={{ current: page, pageSize, total, showSizeChanger: true, onChange: (p, ps) => { setPage(p); setPageSize(ps); }, showTotal: (t) => `共 ${t} 条` }}
+      <ProTable<Voucher>
+        key={tableKey}
+        ref={tableRef}
+        columns={columns}
+        fetchData={async (params) => {
+          const res = await voucherApi.page({ page: params.pageIndex, pageSize: params.pageSize, ...searchParams } as PageParams);
+          return { data: { list: res.list || [], total: res.total || 0 } };
+        }}
+        searchInitialValues={searchParams}
+        tableProps={{
+          rowSelection: {
+            selectedRowKeys,
+            onChange: (keys) => setSelectedRowKeys(keys as number[]),
+          },
+        }}
       />
     </Card>
   );

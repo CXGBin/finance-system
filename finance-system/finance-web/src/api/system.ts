@@ -124,7 +124,7 @@ export const configApi = {
   /** 批量修改配置 */
   batchUpdate: (items: Partial<SysConfig>[]) => put('/system/config', items),
   /** 兼容旧调用（别名） */
-  update: (data: Partial<SysConfig>) => put(`/system/config/${data.key}`, data),
+  update: (data: { configKey: string; configValue: string }) => put(`/system/config/${data.configKey}`, data),
 };
 
 /** 系统公告 */

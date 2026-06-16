@@ -33,12 +33,12 @@ export const approvalApi = {
   /** 发起审批 */
   start: (data: Partial<ApprovalInstance>) => post('/approval/instance/start', data),
   /** 审批操作（通过/驳回/转办） */
-  action: (id: number, actionType: string, comment: string, targetUserId?: number) =>
-    post('/approval/instance/action', { instanceId: id, actionType, comment, targetUserId }),
+  action: (id: number, action: number, comment: string, targetUserId?: number) =>
+    post('/approval/instance/action', { instanceId: id, action, comment, targetUserId }),
   /** 通过审批（便捷方法） */
-  approve: (id: number, comment: string) => post('/approval/instance/action', { instanceId: id, actionType: 'approve', comment }),
+  approve: (id: number, comment: string) => post('/approval/instance/action', { instanceId: id, action: 1, comment }),
   /** 驳回审批（便捷方法） */
-  reject: (id: number, comment: string) => post('/approval/instance/action', { instanceId: id, actionType: 'reject', comment }),
+  reject: (id: number, comment: string) => post('/approval/instance/action', { instanceId: id, action: 2, comment }),
   /** 撤回审批 */
   withdraw: (id: number) => post(`/approval/instance/${id}/withdraw`),
   /** 获取审批记录 */
@@ -47,8 +47,8 @@ export const approvalApi = {
   transfer: (instanceId: number, targetUserId: number, comment: string) =>
     post(`/approval/instance/${instanceId}/transfer`, { targetUserId, comment }),
   /** 批量审批操作 */
-  batchAction: (ids: number[], actionType: string, comment: string) =>
-    post('/approval/instance/batch-action', { ids, actionType, comment }),
+  batchAction: (ids: number[], action: number, comment: string) =>
+    post('/approval/instance/batch-action', { ids, action, comment }),
   /** 获取审批统计数据 */
   statistics: () => get<Record<string, unknown>>('/approval/instance/statistics'),
 };

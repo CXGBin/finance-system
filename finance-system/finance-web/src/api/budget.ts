@@ -32,7 +32,7 @@ export const budgetApi = {
 
   // ========== 预算执行跟踪（后端: api/budget/execution）==========
   /** 查询预算执行情况 */
-  execution: (params: { year: number; subjectId?: number; deptId?: number }) =>
+  execution: (params: { budgetYearId: number; subjectId?: number; deptId?: number; month?: number }) =>
     get<BudgetExecution[]>('/budget/execution', params),
 
   // ========== 预算调整（后端: api/budget/adjustment）==========

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Card, Table, Select, Space, Button } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Card, Table, Select, Space, Button, message } from 'antd';
 import { budgetApi } from '@/api/budget';
 import type { BudgetExecution } from '@/types/budget.d';
 import dayjs from 'dayjs';
@@ -8,11 +8,24 @@ import dayjs from 'dayjs';
 const BudgetExecution: React.FC = () => {
   const [data, setData] = useState<BudgetExecution[]>([]);
   const [loading, setLoading] = useState(false);
-  const [year, setYear] = useState(dayjs().year());
+  const [years, setYears] = useState<{ id: number; year: number; status: number }[]>([]);
+  const [selectedYearId, setSelectedYearId] = useState<number | undefined>();
+
+  useEffect(() => {
+    budgetApi.years().then((res) => {
+      const list = res.data || [];
+      setYears(list);
+      if (list.length > 0) setSelectedYearId(list[0].id);
+    }).catch(() => {});
+  }, []);
 
   const loadData = async () => {
+    if (!selectedYearId) return;
     setLoading(true);
-    try { const res = await budgetApi.execution({ year }); setData(res.data || []); } finally { setLoading(false); }
+    try {
+      const res = await budgetApi.execution({ budgetYearId: selectedYearId });
+      setData(res.data || []);
+    } finally { setLoading(false); }
   };
 
   const columns = [
@@ -27,8 +40,13 @@ const BudgetExecution: React.FC = () => {
   return (
     <Card title="预算执行">
       <Space style={{ marginBottom: 16 }}>
-        <Select value={year} onChange={setYear} style={{ width: 100 }} options={Array.from({ length: 5 }, (_, i) => ({ label: String(dayjs().year() - 2 + i), value: dayjs().year() - 2 + i }))} />
-        <span>年</span>
+        <Select
+          value={selectedYearId}
+          onChange={setSelectedYearId}
+          style={{ width: 120 }}
+          placeholder="选择预算年度"
+          options={years.map((y) => ({ label: `${y.year}年`, value: y.id }))}
+        />
         <Button type="primary" onClick={loadData} loading={loading}>查询</Button>
       </Space>
       <Table columns={columns} dataSource={data} rowKey="budgetSubjectId" loading={loading} pagination={false} />

@@ -37,7 +37,7 @@ export const expenseApi = {
 
   // ========== 兼容旧调用（别名）==========
   /** 付款列表（后端暂无独立付款接口，使用报销列表过滤已付款） */
-  paymentList: (params: PageParams) => get<PagedResult<ExpenseClaim>>('/expense/claim/list', { ...params, paymentStatus: 1 }),
+  paymentList: (params: PageParams) => get<PagedResult<ExpenseClaim>>('/expense/claim/list', { ...params, status: 4 }),
   /** 付款确认 */
   paymentConfirm: (id: number) => post(`/expense/claim/${id}/pay`),
   /** 分摊列表（后端暂无独立分摊接口） */
@@ -65,5 +65,5 @@ export const loanApi = {
   /** 审批驳回 */
   reject: (id: number) => post(`/expense/loan/${id}/reject`),
   /** 还款确认 */
-  settle: (id: number, data: { settleAmount: number; settleDate: string }) => post(`/expense/loan/${id}/settle`, data),
+  settle: (id: number, data: { amount: number; claimId: number }) => post(`/expense/loan/${id}/settle`, data),
 };
