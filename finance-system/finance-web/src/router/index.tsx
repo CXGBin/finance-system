@@ -35,6 +35,7 @@ const router = createBrowserRouter([
     element: <MainLayout />,
     children: [
       { index: true, element: withGuard(wrapSuspense(() => import('@/modules/dashboard'))) },
+      { path: 'dashboard', element: withGuard(wrapSuspense(() => import('@/modules/dashboard'))) },
       // 系统管理
       { path: 'system/user', element: withGuard(wrapSuspense(() => import('@/modules/system/user'))) },
       { path: 'system/role', element: withGuard(wrapSuspense(() => import('@/modules/system/role'))) },

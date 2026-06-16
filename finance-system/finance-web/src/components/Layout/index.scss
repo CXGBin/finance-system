@@ -1,16 +1,122 @@
-.logo {
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid #f0f0f0;
-  background: #fff;
+/* 全局样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.logo-text {
-  font-size: 16px;
+html, body, #root {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ProLayout 内容区域 */
+.main-content {
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+  min-height: 280px;
+}
+
+/* ProTable 搜索栏样式优化 */
+.pro-table-search {
+  padding: 16px 0 0;
+  margin-bottom: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.pro-table-search .ant-form-item {
+  margin-bottom: 12px;
+}
+
+.pro-table-toolbar {
+  margin-bottom: 12px;
+}
+
+/* 表格紧凑模式 */
+.ant-table {
+  font-size: 13px;
+}
+
+.ant-table .ant-table-cell {
+  padding: 8px 12px !important;
+}
+
+/* 表单紧凑模式 */
+.ant-form-item {
+  margin-bottom: 16px;
+}
+
+.ant-modal .ant-form-item {
+  margin-bottom: 16px;
+}
+
+/* 表格操作按钮 */
+.table-action {
+  padding: 0 4px;
+  font-size: 13px;
+}
+
+/* 登录页样式优化 */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* 页面标题 */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.page-title {
+  font-size: 18px;
   font-weight: 600;
-  color: #1890ff;
-  white-space: nowrap;
-  overflow: hidden;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+/* 状态标签 */
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 统计卡片 */
+.stat-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.stat-card .stat-value {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.stat-card .stat-label {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-top: 4px;
+}
+
+/* ProLayout覆盖：隐藏多余breadcrumb层级 */
+.ant-pro-page-container-children-content {
+  padding: 0 !important;
+}
+
+.ant-pro-page-container-warp {
+  padding-block: 0 !important;
 }

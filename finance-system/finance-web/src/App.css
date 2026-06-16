@@ -1,42 +1,14 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-#root {
-  min-height: 100vh;
-}
-
-/* ProTable search form */
-.pro-table-search {
-  margin-bottom: 16px;
-  padding: 16px;
-  background: #fafafa;
-  border-radius: 6px;
-}
-
-.pro-table-search .ant-form-item {
-  margin-bottom: 0;
-}
-
-/* Amount right align */
+/* 金额右对齐 */
 .amount-right {
   text-align: right;
 }
 
-/* Negative amount red */
+/* 负数金额红色 */
 .amount-negative {
   color: #ff4d4f;
 }
 
-/* Scrollbar */
+/* 滚动条美化 */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -49,4 +21,16 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #bfbfbf;
+}
+
+/* 金额右对齐 */
+.text-right {
+  text-align: right;
+}
+
+/* 文字溢出省略 */
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

@@ -61,7 +61,7 @@ const Header: React.FC = () => {
       <Dropdown menu={dropdownItems} placement="bottomRight">
         <Space style={{ cursor: 'pointer' }}>
           <Avatar size="small" icon={<UserOutlined />} />
-          <Text>{userInfo?.nickname || userInfo?.username || '用户'}</Text>
+          <Text>{userInfo?.realName || userInfo?.username || '用户'}</Text>
         </Space>
       </Dropdown>
     </AntHeader>
