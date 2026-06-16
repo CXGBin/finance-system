@@ -20,6 +20,10 @@ using Serilog;
 using SqlSugar;
 using System.Text;
 
+// ========== SQL Server 2012 TLS 兼容：启用 TLS 1.0 ========== 
+AppContext.SetSwitch("Switch.System.Net.DontCheckCertificateRevocationStatus", true);
+Environment.SetEnvironmentVariable("DOTNET_SYSTEM_NET_SECURITY_USEOPENSSL", "0");
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ========== Serilog 结构化日志 ==========

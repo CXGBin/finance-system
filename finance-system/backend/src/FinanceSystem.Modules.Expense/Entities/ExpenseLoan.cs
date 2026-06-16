@@ -10,6 +10,7 @@ namespace FinanceSystem.Modules.Expense.Entities;
 /// <summary>
 /// ExpenseLoan
 /// </summary>
+[SugarTable("fm_expense_loan", "借款申请表")]
 public class ExpenseLoan : FullEntity
 {
     /// <summary>借款编号</summary>

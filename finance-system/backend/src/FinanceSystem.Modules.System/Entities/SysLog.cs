@@ -68,6 +68,7 @@ public class SysLog : BaseEntity
     /// <summary>
     /// HTTP响应状态码
     /// </summary>
+    [SugarColumn(ColumnDataType = "nvarchar(10)", IsNullable = true, ColumnDescription = "HTTP响应状态码")]
     public int ResponseCode { get; set; }
 
     /// <summary>

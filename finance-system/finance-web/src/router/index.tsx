@@ -45,6 +45,7 @@ const router = createBrowserRouter([
       { path: 'system/log', element: withGuard(wrapSuspense(() => import('@/modules/system/log'))) },
       { path: 'system/module', element: withGuard(wrapSuspense(() => import('@/modules/system/module'))) },
       { path: 'system/config', element: withGuard(wrapSuspense(() => import('@/modules/system/config'))) },
+      { path: 'system/notice', element: withGuard(wrapSuspense(() => import('@/modules/system/notice'))) },
       // 账务管理
       { path: 'account/subject', element: withGuard(wrapSuspense(() => import('@/modules/account/subject'))) },
       { path: 'account/balance', element: withGuard(wrapSuspense(() => import('@/modules/account/balance'))) },

@@ -133,7 +133,7 @@ export interface SysNotice {
   content: string;
   noticeType: number;
   status: number;
-  createdBy: string;
+  createdBy: number;
   createdTime: string;
 }
 

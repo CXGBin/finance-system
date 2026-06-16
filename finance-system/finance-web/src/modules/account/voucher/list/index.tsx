@@ -40,18 +40,20 @@ const VoucherList: React.FC = () => {
     loadData();
   };
 
+  /** 批量审核凭证 */
   const handleBatchAudit = async () => {
     try {
-      await fetch('/api/voucher/batch-audit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(selectedRowKeys) });
+      await voucherApi.batchAudit(selectedRowKeys);
       message.success('批量审核成功');
       setSelectedRowKeys([]);
       loadData();
     } catch { message.error('批量审核失败'); }
   };
 
+  /** 红字冲销凭证 */
   const handleReverse = async (id: number) => {
     try {
-      await fetch('/api/voucher/' + id + '/reverse', { method: 'POST' });
+      await voucherApi.reverse(id);
       message.success('红字冲销凭证已生成');
       loadData();
     } catch { message.error('冲销失败'); }

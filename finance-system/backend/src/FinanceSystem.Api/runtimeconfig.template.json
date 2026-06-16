@@ -1,0 +1,5 @@
+{
+  "configProperties": {
+    "System.Net.Security.SslProtocols": "Ssl3, Tls, Tls11, Tls12"
+  }
+}

@@ -109,6 +109,7 @@ const menuData: MenuItem[] = [
       { key: '/system/log', label: '操作日志', icon: <FileTextOutlined /> },
       { key: '/system/module', label: '模块管理', icon: <AppstoreOutlined /> },
       { key: '/system/config', label: '系统配置', icon: <ControlOutlined /> },
+      { key: '/system/notice', label: '系统公告', icon: <BellOutlined /> },
     ],
   },
   {

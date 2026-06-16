@@ -83,6 +83,7 @@ public static class SeedData
                 db.CodeFirst.InitTables<TaxDeclaration>();
                 db.CodeFirst.InitTables<TaxInvoice>();
                 db.CodeFirst.InitTables<ReportTemplate>();
+                db.CodeFirst.InitTables<ExpenseLoan>();
             }
             else
             {
@@ -138,6 +139,27 @@ public static class SeedData
         if (approvalFlowCount == 0)
         {
             await InitApprovalFlowsAsync(db);
+        }
+
+        // 初始化数据字典种子数据
+        var dictTypeCount = await db.Queryable<SysDictType>().CountAsync();
+        if (dictTypeCount == 0)
+        {
+            await InitDictDataAsync(db);
+        }
+
+        // 初始化岗位种子数据
+        var postCount = await db.Queryable<SysPost>().CountAsync();
+        if (postCount == 0)
+        {
+            await InitPostsAsync(db);
+        }
+
+        // 初始化系统公告种子数据
+        var noticeCount = await db.Queryable<SysNotice>().CountAsync();
+        if (noticeCount == 0)
+        {
+            await InitNoticeAsync(db);
         }
     }
 
@@ -415,6 +437,110 @@ public static class SeedData
                 await db.Insertable(batch).ExecuteCommandAsync();
             }
         }
+    }
+
+    /// <summary>
+    /// 初始化数据字典种子数据
+    /// </summary>
+    private static async Task InitDictDataAsync(ISqlSugarClient db)
+    {
+        // 字典类型
+        var dictTypes = new List<SysDictType>
+        {
+            new() { DictName = "凭证类型", DictType = "voucher_type", Status = 1, Remark = "凭证类型分类" },
+            new() { DictName = "费用类型", DictType = "expense_type", Status = 1, Remark = "费用报销分类" },
+            new() { DictName = "资产状态", DictType = "asset_status", Status = 1, Remark = "资产使用状态" },
+            new() { DictName = "折旧方法", DictType = "depreciation_method", Status = 1, Remark = "固定资产折旧计算方法" },
+            new() { DictName = "审批状态", DictType = "approval_status", Status = 1, Remark = "审批流程状态" },
+            new() { DictName = "科目类别", DictType = "subject_category", Status = 1, Remark = "会计科目大类" },
+        };
+        await db.Insertable(dictTypes).ExecuteCommandAsync();
+
+        // 字典数据
+        var dictDatas = new List<SysDictData>();
+
+        // 凭证类型
+        dictDatas.AddRange(new List<SysDictData>
+        {
+            new() { DictType = "voucher_type", DictLabel = "记账凭证", DictValue = "1", SortOrder = 1, Status = 1 },
+            new() { DictType = "voucher_type", DictLabel = "收款凭证", DictValue = "2", SortOrder = 2, Status = 1 },
+            new() { DictType = "voucher_type", DictLabel = "付款凭证", DictValue = "3", SortOrder = 3, Status = 1 },
+            new() { DictType = "voucher_type", DictLabel = "转账凭证", DictValue = "4", SortOrder = 4, Status = 1 },
+        });
+
+        // 费用类型
+        dictDatas.AddRange(new List<SysDictData>
+        {
+            new() { DictType = "expense_type", DictLabel = "差旅费", DictValue = "travel", SortOrder = 1, Status = 1 },
+            new() { DictType = "expense_type", DictLabel = "办公费", DictValue = "office", SortOrder = 2, Status = 1 },
+            new() { DictType = "expense_type", DictLabel = "交通费", DictValue = "transport", SortOrder = 3, Status = 1 },
+            new() { DictType = "expense_type", DictLabel = "招待费", DictValue = "entertainment", SortOrder = 4, Status = 1 },
+            new() { DictType = "expense_type", DictLabel = "通讯费", DictValue = "communication", SortOrder = 5, Status = 1 },
+            new() { DictType = "expense_type", DictLabel = "培训费", DictValue = "training", SortOrder = 6, Status = 1 },
+        });
+
+        // 资产状态
+        dictDatas.AddRange(new List<SysDictData>
+        {
+            new() { DictType = "asset_status", DictLabel = "使用中", DictValue = "1", SortOrder = 1, Status = 1 },
+            new() { DictType = "asset_status", DictLabel = "闲置", DictValue = "2", SortOrder = 2, Status = 1 },
+            new() { DictType = "asset_status", DictLabel = "维修中", DictValue = "3", SortOrder = 3, Status = 1 },
+            new() { DictType = "asset_status", DictLabel = "已报废", DictValue = "4", SortOrder = 4, Status = 1 },
+        });
+
+        // 折旧方法
+        dictDatas.AddRange(new List<SysDictData>
+        {
+            new() { DictType = "depreciation_method", DictLabel = "直线法", DictValue = "1", SortOrder = 1, Status = 1 },
+            new() { DictType = "depreciation_method", DictLabel = "双倍余额递减法", DictValue = "2", SortOrder = 2, Status = 1 },
+            new() { DictType = "depreciation_method", DictLabel = "年数总和法", DictValue = "3", SortOrder = 3, Status = 1 },
+        });
+
+        // 科目类别
+        dictDatas.AddRange(new List<SysDictData>
+        {
+            new() { DictType = "subject_category", DictLabel = "资产类", DictValue = "1", SortOrder = 1, Status = 1 },
+            new() { DictType = "subject_category", DictLabel = "负债类", DictValue = "2", SortOrder = 2, Status = 1 },
+            new() { DictType = "subject_category", DictLabel = "权益类", DictValue = "3", SortOrder = 3, Status = 1 },
+            new() { DictType = "subject_category", DictLabel = "收入类", DictValue = "4", SortOrder = 4, Status = 1 },
+            new() { DictType = "subject_category", DictLabel = "费用类", DictValue = "5", SortOrder = 5, Status = 1 },
+            new() { DictType = "subject_category", DictLabel = "成本类", DictValue = "6", SortOrder = 6, Status = 1 },
+        });
+
+        if (dictDatas.Count > 0)
+        {
+            await db.Insertable(dictDatas).ExecuteCommandAsync();
+        }
+    }
+
+    /// <summary>
+    /// 初始化岗位种子数据
+    /// </summary>
+    private static async Task InitPostsAsync(ISqlSugarClient db)
+    {
+        var posts = new List<SysPost>
+        {
+            new() { DeptId = 1, PostCode = "CEO", PostName = "总经理", SortOrder = 1, Status = 1, Remark = "公司总经理", UpdatedTime = DateTime.Now },
+            new() { DeptId = 1, PostCode = "CFO", PostName = "财务总监", SortOrder = 2, Status = 1, Remark = "财务部门负责人", UpdatedTime = DateTime.Now },
+            new() { DeptId = 1, PostCode = "ACCOUNTANT", PostName = "会计", SortOrder = 3, Status = 1, Remark = "负责日常账务处理", UpdatedTime = DateTime.Now },
+            new() { DeptId = 1, PostCode = "CASHIER", PostName = "出纳", SortOrder = 4, Status = 1, Remark = "负责现金和银行存款管理", UpdatedTime = DateTime.Now },
+            new() { DeptId = 1, PostCode = "AUDITOR", PostName = "审计员", SortOrder = 5, Status = 1, Remark = "负责内部审计", UpdatedTime = DateTime.Now },
+            new() { DeptId = 1, PostCode = "MANAGER", PostName = "部门经理", SortOrder = 6, Status = 1, Remark = "各部门负责人", UpdatedTime = DateTime.Now },
+        };
+        await db.Insertable(posts).ExecuteCommandAsync();
+    }
+
+    /// <summary>
+    /// 初始化系统公告种子数据
+    /// </summary>
+    private static async Task InitNoticeAsync(ISqlSugarClient db)
+    {
+        var notices = new List<SysNotice>
+        {
+            new() { Title = "欢迎使用财务管理系统", Content = "本系统已正式上线运行，请各部门人员根据权限使用相关功能模块。如遇问题请联系财务部。", NoticeType = 2, Status = 1, CreatedBy = 1, CreatedTime = DateTime.Now },
+            new() { Title = "系统操作指南", Content = "1. 首次登录后请修改默认密码\n2. 请先完成会计科目初始化和会计期间设置\n3. 凭证录入后需经审核才能生效\n4. 期末结账前请确保所有凭证已审核", NoticeType = 1, Status = 1, CreatedBy = 1, CreatedTime = DateTime.Now },
+        };
+        await db.Insertable(notices).ExecuteCommandAsync();
     }
 
     /// <summary>
