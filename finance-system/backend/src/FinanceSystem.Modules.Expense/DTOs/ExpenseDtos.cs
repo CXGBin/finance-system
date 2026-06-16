@@ -69,6 +69,13 @@ public class ExpenseItemRequest
 /// <summary>费用统计查询</summary>
 public class ExpenseStatisticsQuery
 {
+    /// <summary>
+    /// 年份
+    /// </summary>
+    public int? Year { get; set; }
+    /// <summary>
+    /// 开始日期
+    /// </summary>
     public string StartDate { get; set; } = string.Empty;
     /// <summary>
     /// 结束日期

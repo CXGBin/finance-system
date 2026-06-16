@@ -310,8 +310,11 @@ public class ExpenseStatisticsService : IExpenseStatisticsService
     /// </summary>
     public async Task<List<object>> GetStatisticsAsync(ExpenseStatisticsQuery query)
     {
-        var startDate = DateTime.Parse(query.StartDate);
-        var endDate = DateTime.Parse(query.EndDate);
+        DateTime startDate, endDate;
+        if (string.IsNullOrWhiteSpace(query.StartDate) || !DateTime.TryParse(query.StartDate, out startDate))
+            startDate = new DateTime(query.Year ?? DateTime.Now.Year, 1, 1);
+        if (string.IsNullOrWhiteSpace(query.EndDate) || !DateTime.TryParse(query.EndDate, out endDate))
+            endDate = new DateTime(query.Year ?? DateTime.Now.Year, 12, 31, 23, 59, 59);
 
         var items = await _db.Queryable<ExpenseItem>()
             .LeftJoin<ExpenseClaim>((i, c) => i.ClaimId == c.Id)

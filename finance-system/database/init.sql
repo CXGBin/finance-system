@@ -780,6 +780,8 @@ BEGIN
         AmountWithoutTax  DECIMAL(18,2)  NOT NULL DEFAULT 0,      -- 不含税金额
         TotalAmount       DECIMAL(18,2)  NOT NULL DEFAULT 0,      -- 价税合计
         Direction         INT            NOT NULL DEFAULT 1,      -- 1收入 2支出
+        IsVerified        INT            NOT NULL DEFAULT 0,      -- 是否验证 0否 1是
+        Remark            NVARCHAR(500)  NULL,                     -- 备注
         VoucherId         BIGINT         NULL,
         CreatedTime       DATETIME       NOT NULL DEFAULT GETDATE(),
         UpdatedTime       DATETIME       NULL,
@@ -900,6 +902,20 @@ BEGIN
     ('6711','营业外支出',  NULL,1,5,1,55),
     ('6801','所得税费用',  NULL,1,5,1,56),
     ('6901','以前年度损益调整',NULL,1,5,1,57);
+END
+GO
+
+-- 审批流程模板种子数据
+IF NOT EXISTS (SELECT TOP 1 1 FROM fm_approval_flow)
+BEGIN
+    INSERT INTO fm_approval_flow (FlowName, FlowCode, ModuleType, Description, IsEnabled, NodesJson)
+    VALUES
+    ('通用费用审批流程', 'EXPENSE_DEFAULT', 'expense', '默认费用报销审批：申请人→部门经理→财务总监', 1,
+     '[{"NodeName":"部门经理审批","IsFinal":false},{"NodeName":"财务总监审批","IsFinal":true}]'),
+    ('通用预算审批流程', 'BUDGET_DEFAULT', 'budget', '默认预算审批：申请人→部门经理→财务总监', 1,
+     '[{"NodeName":"部门经理审批","IsFinal":false},{"NodeName":"财务总监审批","IsFinal":true}]'),
+    ('通用资产采购审批', 'ASSET_DEFAULT', 'asset', '默认资产采购审批：申请人→部门经理→财务总监', 1,
+     '[{"NodeName":"部门经理审批","IsFinal":false},{"NodeName":"财务总监审批","IsFinal":true}]');
 END
 GO
 

@@ -132,6 +132,13 @@ public static class SeedData
         {
             await InitRoleMenuAsync(db, roleId, menuIds);
         }
+
+        // 初始化审批流程种子数据
+        var approvalFlowCount = await db.Queryable<ApprovalFlow>().CountAsync();
+        if (approvalFlowCount == 0)
+        {
+            await InitApprovalFlowsAsync(db);
+        }
     }
 
     /// <summary>
@@ -349,6 +356,47 @@ public static class SeedData
 
         await db.Insertable(menus).ExecuteCommandAsync();
         return menus.Select(m => m.Id).ToList();
+    }
+
+    /// <summary>
+    /// 初始化默认审批流程模板
+    /// </summary>
+    private static async Task InitApprovalFlowsAsync(ISqlSugarClient db)
+    {
+        var flows = new List<ApprovalFlow>
+        {
+            new()
+            {
+                FlowName = "通用费用审批流程",
+                FlowCode = "EXPENSE_DEFAULT",
+                ModuleType = "expense",
+                Description = "默认费用报销审批：申请人→部门经理→财务总监",
+                IsEnabled = 1,
+                NodesJson = "[{\"NodeName\":\"部门经理审批\",\"IsFinal\":false},{\"NodeName\":\"财务总监审批\",\"IsFinal\":true}]",
+                UpdatedTime = DateTime.Now
+            },
+            new()
+            {
+                FlowName = "通用预算审批流程",
+                FlowCode = "BUDGET_DEFAULT",
+                ModuleType = "budget",
+                Description = "默认预算审批：申请人→部门经理→财务总监",
+                IsEnabled = 1,
+                NodesJson = "[{\"NodeName\":\"部门经理审批\",\"IsFinal\":false},{\"NodeName\":\"财务总监审批\",\"IsFinal\":true}]",
+                UpdatedTime = DateTime.Now
+            },
+            new()
+            {
+                FlowName = "通用资产采购审批",
+                FlowCode = "ASSET_DEFAULT",
+                ModuleType = "asset",
+                Description = "默认资产采购审批：申请人→部门经理→财务总监",
+                IsEnabled = 1,
+                NodesJson = "[{\"NodeName\":\"部门经理审批\",\"IsFinal\":false},{\"NodeName\":\"财务总监审批\",\"IsFinal\":true}]",
+                UpdatedTime = DateTime.Now
+            }
+        };
+        await db.Insertable(flows).ExecuteCommandAsync();
     }
 
     /// <summary>
