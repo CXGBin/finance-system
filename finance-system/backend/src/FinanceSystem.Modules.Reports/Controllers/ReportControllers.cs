@@ -23,7 +23,7 @@ public class BalanceSheetController : ControllerBase
     /// <summary>
     /// 查询资产负债表
     /// </summary>
-    [HttpGet]
+    [HttpGet("")]
     public async Task<ApiResult<BalanceSheetResult>> Get([FromQuery] ReportQuery query)
     {
         return ApiResult<BalanceSheetResult>.Success(await _service.GenerateAsync(query));
@@ -47,7 +47,7 @@ public class IncomeStatementController : ControllerBase
     /// <summary>
     /// 查询利润表
     /// </summary>
-    [HttpGet]
+    [HttpGet("")]
     public async Task<ApiResult<IncomeStatementResult>> Get([FromQuery] IncomeStatementQuery query)
     {
         return ApiResult<IncomeStatementResult>.Success(await _service.GenerateAsync(query));
@@ -71,7 +71,7 @@ public class CashFlowController : ControllerBase
     /// <summary>
     /// 查询现金流量表
     /// </summary>
-    [HttpGet]
+    [HttpGet("")]
     public async Task<ApiResult<CashFlowResult>> Get([FromQuery] ReportQuery query)
     {
         return ApiResult<CashFlowResult>.Success(await _service.GenerateAsync(query));
@@ -95,7 +95,7 @@ public class SubjectBalanceReportController : ControllerBase
     /// <summary>
     /// 查询科目余额表
     /// </summary>
-    [HttpGet]
+    [HttpGet("")]
     public async Task<ApiResult<object>> Get([FromQuery] SubjectBalanceReportQuery query)
     {
         return ApiResult<object>.Success(await _service.GetReportAsync(query));
@@ -216,7 +216,7 @@ public class CompareController : ControllerBase
     /// <summary>
     /// 多期对比分析
     /// </summary>
-    [HttpGet]
+    [HttpGet("")]
     public async Task<ApiResult<CompareResult>> Get([FromQuery] CompareQuery query)
     {
         return ApiResult<CompareResult>.Success(await _service.CompareAsync(query));

@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Card, Tag, Space, Button } from 'antd';
-import ProTable from '@/components/ProTable';
+import ProTable, { type ProTableRef } from '@/components/ProTable';
 import { taxApi } from '@/api/tax';
 import type { TaxDeclaration } from '@/types/tax.d';
 
 /** 纳税申报 */
 const TaxDeclaration: React.FC = () => {
+  const actionRef = useRef<ProTableRef>(null);
   const columns = [
     { title: '申报期间', dataIndex: 'declarePeriod', key: 'declarePeriod', search: true },
     { title: '税种', dataIndex: 'taxName', key: 'taxName' },
@@ -17,12 +18,12 @@ const TaxDeclaration: React.FC = () => {
     },
     { title: '操作', key: 'action', render: (_: unknown, record: TaxDeclaration) => (
       <Space>
-        {record.status === 0 && <a onClick={() => taxApi.declarationSubmit(record.id).then(() => window.location.reload())}>申报</a>}
-        {record.status === 1 && <a onClick={() => taxApi.declarationSubmit(record.id).then(() => window.location.reload())}>确认缴纳</a>}
+        {record.status === 0 && <a onClick={() => taxApi.declarationSubmit(record.id).then(() => actionRef.current?.refresh())}>申报</a>}
+        {record.status === 1 && <a onClick={() => taxApi.declarationSubmit(record.id).then(() => actionRef.current?.refresh())}>确认缴纳</a>}
       </Space>
     )},
   ];
-  return <Card title="纳税申报"><ProTable columns={columns} fetchData={(params) => taxApi.declarationList(params as any)} /></Card>;
+  return <Card title="纳税申报"><ProTable ref={actionRef} columns={columns} fetchData={(params) => taxApi.declarationList(params as any)} /></Card>;
 };
 
 export default TaxDeclaration;

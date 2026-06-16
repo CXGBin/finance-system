@@ -56,7 +56,7 @@ public class RoleController : ControllerBase
     /// <summary>
     /// 新增角色
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] RoleCreateRequest request)
     {
         return ApiResult<long>.Success(await _roleService.CreateAsync(request));

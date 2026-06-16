@@ -26,7 +26,7 @@ public class ExpenseTypeController : ControllerBase
     /// <summary>
     /// 新增费用类型
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] ExpenseTypeRequest request) => ApiResult<long>.Success(await _service.CreateAsync(request));
 
     /// <summary>
@@ -73,7 +73,7 @@ public class ExpenseClaimController : ControllerBase
     /// <summary>
     /// 新增报销单
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] ExpenseClaimRequest request) => ApiResult<long>.Success(await _service.CreateAsync(request, HttpContext.GetCurrentUserId()));
 
     /// <summary>
@@ -114,7 +114,7 @@ public class ExpenseStatisticsController : ControllerBase
     /// <summary>
     /// 获取费用统计数据
     /// </summary>
-    [HttpGet]
+    [HttpGet("")]
     public async Task<ApiResult<List<object>>> GetStatistics([FromQuery] ExpenseStatisticsQuery query) => ApiResult<List<object>>.Success(await _service.GetStatisticsAsync(query));
 }
 
@@ -138,7 +138,7 @@ public class ExpenseAllocateController : ControllerBase
     /// <summary>
     /// 新增费用分摊记录
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] ExpenseAllocateRequest request) => ApiResult<long>.Success(await _service.CreateAsync(request));
 }
 
@@ -156,7 +156,7 @@ public class ExpenseLoanController : ControllerBase
     /// <summary>
     /// 分页查询借款申请列表
     /// </summary>
-    [HttpGet]
+    [HttpGet("")]
     public async Task<ApiResult<PageResult<ExpenseLoan>>> GetList([FromQuery] ExpenseLoanQuery query) => ApiResult<PageResult<ExpenseLoan>>.Success(await _service.GetListAsync(query));
 
     /// <summary>
@@ -168,7 +168,7 @@ public class ExpenseLoanController : ControllerBase
     /// <summary>
     /// 新增借款申请
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] ExpenseLoanRequest request) => ApiResult<long>.Success(await _service.CreateAsync(request, HttpContext.GetCurrentUserId()));
 
     /// <summary>

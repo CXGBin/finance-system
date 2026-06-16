@@ -1,12 +1,16 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Table, Button, Space, Input, Row, Col, Form, Typography, Empty, Spin } from 'antd';
+import React, { useState, useCallback, useEffect, useImperativeHandle, forwardRef } from 'react';
+import { Table, Button, Space, Input, Row, Col, Form, Empty } from 'antd';
 import type { TableProps, ColumnType } from 'antd';
-import { ReloadOutlined, DownOutlined, UpOutlined, PlusOutlined } from '@ant-design/icons';
+import { ReloadOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 import type { PagedResult, PageParams, SearchParams } from '@/types/api.d';
 
 export interface ProTableColumn<T = Record<string, unknown>> extends ColumnType<T> {
   search?: boolean;
   searchRender?: React.ReactNode;
+}
+
+export interface ProTableRef {
+  refresh: () => void;
 }
 
 export interface ProTableProps<T = Record<string, unknown>> {
@@ -19,7 +23,7 @@ export interface ProTableProps<T = Record<string, unknown>> {
   defaultPageSize?: number;
 }
 
-function ProTable<T extends Record<string, unknown>>({
+const ProTableInner = forwardRef<ProTableRef, ProTableProps>(function ProTableInner<T extends Record<string, unknown>>({
   columns,
   fetchData,
   rowKey = 'id' as string | ((record: T) => string),
@@ -27,7 +31,7 @@ function ProTable<T extends Record<string, unknown>>({
   searchInitialValues = {},
   tableProps,
   defaultPageSize = 10,
-}: ProTableProps<T>) {
+}, ref) {
   const [form] = Form.useForm();
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(false);
@@ -51,6 +55,8 @@ function ProTable<T extends Record<string, unknown>>({
     }
   }, [fetchData, pageParams, form]);
 
+  useImperativeHandle(ref, () => ({ refresh: loadData }), [loadData]);
+
   useEffect(() => {
     loadData();
   }, [loadData]);
@@ -70,31 +76,7 @@ function ProTable<T extends Record<string, unknown>>({
 
   const searchColumns = columns.filter((col) => col.search);
   const showSearch = searchColumns.length > 0;
-
   const visibleSearchCols = searchExpanded ? searchColumns : searchColumns.slice(0, 3);
-
-  const renderContent = () => {
-    if (error) return <Empty description={error} />;
-    return (
-      <Table<T>
-        {...tableProps}
-        rowKey={rowKey}
-        columns={columns}
-        dataSource={data}
-        loading={loading}
-        pagination={{
-          current: pageParams.pageIndex,
-          pageSize: pageParams.pageSize,
-          total,
-          showSizeChanger: true,
-          showQuickJumper: true,
-          showTotal: (t) => `共 ${t} 条`,
-          onChange: handlePageChange,
-        }}
-        scroll={{ x: 'max-content' }}
-      />
-    );
-  };
 
   return (
     <div>
@@ -108,18 +90,13 @@ function ProTable<T extends Record<string, unknown>>({
                 </Form.Item>
               </Col>
             ))}
-            <Col span={searchExpanded ? 6 : 6} style={{ textAlign: 'right' }}>
+            <Col span={6} style={{ textAlign: 'right' }}>
               <Space>
-                <Button type="primary" onClick={handleSearch}>
-                  查询
-                </Button>
+                <Button type="primary" onClick={handleSearch}>查询</Button>
                 <Button onClick={handleReset}>重置</Button>
                 {searchColumns.length > 3 && (
-                  <Button
-                    type="link"
-                    onClick={() => setSearchExpanded(!searchExpanded)}
-                    icon={searchExpanded ? <UpOutlined /> : <DownOutlined />}
-                  >
+                  <Button type="link" onClick={() => setSearchExpanded(!searchExpanded)}
+                    icon={searchExpanded ? <UpOutlined /> : <DownOutlined />}>
                     {searchExpanded ? '收起' : '展开'}
                   </Button>
                 )}
@@ -131,21 +108,34 @@ function ProTable<T extends Record<string, unknown>>({
 
       <div className="pro-table-toolbar" style={{ marginBottom: 16 }}>
         <Space>
-          <Button
-            type="primary"
-            icon={<ReloadOutlined />}
-            onClick={loadData}
-            loading={loading}
-          >
-            刷新
-          </Button>
+          <Button type="primary" icon={<ReloadOutlined />} onClick={loadData} loading={loading}>刷新</Button>
           {toolbarActions}
         </Space>
       </div>
 
-      {renderContent()}
+      {error ? (
+        <Empty description={error} />
+      ) : (
+        <Table<T>
+          {...tableProps}
+          rowKey={rowKey}
+          columns={columns}
+          dataSource={data}
+          loading={loading}
+          pagination={{
+            current: pageParams.pageIndex,
+            pageSize: pageParams.pageSize,
+            total,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (t) => `共 ${t} 条`,
+            onChange: handlePageChange,
+          }}
+          scroll={{ x: 'max-content' }}
+        />
+      )}
     </div>
   );
-}
+});
 
-export default ProTable;
+export default ProTableInner;

@@ -24,8 +24,8 @@ const JournalLedger: React.FC = () => {
     { title: '摘要', dataIndex: 'summary', key: 'summary', ellipsis: true },
     { title: '科目编码', dataIndex: 'subjectCode', key: 'subjectCode' },
     { title: '科目名称', dataIndex: 'subjectName', key: 'subjectName' },
-    { title: '借方金额', dataIndex: 'debit', key: 'debit', align: 'right' },
-    { title: '贷方金额', dataIndex: 'credit', key: 'credit', align: 'right' },
+    { title: '借方金额', dataIndex: 'debitAmount', key: 'debitAmount', align: 'right' },
+    { title: '贷方金额', dataIndex: 'creditAmount', key: 'creditAmount', align: 'right' },
   ];
 
   return (

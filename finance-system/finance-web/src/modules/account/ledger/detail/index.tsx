@@ -42,8 +42,8 @@ const DetailLedger: React.FC = () => {
     { title: '日期', dataIndex: 'voucherDate', key: 'voucherDate' },
     { title: '凭证号', dataIndex: 'voucherNo', key: 'voucherNo' },
     { title: '摘要', dataIndex: 'summary', key: 'summary', ellipsis: true },
-    { title: '借方金额', dataIndex: 'debit', key: 'debit', align: 'right' },
-    { title: '贷方金额', dataIndex: 'credit', key: 'credit', align: 'right' },
+    { title: '借方金额', dataIndex: 'debitAmount', key: 'debitAmount', align: 'right' },
+    { title: '贷方金额', dataIndex: 'creditAmount', key: 'creditAmount', align: 'right' },
     { title: '方向', dataIndex: 'direction', key: 'direction' },
     { title: '余额', dataIndex: 'balance', key: 'balance', align: 'right' },
   ];

@@ -122,9 +122,11 @@ export interface SysModule {
 
 /** 系统配置项 - 与后端 SysConfig 对齐 */
 export interface SysConfig {
-  configKey: string; // 后端 ConfigKey
-  configValue: string; // 后端 ConfigValue
-  configName: string; // 后端 ConfigName
-  configGroup: string; // 后端 ConfigGroup
+  id?: number;
+  configKey: string;
+  configValue: string;
+  configName: string;
+  configGroup: string;
   remark?: string;
+  createdTime?: string;
 }

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Tag, Space, Button } from 'antd';
-import ProTable from '@/components/ProTable';
+import ProTable, { type ProTableRef } from '@/components/ProTable';
 import { expenseApi } from '@/api/expense';
 import { useNavigate } from 'react-router-dom';
 import type { ExpenseClaim } from '@/types/expense.d';
@@ -8,6 +8,7 @@ import type { ExpenseClaim } from '@/types/expense.d';
 /** 报销单列表 */
 const ExpenseClaimList: React.FC = () => {
   const navigate = useNavigate();
+  const actionRef = useRef<ProTableRef>(null);
   const columns = [
     { title: '报销单号', dataIndex: 'claimNo', key: 'claimNo', search: true },
     { title: '标题', dataIndex: 'title', key: 'title' },
@@ -26,15 +27,15 @@ const ExpenseClaimList: React.FC = () => {
         <Space>
           <a onClick={() => navigate(`/expense/claim/${record.id}`)}>查看</a>
           {record.status === 0 && <a onClick={() => navigate('/expense/claim/add', { state: record })}>编辑</a>}
-          {record.status === 0 && <a onClick={() => expenseApi.claimSubmit(record.id).then(() => window.location.reload())}>提交</a>}
-          {record.status === 2 && <a onClick={() => expenseApi.paymentConfirm(record.id).then(() => window.location.reload())}>确认付款</a>}
+          {record.status === 0 && <a onClick={() => expenseApi.claimSubmit(record.id).then(() => actionRef.current?.refresh())}>提交</a>}
+          {record.status === 2 && <a onClick={() => expenseApi.paymentConfirm(record.id).then(() => actionRef.current?.refresh())}>确认付款</a>}
         </Space>
       ),
     },
   ];
   return (
     <div>
-      <ProTable columns={columns} fetchData={(params) => expenseApi.claimList(params as any)} toolbarActions={<Button type="primary" onClick={() => navigate('/expense/claim/add')}>新增报销</Button>} />
+      <ProTable ref={actionRef} columns={columns} fetchData={(params) => expenseApi.claimList(params as any)} toolbarActions={<Button type="primary" onClick={() => navigate('/expense/claim/add')}>新增报销</Button>} />
     </div>
   );
 };

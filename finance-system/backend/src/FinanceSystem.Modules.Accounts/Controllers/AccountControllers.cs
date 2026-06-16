@@ -48,7 +48,7 @@ public class SubjectController : ControllerBase
     /// <summary>
     /// 新增科目
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] SubjectCreateRequest request)
     {
         return ApiResult<long>.Success(await _subjectService.CreateAsync(request));
@@ -162,7 +162,7 @@ public class VoucherController : ControllerBase
     /// <summary>
     /// 新增凭证（草稿）
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] VoucherCreateRequest request)
     {
         return ApiResult<long>.Success(await _voucherService.CreateAsync(request, HttpContext.GetCurrentUserId()));
@@ -378,7 +378,7 @@ public class SubjectBalanceController : ControllerBase
     /// <summary>
     /// 批量保存期初余额
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<bool>> Save([FromBody] List<SubjectBalanceRequest> items)
     {
         await _balanceService.SaveAsync(items);
@@ -484,7 +484,7 @@ public class AuxiliaryController : ControllerBase
     /// <summary>
     /// 新增辅助核算项
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create(string type, [FromBody] dynamic request)
     {
         return ApiResult<long>.Success(await _auxiliaryService.CreateAsync(type, request));

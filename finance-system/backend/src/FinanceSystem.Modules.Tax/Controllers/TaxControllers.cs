@@ -26,7 +26,7 @@ public class TaxCategoryController : ControllerBase
     /// <summary>
     /// 新增税种
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] TaxCategoryRequest request) => ApiResult<long>.Success(await _service.CreateAsync(request));
 
     /// <summary>
@@ -105,7 +105,7 @@ public class TaxInvoiceController : ControllerBase
     /// <summary>
     /// 新增发票
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] TaxInvoiceRequest request) => ApiResult<long>.Success(await _service.CreateAsync(request));
 
     /// <summary>
@@ -163,6 +163,6 @@ public class TaxCalendarController : ControllerBase
     /// <summary>
     /// 获取指定月份税务日历事项
     /// </summary>
-    [HttpGet]
+    [HttpGet("")]
     public async Task<ApiResult<List<object>>> Calendar([FromQuery] int year, [FromQuery] int month) => ApiResult<List<object>>.Success(await _service.GetCalendarAsync(year, month));
 }

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Tag, Button, Space, Tabs } from 'antd';
-import ProTable from '@/components/ProTable';
+import ProTable, { type ProTableRef } from '@/components/ProTable';
 import { approvalApi } from '@/api/approval';
 import { useNavigate } from 'react-router-dom';
 import type { ApprovalInstance } from '@/types/approval.d';
@@ -10,6 +10,7 @@ import type { PageParams } from '@/types/api.d';
 const MyApproval: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>('initiated');
+  const actionRef = useRef<ProTableRef>(null);
 
   const commonColumns = [
     { title: '业务ID', dataIndex: 'businessId', key: 'businessId', search: true },
@@ -31,7 +32,7 @@ const MyApproval: React.FC = () => {
       title: '操作', key: 'action', render: (_: unknown, record: ApprovalInstance) => (
         <Space>
           <a onClick={() => navigate(`/approval/${record.id}`)}>详情</a>
-          {record.status === 0 && <a onClick={() => approvalApi.withdraw(record.id).then(() => window.location.reload())}>撤回</a>}
+          {record.status === 0 && <a onClick={() => approvalApi.withdraw(record.id).then(() => actionRef.current?.refresh())}>撤回</a>}
         </Space>
       ),
     },
@@ -60,12 +61,12 @@ const MyApproval: React.FC = () => {
     {
       key: 'initiated',
       label: '我发起的',
-      children: <ProTable columns={initiatedColumns} fetchData={fetchInitiated as any} />,
+      children: <ProTable ref={actionRef} columns={initiatedColumns} fetchData={fetchInitiated as any} />,
     },
     {
       key: 'approved',
       label: '我审批的',
-      children: <ProTable columns={approvedColumns} fetchData={fetchApproved as any} />,
+      children: <ProTable ref={actionRef} columns={approvedColumns} fetchData={fetchApproved as any} />,
     },
   ];
 

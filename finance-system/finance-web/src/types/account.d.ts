@@ -61,14 +61,17 @@ export interface VoucherEntry {
 
 /** 总账/明细账/日记账记录 */
 export interface LedgerRecord {
-  period: string;
+  id?: number;
+  subjectId?: number;
+  subjectCode?: string;
+  subjectName?: string;
   voucherNo: string;
   voucherDate: string;
   summary: string;
   debitAmount: number;
   creditAmount: number;
-  balance: number;
-  direction: 'debit' | 'credit';
+  balance?: number;
+  direction?: 'debit' | 'credit';
 }
 
 /** 会计期间 - 与后端 AccountingPeriod 对齐 */

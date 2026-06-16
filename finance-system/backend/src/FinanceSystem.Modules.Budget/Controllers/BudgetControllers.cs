@@ -76,7 +76,7 @@ public class BudgetSubjectController : ControllerBase
     /// <summary>
     /// 新增预算科目
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] BudgetSubjectRequest request)
     {
         return ApiResult<long>.Success(await _subjectService.CreateAsync(request));
@@ -164,7 +164,7 @@ public class BudgetExecutionController : ControllerBase
     /// <summary>
     /// 查询预算执行情况
     /// </summary>
-    [HttpGet]
+    [HttpGet("")]
     public async Task<ApiResult<List<BudgetExecutionItem>>> GetExecution([FromQuery] BudgetExecutionQuery query)
     {
         return ApiResult<List<BudgetExecutionItem>>.Success(await _executionService.GetExecutionAsync(query));
@@ -188,7 +188,7 @@ public class BudgetAdjustmentController : ControllerBase
     /// <summary>
     /// 发起预算调整
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> CreateAdjust([FromBody] BudgetAdjustRequest request)
     {
         return ApiResult<long>.Success(await _adjustService.CreateAdjustAsync(request, HttpContext.GetCurrentUserId()));

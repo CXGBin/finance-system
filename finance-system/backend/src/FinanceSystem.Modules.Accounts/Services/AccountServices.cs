@@ -522,12 +522,15 @@ public class LedgerService : ILedgerService
         }
 
         var list = await queryable
+            .LeftJoin<AccountSubject>((e, v, s) => e.SubjectId == s.Id)
             .OrderBy((e, v) => v.VoucherDate, OrderByType.Desc)
             .OrderBy((e, v) => v.VoucherNo)
-            .Select((e, v) => new
+            .Select((e, v, s) => new
             {
                 e.Summary,
                 e.SubjectId,
+                SubjectCode = s.SubjectCode,
+                SubjectName = s.SubjectName,
                 e.DebitAmount,
                 e.CreditAmount,
                 VoucherNo = v.VoucherNo,
@@ -549,14 +552,17 @@ public class LedgerService : ILedgerService
         RefAsync<int> total = 0;
         var list = await _db.Queryable<VoucherEntry>()
             .LeftJoin<Voucher>((e, v) => e.VoucherId == v.Id)
+            .LeftJoin<AccountSubject>((e, v, s) => e.SubjectId == s.Id)
             .Where(e => cashSubjects.Contains(e.SubjectId))
             .WhereIF(query.DateStart.HasValue, (e, v) => v.VoucherDate >= query.DateStart)
             .WhereIF(query.DateEnd.HasValue, (e, v) => v.VoucherDate <= query.DateEnd)
             .OrderBy((e, v) => v.VoucherDate)
-            .Select((e, v) => new
+            .Select((e, v, s) => new
             {
                 e.Summary,
                 e.SubjectId,
+                SubjectCode = s.SubjectCode,
+                SubjectName = s.SubjectName,
                 e.DebitAmount,
                 e.CreditAmount,
                 VoucherNo = v.VoucherNo,

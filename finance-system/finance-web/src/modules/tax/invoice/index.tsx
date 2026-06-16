@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Modal, Form, Input, InputNumber, DatePicker, Select, Button, message, Space, Tag } from 'antd';
-import ProTable from '@/components/ProTable';
+import ProTable, { type ProTableRef } from '@/components/ProTable';
 import { taxApi } from '@/api/tax';
 import type { Invoice } from '@/types/tax.d';
 
@@ -8,6 +8,7 @@ import type { Invoice } from '@/types/tax.d';
 const TaxInvoice: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [form] = Form.useForm();
+  const actionRef = useRef<ProTableRef>(null);
 
   const columns = [
     { title: '发票号码', dataIndex: 'invoiceNo', key: 'invoiceNo', search: true },
@@ -19,7 +20,7 @@ const TaxInvoice: React.FC = () => {
     { title: '已认证', dataIndex: 'isVerified', key: 'isVerified', render: (v: number) => v === 1 ? <Tag color="success">已认证</Tag> : <Tag color="default">未认证</Tag> },
     {
       title: '操作', key: 'action', render: (_: unknown, record: Invoice) => (
-        record.isVerified === 0 ? <a onClick={() => taxApi.invoiceRemove(record.id).then(() => window.location.reload())} style={{ color: '#ff4d4f' }}>删除</a> : null
+        record.isVerified === 0 ? <a onClick={() => taxApi.invoiceRemove(record.id).then(() => actionRef.current?.refresh())} style={{ color: '#ff4d4f' }}>删除</a> : null
       ),
     },
   ];
@@ -30,12 +31,13 @@ const TaxInvoice: React.FC = () => {
       await taxApi.invoiceAdd({ ...values, invoiceDate: values.invoiceDate?.format('YYYY-MM-DD') } as any);
       message.success('登记成功');
       setModalOpen(false);
+      actionRef.current?.refresh();
     } catch {}
   };
 
   return (
     <div>
-      <ProTable columns={columns} fetchData={(params) => taxApi.invoiceList(params as any)} toolbarActions={<a onClick={() => { form.resetFields(); setModalOpen(true); }}>登记发票</a>} />
+      <ProTable ref={actionRef} columns={columns} fetchData={(params) => taxApi.invoiceList(params as any)} toolbarActions={<a onClick={() => { form.resetFields(); setModalOpen(true); }}>登记发票</a>} />
       <Modal title="登记发票" open={modalOpen} onOk={handleSave} onCancel={() => setModalOpen(false)} width={600}>
         <Form form={form} layout="vertical">
           <Form.Item name="invoiceType" label="发票类型" rules={[{ required: true }]}><Select options={[{ label: '增值税专用', value: 1 }, { label: '增值税普通', value: 2 }, { label: '其他', value: 3 }]} /></Form.Item>

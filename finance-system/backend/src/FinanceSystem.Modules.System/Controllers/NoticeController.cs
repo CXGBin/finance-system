@@ -33,7 +33,7 @@ public class NoticeController : ControllerBase
     /// <summary>
     /// 新增公告
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] NoticeCreateRequest request)
     {
         return ApiResult<long>.Success(await _noticeService.CreateAsync(request, HttpContext.GetCurrentUserId()));

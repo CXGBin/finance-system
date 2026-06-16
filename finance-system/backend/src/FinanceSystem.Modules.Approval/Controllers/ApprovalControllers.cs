@@ -33,7 +33,7 @@ public class ApprovalFlowController : ControllerBase
     /// <summary>
     /// 创建流程
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] ApprovalFlowRequest request)
     {
         return ApiResult<long>.Success(await _flowService.CreateAsync(request));

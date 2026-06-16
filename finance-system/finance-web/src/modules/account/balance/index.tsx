@@ -30,7 +30,7 @@ const BalanceList: React.FC = () => {
     } finally { setLoading(false); }
   };
 
-  const handleChange = (id: number, field: 'debit' | 'credit', value: number | null) => {
+  const handleChange = (id: number, field: 'beginDebit' | 'beginCredit', value: number | null) => {
     setData(prev => prev.map(item =>
       item.id === id ? { ...item, [field]: value || 0 } : item
     ));
@@ -48,15 +48,15 @@ const BalanceList: React.FC = () => {
     { title: '科目编码', dataIndex: 'subjectCode', key: 'subjectCode' },
     { title: '科目名称', dataIndex: 'subjectName', key: 'subjectName' },
     {
-      title: '期初借方', dataIndex: 'debit', key: 'debit', align: 'right',
+      title: '期初借方', dataIndex: 'beginDebit', key: 'beginDebit', align: 'right',
       render: (val: number, record: BalanceItem) => (
-        <InputNumber value={val} onChange={(v) => handleChange(record.id, 'debit', v)} style={{ width: 120 }} />
+        <InputNumber value={val} onChange={(v) => handleChange(record.id, 'beginDebit', v)} style={{ width: 120 }} />
       ),
     },
     {
-      title: '期初贷方', dataIndex: 'credit', key: 'credit', align: 'right',
+      title: '期初贷方', dataIndex: 'beginCredit', key: 'beginCredit', align: 'right',
       render: (val: number, record: BalanceItem) => (
-        <InputNumber value={val} onChange={(v) => handleChange(record.id, 'credit', v)} style={{ width: 120 }} />
+        <InputNumber value={val} onChange={(v) => handleChange(record.id, 'beginCredit', v)} style={{ width: 120 }} />
       ),
     },
   ];

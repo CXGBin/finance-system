@@ -226,7 +226,7 @@ public class ConfigController : ControllerBase
     /// <summary>
     /// 批量修改配置
     /// </summary>
-    [HttpPut]
+    [HttpPut("")]
     public async Task<ApiResult<bool>> BatchUpdate([FromBody] List<ConfigUpdateRequest> items)
     {
         await _configService.BatchUpdateAsync(items);

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Form, Input, DatePicker, Select, Table, Button, Space, InputNumber, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { voucherApi, subjectApi } from '@/api/account';
-import type { Subject } from '@/types/account.d';
+import type { Subject, VoucherEntry } from '@/types/account.d';
 import dayjs from 'dayjs';
 
 /** 凭证新增/编辑页面 */
@@ -10,7 +10,7 @@ const VoucherAdd: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [entries, setEntries] = useState<any[]>([{ id: Date.now(), subjectId: undefined, summary: '', debit: 0, credit: 0 }]);
+  const [entries, setEntries] = useState<VoucherEntry[]>([{ id: Date.now(), subjectId: 0, summary: '', debitAmount: 0, creditAmount: 0 } as VoucherEntry]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => { loadSubjects(); }, []);
@@ -21,7 +21,7 @@ const VoucherAdd: React.FC = () => {
   };
 
   const addEntry = () => {
-    setEntries([...entries, { id: Date.now(), subjectId: undefined, summary: '', debit: 0, credit: 0 }]);
+    setEntries([...entries, { id: Date.now(), subjectId: 0, summary: '', debitAmount: 0, creditAmount: 0 } as VoucherEntry]);
   };
 
   const removeEntry = (rowId: number) => {
@@ -36,23 +36,23 @@ const VoucherAdd: React.FC = () => {
   const handleSubmit = async () => {
     const values = await form.validateFields();
     if (entries.some(e => !e.subjectId)) { message.warning('分录科目不能为空'); return; }
-    const totalDebit = entries.reduce((s, e) => s + (e.debit || 0), 0);
-    const totalCredit = entries.reduce((s, e) => s + (e.credit || 0), 0);
+    const totalDebit = entries.reduce((s, e) => s + (e.debitAmount || 0), 0);
+    const totalCredit = entries.reduce((s, e) => s + (e.creditAmount || 0), 0);
     if (Math.abs(totalDebit - totalCredit) > 0.01) { message.warning(`借贷不平：借方${totalDebit} ≠ 贷方${totalCredit}`); return; }
 
     setLoading(true);
     try {
       await voucherApi.add({
         voucherDate: values.voucherDate?.format('YYYY-MM-DD'),
-        summary: values.summary,
-        periodId: values.periodId,
+        abstractText: values.summary,
+        voucherType: 0,
         entries: entries.map(e => ({
           subjectId: e.subjectId,
           summary: e.summary,
-          debit: e.debit,
-          credit: e.credit,
+          debitAmount: e.debitAmount || 0,
+          creditAmount: e.creditAmount || 0,
         })),
-      } as any);
+      });
       message.success('保存成功');
       navigate('/account/voucher');
     } finally { setLoading(false); }
@@ -66,17 +66,17 @@ const VoucherAdd: React.FC = () => {
     { title: '摘要', dataIndex: 'summary', render: (val: string, record: VoucherEntry) => (
       <Input value={val} onChange={(e) => updateEntry(record.id, 'summary', e.target.value)} style={{ width: 150 }} />
     )},
-    { title: '借方', dataIndex: 'debit', align: 'right', render: (val: number, record: VoucherEntry) => (
-      <InputNumber value={val} onChange={(v) => updateEntry(record.id, 'debit', v)} style={{ width: 120 }} min={0} />
+    { title: '借方', dataIndex: 'debitAmount', align: 'right', render: (val: number, record: VoucherEntry) => (
+      <InputNumber value={val} onChange={(v) => updateEntry(record.id, 'debitAmount', v)} style={{ width: 120 }} min={0} />
     )},
-    { title: '贷方', dataIndex: 'credit', align: 'right', render: (val: number, record: VoucherEntry) => (
-      <InputNumber value={val} onChange={(v) => updateEntry(record.id, 'credit', v)} style={{ width: 120 }} min={0} />
+    { title: '贷方', dataIndex: 'creditAmount', align: 'right', render: (val: number, record: VoucherEntry) => (
+      <InputNumber value={val} onChange={(v) => updateEntry(record.id, 'creditAmount', v)} style={{ width: 120 }} min={0} />
     )},
     { title: '操作', render: (_: unknown, record: VoucherEntry) => <Button type="link" danger onClick={() => removeEntry(record.id)}>删除</Button> },
   ];
 
-  const totalDebit = entries.reduce((s, e) => s + (e.debit || 0), 0);
-  const totalCredit = entries.reduce((s, e) => s + (e.credit || 0), 0);
+  const totalDebit = entries.reduce((s, e) => s + (e.debitAmount || 0), 0);
+  const totalCredit = entries.reduce((s, e) => s + (e.creditAmount || 0), 0);
 
   return (
     <Card title="新增凭证">

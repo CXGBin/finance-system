@@ -45,7 +45,7 @@ public class MenuController : ControllerBase
     /// <summary>
     /// 新增菜单
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] MenuCreateRequest request)
     {
         return ApiResult<long>.Success(await _menuService.CreateAsync(request));
@@ -101,7 +101,7 @@ public class DeptController : ControllerBase
     /// <summary>
     /// 新增部门
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] DeptCreateRequest request)
     {
         return ApiResult<long>.Success(await _deptService.CreateAsync(request));
@@ -162,7 +162,7 @@ public class PostController : ControllerBase
     /// <summary>
     /// 新增岗位
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] PostCreateRequest request)
     {
         return ApiResult<long>.Success(await _postService.CreateAsync(request));

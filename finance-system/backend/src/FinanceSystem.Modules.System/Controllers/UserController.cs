@@ -52,7 +52,7 @@ public class UserController : ControllerBase
     /// <summary>
     /// 新增用户
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] UserCreateRequest request)
     {
         return ApiResult<long>.Success(await _userService.CreateAsync(request));

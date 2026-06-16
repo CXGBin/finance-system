@@ -26,7 +26,7 @@ public class AssetCategoryController : ControllerBase
     /// <summary>
     /// 新增资产分类
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] AssetCategoryRequest request) => ApiResult<long>.Success(await _service.CreateAsync(request));
 
     /// <summary>
@@ -67,7 +67,7 @@ public class AssetCardController : ControllerBase
     /// <summary>
     /// 新增资产卡片
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] AssetCardRequest request) => ApiResult<long>.Success(await _service.CreateAsync(request));
 
     /// <summary>
@@ -138,7 +138,7 @@ public class AssetInventoryController : ControllerBase
     /// <summary>
     /// 创建资产盘点单
     /// </summary>
-    [HttpPost]
+    [HttpPost("")]
     public async Task<ApiResult<long>> Create([FromBody] AssetInventoryRequest request) => ApiResult<long>.Success(await _service.CreateAsync(request));
 
     /// <summary>
