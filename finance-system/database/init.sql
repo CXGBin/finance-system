@@ -52,6 +52,7 @@ BEGIN
         Description NVARCHAR(200)  NULL,                      -- 角色描述
         SortOrder   INT            NOT NULL DEFAULT 0,
         Status      INT            NOT NULL DEFAULT 1,
+        DataScope   INT            NOT NULL DEFAULT 1,    -- 数据范围 1全部 2本部门 3本人
         CreatedTime DATETIME      NOT NULL DEFAULT GETDATE(),
         CONSTRAINT PK_sys_role PRIMARY KEY (Id)
     );
@@ -580,6 +581,7 @@ BEGIN
         Comment         NVARCHAR(500)  NULL,
         ApproveTime     DATETIME       NOT NULL DEFAULT GETDATE(),
         CreatedTime     DATETIME       NOT NULL DEFAULT GETDATE(),
+        UpdatedTime     DATETIME       NULL,
         CONSTRAINT PK_fm_approval_record PRIMARY KEY (Id)
     );
     CREATE INDEX IX_fm_approval_record_InstanceId ON fm_approval_record(InstanceId);
@@ -652,6 +654,7 @@ BEGIN
         NetValue         DECIMAL(18,2)  NOT NULL DEFAULT 0,          -- 净值
         VoucherId        BIGINT         NULL,                       -- 关联凭证ID
         CreatedTime      DATETIME       NOT NULL DEFAULT GETDATE(),
+        UpdatedTime     DATETIME       NULL,
         CONSTRAINT PK_fm_asset_depreciation PRIMARY KEY (Id)
     );
     CREATE INDEX IX_fm_asset_depreciation_AssetId ON fm_asset_depreciation(AssetId);
