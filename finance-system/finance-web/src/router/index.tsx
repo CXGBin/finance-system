@@ -4,7 +4,6 @@ import { Spin } from 'antd';
 import AuthGuard from '@/components/AuthGuard';
 import MainLayout from '@/components/Layout';
 import LoginPage from '@/modules/login';
-import DashboardPage from '@/modules/dashboard';
 import './lazyModules';
 
 const Loading = () => (
