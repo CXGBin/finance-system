@@ -1,21 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Select, Statistic, Row, Col, Spin } from 'antd';
+import { Card, Select, Statistic, Row, Col, Spin, message } from 'antd';
+import { taxApi } from '@/api/tax';
 
+/** 税负分析 */
 export default function TaxBurdenPage() {
   const [year, setYear] = useState(new Date().getFullYear());
   const [quarter, setQuarter] = useState<number | undefined>(undefined);
-  const [data, setData] = useState<any>({});
+  const [data, setData] = useState<Record<string, unknown>>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    const params = new URLSearchParams({ year: String(year) });
-    if (quarter) params.set('quarter', String(quarter));
-    fetch('/api/tax/report/burden?' + params, {
-      headers: { Authorization: 'Bearer ' + localStorage.getItem('token') },
-    })
-      .then(r => r.json())
-      .then(r => setData(r.data || {}))
+    taxApi.reportBurden(year, quarter)
+      .then(res => setData(res.data || {}))
+      .catch(() => { message.error('加载税负分析数据失败'); })
       .finally(() => setLoading(false));
   }, [year, quarter]);
 
@@ -35,13 +33,13 @@ export default function TaxBurdenPage() {
       </Card>
       <Spin spinning={loading}>
         <Row gutter={16} style={{ marginBottom: 16 }}>
-          <Col span={6}><Card><Statistic title="营业收入" value={data.totalRevenue || 0} prefix="¥" precision={2} /></Card></Col>
-          <Col span={6}><Card><Statistic title="增值税" value={data.vatPaid || 0} prefix="¥" precision={2} /></Card></Col>
-          <Col span={6}><Card><Statistic title="增值税税负率" value={data.vatBurdenRate || 0} suffix="%" precision={2} /></Card></Col>
-          <Col span={6}><Card><Statistic title="综合税负率" value={data.totalBurdenRate || 0} suffix="%" precision={2} /></Card></Col>
+          <Col span={6}><Card><Statistic title="营业收入" value={Number(data.totalRevenue || 0)} prefix="¥" precision={2} /></Card></Col>
+          <Col span={6}><Card><Statistic title="增值税" value={Number(data.vatPaid || 0)} prefix="¥" precision={2} /></Card></Col>
+          <Col span={6}><Card><Statistic title="增值税税负率" value={Number(data.vatBurdenRate || 0)} suffix="%" precision={2} /></Card></Col>
+          <Col span={6}><Card><Statistic title="综合税负率" value={Number(data.totalBurdenRate || 0)} suffix="%" precision={2} /></Card></Col>
         </Row>
         <Row gutter={16}>
-          <Col span={12}><Card><Statistic title="全部已缴税费合计" value={data.totalTaxPaid || 0} prefix="¥" precision={2} valueStyle={{ color: '#cf1322' }} /></Card></Col>
+          <Col span={12}><Card><Statistic title="全部已缴税费合计" value={Number(data.totalTaxPaid || 0)} prefix="¥" precision={2} valueStyle={{ color: '#cf1322' }} /></Card></Col>
         </Row>
       </Spin>
     </div>

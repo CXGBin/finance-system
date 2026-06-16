@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { Card, Table, Select, DatePicker, Space, Button } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Card, Table, Select, Space, Button, Empty, message } from 'antd';
 import { ledgerApi } from '@/api/account';
 import { subjectApi } from '@/api/account';
-import { useEffect } from 'react';
 import type { Subject, LedgerRecord } from '@/types/account.d';
 import dayjs from 'dayjs';
 
@@ -11,21 +10,32 @@ const GeneralLedger: React.FC = () => {
   const [data, setData] = useState<LedgerRecord[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [params, setParams] = useState({ subjectId: undefined as number | undefined, startPeriod: dayjs().startOf('year').format('YYYY-MM'), endPeriod: dayjs().format('YYYY-MM') });
 
   useEffect(() => { loadSubjects(); loadData(); }, []);
 
   const loadSubjects = async () => {
-    const res = await subjectApi.list();
-    setSubjects(res.data || []);
+    try {
+      const res = await subjectApi.list();
+      setSubjects(res.data || []);
+    } catch {
+      message.error('加载科目列表失败');
+    }
   };
 
   const loadData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await ledgerApi.general(params);
       setData(res.data || []);
-    } finally { setLoading(false); }
+    } catch {
+      setError('查询总账数据失败');
+      message.error('查询总账数据失败');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const columns = [
@@ -43,14 +53,20 @@ const GeneralLedger: React.FC = () => {
   return (
     <Card title="总账">
       <Space style={{ marginBottom: 16 }}>
-        <Select allowClear placeholder="选择科目" style={{ width: 200 }} value={params.subjectId} onChange={(v) => setParams({ ...params, subjectId: v })} options={subjects.map(s => ({ label: `${s.subjectCode} ${s.subjectName}`, value: s.id }))} />
+        <Select allowClear placeholder="选择科目" style={{ width: 200 }} value={params.subjectId} onChange={(v) => setParams({ ...params, subjectId: v })} options={subjects.map(s => ({ label: `${s.code} ${s.name}`, value: s.id }))} />
         <span>期间：</span>
         <Select value={params.startPeriod} onChange={(v) => setParams({ ...params, startPeriod: v })} style={{ width: 120 }} options={Array.from({ length: 12 }, (_, i) => ({ label: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}`, value: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}` }))} />
         <span>至</span>
         <Select value={params.endPeriod} onChange={(v) => setParams({ ...params, endPeriod: v })} style={{ width: 120 }} options={Array.from({ length: 12 }, (_, i) => ({ label: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}`, value: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}` }))} />
         <Button type="primary" onClick={loadData}>查询</Button>
       </Space>
-      <Table columns={columns} dataSource={data} rowKey="id" loading={loading} pagination={false} />
+      {error ? (
+        <Empty description={error} />
+      ) : (
+        <Table columns={columns} dataSource={data} rowKey="id" loading={loading} pagination={false}
+          locale={{ emptyText: <Empty description="暂无总账数据，请选择科目和期间后查询" /> }}
+        />
+      )}
     </Card>
   );
 };

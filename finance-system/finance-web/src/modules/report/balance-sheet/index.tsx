@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Card, Table, Select, Space, Button } from 'antd';
-import { reportApi } from '@/api/report';
+import { Card, Table, Select, Space, Button, message } from 'antd';
+import { reportApi, reportExportApi } from '@/api/report';
 import type { BalanceSheetRow } from '@/types/report.d';
 import dayjs from 'dayjs';
 
@@ -18,6 +18,21 @@ const BalanceSheet: React.FC = () => {
     } finally { setLoading(false); }
   };
 
+  /** 导出Excel */  
+  const handleExport = async () => {
+    try {
+      message.loading({ content: '正在导出...', key: 'export' });
+      const res = await reportExportApi.excel({ reportType: 'balance-sheet', year: params.year, month: params.month });
+      const link = document.createElement('a');
+      link.href = res.data as string;
+      link.download = `资产负债表_${params.year}_${params.month}.xlsx`;
+      link.click();
+      message.success({ content: '导出成功', key: 'export' });
+    } catch {
+      message.error({ content: '导出失败', key: 'export' });
+    }
+  };
+
   const columns = [
     { title: '项目', dataIndex: 'itemName', key: 'itemName', width: 200 },
     { title: '行次', dataIndex: 'lineNo', key: 'lineNo', width: 60, align: 'center' },
@@ -26,7 +41,7 @@ const BalanceSheet: React.FC = () => {
   ];
 
   return (
-    <Card title="资产负债表" extra={<Button type="primary" onClick={loadData} loading={loading}>查询</Button>}>
+    <Card title="资产负债表" extra={<Space><Button onClick={handleExport}>导出Excel</Button><Button type="primary" onClick={loadData} loading={loading}>查询</Button></Space>}>
       <Space style={{ marginBottom: 16 }}>
         <Select value={params.year} onChange={(v) => setParams({ ...params, year: v })} style={{ width: 100 }} options={Array.from({ length: 5 }, (_, i) => ({ label: String(dayjs().year() - 2 + i), value: dayjs().year() - 2 + i }))} />
         <span>年</span>

@@ -19,11 +19,7 @@ export default function AssetDisposePage() {
     try {
       const values = await form.validateFields();
       const disposeDate = values.disposeDate?.format('YYYY-MM-DD') || new Date().toISOString().split('T')[0];
-      await fetch('/api/asset/card/' + selectedAsset.id + '/dispose', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
-        body: JSON.stringify({ ...values, disposeDate }),
-      });
+      await assetApi.dispose(selectedAsset.id, { ...values, disposeDate });
       message.success('资产处置成功，已生成处置凭证');
       setModalVisible(false);
       form.resetFields();

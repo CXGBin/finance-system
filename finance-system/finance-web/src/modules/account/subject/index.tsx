@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Tree, Button, Modal, Form, Input, InputNumber, Select, Tag, message, Popconfirm, Space } from 'antd';
 import type { Subject } from '@/types/account.d';
-import { subjectApi } from '@/api/account';
+import { subjectApi, subjectImportExportApi } from '@/api/account';
 
 /** 科目管理页面 */
 const SubjectList: React.FC = () => {
@@ -51,6 +51,22 @@ const SubjectList: React.FC = () => {
     loadTree();
   };
 
+  /** 导出科目 */
+  const handleExport = async () => {
+    try {
+      message.loading({ content: '正在导出...', key: 'export' });
+      const res = await subjectImportExportApi.exportSubjects();
+      // 下载blob文件
+      const link = document.createElement('a');
+      link.href = res.data as string;
+      link.download = '科目导出.xlsx';
+      link.click();
+      message.success({ content: '导出成功', key: 'export' });
+    } catch {
+      message.error({ content: '导出失败', key: 'export' });
+    }
+  };
+
   const buildTreeNodes = (list: Subject[]): DataNode[] =>
     list.map(item => ({
       key: item.id,
@@ -72,6 +88,7 @@ const SubjectList: React.FC = () => {
     <div>
       <div style={{ marginBottom: 16 }}>
         <Button type="primary" onClick={() => handleAdd()}>新增科目</Button>
+        <Button style={{ marginLeft: 8 }} onClick={handleExport}>导出</Button>
       </div>
       <Tree showLine defaultExpandAll treeData={buildTreeNodes(treeData)} />
       <Modal title={editingRecord ? '编辑科目' : '新增科目'} open={modalOpen} onOk={handleSave} onCancel={() => setModalOpen(false)} width={600}>

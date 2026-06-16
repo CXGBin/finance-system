@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Descriptions, Table, Tag, Button, Space, message } from 'antd';
+import { Card, Descriptions, Table, Tag, Button, Space, message, Modal } from 'antd';
 import { useParams, useNavigate } from 'react-router-dom';
-import { voucherApi } from '@/api/account';
+import { voucherApi, voucherBatchApi } from '@/api/account';
 import type { Voucher } from '@/types/account.d';
 
 /** 凭证详情页面 */
@@ -10,6 +10,8 @@ const VoucherDetail: React.FC = () => {
   const navigate = useNavigate();
   const [voucher, setVoucher] = useState<Voucher | null>(null);
   const [loading, setLoading] = useState(false);
+  const [printVisible, setPrintVisible] = useState(false);
+  const [printData, setPrintData] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     if (id) loadDetail(Number(id));
@@ -30,6 +32,18 @@ const VoucherDetail: React.FC = () => {
     loadDetail(Number(id));
   };
 
+  /** 打开打印预览 */
+  const handlePrint = async () => {
+    if (!id) return;
+    try {
+      const res = await voucherBatchApi.printData(Number(id));
+      setPrintData(res.data || null);
+      setPrintVisible(true);
+    } catch {
+      message.error('获取打印数据失败');
+    }
+  };
+
   const statusMap: Record<number, { color: string; text: string }> = {
     0: { color: 'default', text: '草稿' }, 1: { color: 'processing', text: '待审核' },
     2: { color: 'success', text: '已审核' }, 3: { color: 'error', text: '已作废' },
@@ -47,6 +61,7 @@ const VoucherDetail: React.FC = () => {
     <Card title="凭证详情" loading={loading} extra={
       <Space>
         {voucher?.status === 1 && <Button type="primary" onClick={handleAudit}>审核</Button>}
+        <Button onClick={handlePrint}>打印</Button>
         <Button onClick={() => navigate(-1)}>返回</Button>
       </Space>
     }>
@@ -68,6 +83,50 @@ const VoucherDetail: React.FC = () => {
           />
         </>
       )}
+      <Modal
+        title="凭证打印预览"
+        open={printVisible}
+        onCancel={() => setPrintVisible(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setPrintVisible(false)}>关闭</Button>,
+          <Button key="print" type="primary" onClick={() => window.print()}>打印</Button>,
+        ]}
+        width={700}
+      >
+        {printData && (
+          <div className="print-content">
+            <h3 style={{ textAlign: 'center' }}>记 账 凭 证</h3>
+            <p>凭证字号：{String(printData.voucherNo)}　日期：{String(printData.voucherDate)}</p>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th style={{ border: '1px solid #ddd', padding: 8 }}>摘要</th>
+                  <th style={{ border: '1px solid #ddd', padding: 8 }}>科目</th>
+                  <th style={{ border: '1px solid #ddd', padding: 8, textAlign: 'right' }}>借方金额</th>
+                  <th style={{ border: '1px solid #ddd', padding: 8, textAlign: 'right' }}>贷方金额</th>
+                </tr>
+              </thead>
+              <tbody>
+                {((printData.entries || []) as Array<Record<string, string | number>>).map((entry, i) => (
+                  <tr key={i}>
+                    <td style={{ border: '1px solid #ddd', padding: 8 }}>{String(entry.summary || '')}</td>
+                    <td style={{ border: '1px solid #ddd', padding: 8 }}>{String(entry.subjectName || '')}</td>
+                    <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'right' }}>{Number(entry.debitAmount || entry.debit || 0).toFixed(2)}</td>
+                    <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'right' }}>{Number(entry.creditAmount || entry.credit || 0).toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan={2} style={{ border: '1px solid #ddd', padding: 8, textAlign: 'right', fontWeight: 'bold' }}>合计</td>
+                  <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'right', fontWeight: 'bold' }}>{Number(printData.totalDebit || 0).toFixed(2)}</td>
+                  <td style={{ border: '1px solid #ddd', padding: 8, textAlign: 'right', fontWeight: 'bold' }}>{Number(printData.totalCredit || 0).toFixed(2)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        )}
+      </Modal>
     </Card>
   );
 };

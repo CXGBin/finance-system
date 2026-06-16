@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Input, Button, Space, message, Tag, Popconfirm } from 'antd';
 import { DatePicker } from 'antd';
-import { voucherApi } from '@/api/account';
+import { voucherApi, voucherBatchApi } from '@/api/account';
 import { useNavigate } from 'react-router-dom';
 import type { Voucher } from '@/types/account.d';
 
@@ -50,6 +50,15 @@ const VoucherList: React.FC = () => {
     } catch { message.error('批量审核失败'); }
   };
 
+  /** 复制凭证 */
+  const handleCopy = async (id: number) => {
+    try {
+      const res = await voucherBatchApi.copy(id);
+      message.success('复制成功');
+      navigate(`/account/voucher/add`, { state: { id: res.data } });
+    } catch { message.error('复制失败'); }
+  };
+
   /** 红字冲销凭证 */
   const handleReverse = async (id: number) => {
     try {
@@ -84,6 +93,7 @@ const VoucherList: React.FC = () => {
           {record.status === 1 && <Popconfirm title="确认审核?" onConfirm={() => handleAudit(record.id)}><a>审核</a></Popconfirm>}
           {(record.status === 0 || record.status === 1) && <Popconfirm title="确认作废?" onConfirm={() => handleVoid(record.id)}><a style={{ color: '#ff4d4f' }}>作废</a></Popconfirm>}
           {record.status === 2 && <Popconfirm title="确认红字冲销该凭证?" onConfirm={() => handleReverse(record.id)}><a style={{ color: '#faad14' }}>冲销</a></Popconfirm>}
+          {record.status === 2 && <a onClick={() => handleCopy(record.id)}>复制</a>}
         </Space>
       ),
     },

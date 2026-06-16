@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Button, Tag, message, Popconfirm, Space, Select, InputNumber } from 'antd';
-import { periodApi } from '@/api/account';
+import { Card, Table, Button, Tag, message, Popconfirm, Space, Select, InputNumber, Modal, Statistic, Row, Col } from 'antd';
+import { periodApi, balanceApi } from '@/api/account';
 import dayjs from 'dayjs';
 import type { AccountingPeriod } from '@/types/account.d';
 
@@ -9,6 +9,10 @@ const PeriodList: React.FC = () => {
   const [year, setYear] = useState(dayjs().year());
   const [data, setData] = useState<AccountingPeriod[]>([]);
   const [loading, setLoading] = useState(false);
+  const [balanceModalVisible, setBalanceModalVisible] = useState(false);
+  const [balanceData, setBalanceData] = useState<{ isBalanced: boolean; debitTotal: number; creditTotal: number } | null>(null);
+  const [balanceLoading, setBalanceLoading] = useState(false);
+  const [selectedPeriodId, setSelectedPeriodId] = useState<number | undefined>(undefined);
 
   useEffect(() => { loadData(); }, [year]);
 
@@ -38,6 +42,22 @@ const PeriodList: React.FC = () => {
     loadData();
   };
 
+  /** 试算平衡检查 */
+  const handleTrialBalance = async (periodId: number) => {
+    setSelectedPeriodId(periodId);
+    setBalanceModalVisible(true);
+    setBalanceLoading(true);
+    try {
+      const res = await balanceApi.trialBalance(periodId);
+      setBalanceData(res.data || null);
+    } catch {
+      message.error('试算平衡检查失败');
+      setBalanceData(null);
+    } finally {
+      setBalanceLoading(false);
+    }
+  };
+
   const columns = [
     { title: '年度', dataIndex: 'periodYear', key: 'periodYear' },
     { title: '月份', dataIndex: 'periodMonth', key: 'periodMonth' },
@@ -52,6 +72,7 @@ const PeriodList: React.FC = () => {
       title: '操作', key: 'action',
       render: (_: unknown, record: AccountingPeriod) => (
         <Space>
+          <a onClick={() => handleTrialBalance(record.id as number)}>试算平衡</a>
           {record.isClosed === 0 && (
             <>
               <Popconfirm title="确认结账?" onConfirm={() => handleClose(record as AccountingPeriod)}><a>结账</a></Popconfirm>
@@ -73,6 +94,37 @@ const PeriodList: React.FC = () => {
         <InputNumber value={year} min={2020} max={2099} onChange={(v) => v && setYear(v)} />
       </Space>
       <Table columns={columns} dataSource={data} rowKey="id" loading={loading} pagination={false} />
+      <Modal
+        title="试算平衡检查"
+        open={balanceModalVisible}
+        onCancel={() => setBalanceModalVisible(false)}
+        footer={<Button onClick={() => setBalanceModalVisible(false)}>关闭</Button>}
+      >
+        {balanceLoading && <div style={{ textAlign: 'center', padding: 20 }}>加载中...</div>}
+        {balanceData && (
+          <div>
+            <Row gutter={16} style={{ marginBottom: 16 }}>
+              <Col span={8}>
+                <Statistic title="借方合计" value={balanceData.debitTotal} precision={2} />
+              </Col>
+              <Col span={8}>
+                <Statistic title="贷方合计" value={balanceData.creditTotal} precision={2} />
+              </Col>
+              <Col span={8}>
+                <Statistic
+                  title="差额"
+                  value={Math.abs(balanceData.debitTotal - balanceData.creditTotal)}
+                  precision={2}
+                  valueStyle={{ color: balanceData.isBalanced ? '#3f8600' : '#cf1322' }}
+                />
+              </Col>
+            </Row>
+            <div style={{ textAlign: 'center', fontSize: 16, fontWeight: 'bold', color: balanceData.isBalanced ? '#3f8600' : '#cf1322' }}>
+              {balanceData.isBalanced ? '✓ 试算平衡' : '✗ 试算不平衡，借贷差额：' + (balanceData.debitTotal - balanceData.creditTotal).toFixed(2)}
+            </div>
+          </div>
+        )}
+      </Modal>
     </Card>
   );
 };

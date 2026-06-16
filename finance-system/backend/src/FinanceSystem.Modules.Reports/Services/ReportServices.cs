@@ -684,12 +684,79 @@ public class ReportExportService : IReportExportService
 
     private async Task<string> ExportCashFlow(string period)
     {
-        await Task.CompletedTask;
+        var parts = period.Split('-');
+        var year = int.Parse(parts[0]);
+        var month = int.Parse(parts[1]);
+        var periodEntity = await _db.Queryable<AccountingPeriod>().FirstAsync(p => p.PeriodYear == year && p.PeriodMonth == month);
+        if (periodEntity == null) throw new NotFoundException("会计期间不存在");
+
+        var allSubjects = await _db.Queryable<AccountSubject>().Where(s => s.IsEnabled == 1).ToListAsync();
+        var cashSubjectIds = allSubjects.Where(s => s.IsCash == 1 || s.IsBank == 1).Select(s => s.Id).ToList();
+
+        // 查询所有已审核凭证分录
+        var entries = await _db.Queryable<VoucherEntry>()
+            .LeftJoin<Voucher>((e, v) => e.VoucherId == v.Id)
+            .Where((e, v) => v.PeriodId == periodEntity.Id && v.Status == 1)
+            .Select((e, v) => new { e.VoucherId, e.SubjectId, e.DebitAmount, e.CreditAmount })
+            .ToListAsync();
+
+        var operatingSubjectCodes = AccountingConstants.OperatingSubjectCodes;
+        var investingSubjectCodes = AccountingConstants.InvestingSubjectCodes;
+        var financingSubjectCodes = AccountingConstants.FinancingSubjectCodes;
+
+        decimal operatingInflow = 0, operatingOutflow = 0;
+        decimal investingInflow = 0, investingOutflow = 0;
+        decimal financingInflow = 0, financingOutflow = 0;
+
+        foreach (var entry in entries)
+        {
+            // 现金流出（贷方为现金科目）
+            if (entry.CreditAmount > 0 && cashSubjectIds.Contains(entry.SubjectId))
+            {
+                var counterpartEntries = entries.Where(e => e.VoucherId == entry.VoucherId && e.SubjectId != entry.SubjectId);
+                foreach (var cp in counterpartEntries.Where(e => e.DebitAmount > 0))
+                {
+                    var cpCode = allSubjects.FirstOrDefault(s => s.Id == cp.SubjectId)?.SubjectCode ?? "";
+                    if (investingSubjectCodes.Any(c => cpCode.StartsWith(c)))
+                        investingOutflow += entry.CreditAmount;
+                    else if (financingSubjectCodes.Any(c => cpCode.StartsWith(c)))
+                        financingOutflow += entry.CreditAmount;
+                    else
+                        operatingOutflow += entry.CreditAmount;
+                }
+            }
+            // 现金流入（借方为现金科目）
+            if (entry.DebitAmount > 0 && cashSubjectIds.Contains(entry.SubjectId))
+            {
+                var counterpartEntries = entries.Where(e => e.VoucherId == entry.VoucherId && e.SubjectId != entry.SubjectId);
+                foreach (var cp in counterpartEntries.Where(e => e.CreditAmount > 0))
+                {
+                    var cpCode = allSubjects.FirstOrDefault(s => s.Id == cp.SubjectId)?.SubjectCode ?? "";
+                    if (investingSubjectCodes.Any(c => cpCode.StartsWith(c)))
+                        investingInflow += entry.DebitAmount;
+                    else if (financingSubjectCodes.Any(c => cpCode.StartsWith(c)))
+                        financingInflow += entry.DebitAmount;
+                    else
+                        operatingInflow += entry.DebitAmount;
+                }
+            }
+        }
+
         var sb = new StringBuilder();
-        sb.AppendLine("项目,金额");
-        sb.AppendLine($"现金流量表,{period}");
-        sb.AppendLine("经营活动现金流入,0");
-        sb.AppendLine("经营活动现金流出,0");
+        sb.AppendLine("项目,流入金额,流出金额");
+        sb.AppendLine("一、经营活动");
+        sb.AppendLine($"  销售商品、提供劳务收到的现金,{operatingInflow},");
+        sb.AppendLine($"  经营活动现金流出小计,,{operatingOutflow}");
+        sb.AppendLine($"  经营活动净额,{operatingInflow - operatingOutflow},");
+        sb.AppendLine("二、投资活动");
+        sb.AppendLine($"  收回投资收到的现金,{investingInflow},");
+        sb.AppendLine($"  投资活动现金流出小计,,{investingOutflow}");
+        sb.AppendLine($"  投资活动净额,{investingInflow - investingOutflow},");
+        sb.AppendLine("三、筹资活动");
+        sb.AppendLine($"  取得借款收到的现金,{financingInflow},");
+        sb.AppendLine($"  筹资活动现金流出小计,,{financingOutflow}");
+        sb.AppendLine($"  筹资活动净额,{financingInflow - financingOutflow},");
+        sb.AppendLine($"现金净增加额,{(operatingInflow + investingInflow + financingInflow) - (operatingOutflow + investingOutflow + financingOutflow)},");
         return sb.ToString();
     }
 

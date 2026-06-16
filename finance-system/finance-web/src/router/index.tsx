@@ -56,10 +56,14 @@ const router = createBrowserRouter([
       { path: 'account/ledger/detail', element: withGuard(wrapSuspense(() => import('@/modules/account/ledger/detail'))) },
       { path: 'account/ledger/journal', element: withGuard(wrapSuspense(() => import('@/modules/account/ledger/journal'))) },
       { path: 'account/period', element: withGuard(wrapSuspense(() => import('@/modules/account/period'))) },
+      { path: 'account/auxiliary/customer', element: withGuard(wrapSuspense(() => import('@/modules/account/auxiliary'))) },
+      { path: 'account/auxiliary/supplier', element: withGuard(wrapSuspense(() => import('@/modules/account/auxiliary'))) },
+      { path: 'account/auxiliary/project', element: withGuard(wrapSuspense(() => import('@/modules/account/auxiliary'))) },
       // 报表中心
       { path: 'report/balance-sheet', element: withGuard(wrapSuspense(() => import('@/modules/report/balance-sheet'))) },
       { path: 'report/income-statement', element: withGuard(wrapSuspense(() => import('@/modules/report/income-statement'))) },
       { path: 'report/cash-flow', element: withGuard(wrapSuspense(() => import('@/modules/report/cash-flow'))) },
+      { path: 'report/compare', element: withGuard(wrapSuspense(() => import('@/modules/report/compare'))) },
       { path: 'report/subject-balance', element: withGuard(wrapSuspense(() => import('@/modules/report/subject-balance'))) },
       { path: 'report/custom', element: withGuard(wrapSuspense(() => import('@/modules/report/custom'))) },
       // 预算管理

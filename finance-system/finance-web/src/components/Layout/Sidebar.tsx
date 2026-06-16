@@ -35,6 +35,7 @@ import {
   ReconciliationOutlined,
   BarcodeOutlined,
   ExceptionOutlined,
+  SwapOutlined,
 } from '@ant-design/icons';
 import { useAppStore } from '@/store/useAppStore';
 import { useModuleStore } from '@/store/useModuleStore';
@@ -71,6 +72,7 @@ const iconMap: Record<string, React.ReactNode> = {
   PieChartOutlined: <PieChartOutlined />,
   ReconciliationOutlined: <ReconciliationOutlined />,
   BarcodeOutlined: <BarcodeOutlined />,
+  SwapOutlined: <SwapOutlined />,
   ExceptionOutlined: <ExceptionOutlined />,
 };
 
@@ -125,6 +127,9 @@ const menuData: MenuItem[] = [
       { key: '/account/ledger/detail', label: '明细账', icon: <FileTextOutlined /> },
       { key: '/account/ledger/journal', label: '日记账', icon: <CalendarOutlined /> },
       { key: '/account/period', label: '会计期间', icon: <ScheduleOutlined /> },
+      { key: '/account/auxiliary/customer', label: '辅助核算-客户', icon: <SwapOutlined /> },
+      { key: '/account/auxiliary/supplier', label: '辅助核算-供应商', icon: <SwapOutlined /> },
+      { key: '/account/auxiliary/project', label: '辅助核算-项目', icon: <SwapOutlined /> },
     ],
   },
   {
@@ -138,6 +143,7 @@ const menuData: MenuItem[] = [
       { key: '/report/cash-flow', label: '现金流量表', icon: <DollarOutlined /> },
       { key: '/report/subject-balance', label: '科目余额表', icon: <FileTextOutlined /> },
       { key: '/report/custom', label: '自定义报表', icon: <BarChartOutlined /> },
+      { key: '/report/compare', label: '对比报表', icon: <SwapOutlined /> },
     ],
   },
   {
