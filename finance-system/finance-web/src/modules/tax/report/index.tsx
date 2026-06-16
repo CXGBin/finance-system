@@ -1,33 +1,36 @@
 import React, { useState } from 'react';
-import { Card, Select, Button, Table, Statistic, Row, Col } from 'antd';
+import { Card, Select, Space, Button, Statistic, Row, Col, Table } from 'antd';
+import { ReloadOutlined, FileExcelOutlined } from '@ant-design/icons';
 import { taxApi } from '@/api/tax';
 import dayjs from 'dayjs';
 
-/** 税务报表 */
+/** 纳税统计 */
 const TaxReport: React.FC = () => {
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
   const [year, setYear] = useState(dayjs().year());
+  const [data, setData] = useState<any[]>([]);
 
   const loadData = async () => {
-    setLoading(true);
-    try { const res = await taxApi.reportList({ year }); setData(res.data || []); } finally { setLoading(false); }
+    try { const res = await taxApi.declarationList({ pageIndex: 1, pageSize: 999 }); setData(res.data?.list ?? []); } catch { /* error */ }
   };
 
+  React.useEffect(() => { loadData(); }, []);
+
   const columns = [
-    { title: '税种', dataIndex: 'taxName', key: 'taxName' },
-    { title: '应纳税额', dataIndex: 'taxAmount', key: 'taxAmount', align: 'right' },
-    { title: '已缴税额', dataIndex: 'paidAmount', key: 'paidAmount', align: 'right' },
-    { title: '未缴税额', dataIndex: 'unpaidAmount', key: 'unpaidAmount', align: 'right' },
+    { title: '税种', dataIndex: 'taxName' },
+    { title: '申报期间', dataIndex: 'declarePeriod' },
+    { title: '应纳税额', dataIndex: 'taxAmount', align: 'right', render: (v: number) => <span className="amount-right">{(v ?? 0).toFixed(2)}</span> },
+    { title: '实缴税额', dataIndex: 'actualPaidAmount', align: 'right', render: (v: number) => <span className="amount-right">{(v ?? 0).toFixed(2)}</span> },
   ];
 
   return (
-    <Card title="税务报表">
-      <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col><Select value={year} onChange={setYear} style={{ width: 100 }} options={Array.from({ length: 5 }, (_, i) => ({ label: String(dayjs().year() - 2 + i), value: dayjs().year() - 2 + i }))} /></Col>
-        <Col><Button type="primary" onClick={loadData} loading={loading}>查询</Button></Col>
-      </Row>
-      <Table columns={columns} dataSource={data} rowKey="taxName" loading={loading} pagination={false} />
+    <Card title="纳税统计" extra={
+      <Space>
+        <Select value={year} onChange={setYear} style={{ width: 120 }}
+          options={Array.from({ length: 5 }, (_, i) => ({ label: String(dayjs().year() - 2 + i), value: dayjs().year() - 2 + i }))} />
+        <Button icon={<ReloadOutlined />} onClick={loadData}>刷新</Button>
+      </Space>
+    }>
+      <Table columns={columns} dataSource={data} rowKey="id" pagination={false} />
     </Card>
   );
 };

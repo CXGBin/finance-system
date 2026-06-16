@@ -1,55 +1,49 @@
 import React, { useState } from 'react';
-import { Card, Table, Select, Space, Button, message } from 'antd';
+import { Card, Select, Space, Button, Table, Switch, message } from 'antd';
+import { FileExcelOutlined, ReloadOutlined } from '@ant-design/icons';
 import { reportApi, reportExportApi } from '@/api/report';
-import type { IncomeStatementRow } from '@/types/report.d';
 import dayjs from 'dayjs';
 
 /** 利润表 */
 const IncomeStatement: React.FC = () => {
-  const [data, setData] = useState<IncomeStatementRow[]>([]);
+  const [period, setPeriod] = useState(dayjs().format('YYYY-MM'));
+  const [showZero, setShowZero] = useState(false);
+  const [dataType, setDataType] = useState('month');
+  const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [year, setYear] = useState(dayjs().year());
-  const [month, setMonth] = useState(dayjs().month() + 1);
-
-  const period = `${year}-${String(month).padStart(2, '0')}`;
 
   const loadData = async () => {
     setLoading(true);
-    try { const res = await reportApi.incomeStatement({ period }); setData(res.data || []); } finally { setLoading(false); }
+    try { const res = await reportApi.incomeStatement(period, showZero, dataType); setData(res.data?.items ?? res.data ?? []); } finally { setLoading(false); }
   };
 
+  React.useEffect(() => { loadData(); }, [period, showZero, dataType]);
+
   const handleExport = async () => {
-    try {
-      message.loading({ content: '正在导出...', key: 'export' });
-      const res = await reportExportApi.excel({ reportType: 'income-statement', period });
-      const link = document.createElement('a');
-      link.href = res.data as string;
-      link.download = `利润表_${period}.xlsx`;
-      link.click();
-      message.success({ content: '导出成功', key: 'export' });
-    } catch {
-      message.error({ content: '导出失败', key: 'export' });
-    }
+    try { await reportExportApi.exportExcel('income-statement', period); message.success('导出成功'); } catch { /* error */ }
   };
 
   const columns = [
-    { title: '项目', dataIndex: 'itemName', key: 'itemName', width: 250 },
-    { title: '行次', dataIndex: 'lineNo', key: 'lineNo', width: 60, align: 'center' },
-    { title: '本期金额', dataIndex: 'currentAmount', key: 'currentAmount', align: 'right' },
-    { title: '累计金额', dataIndex: 'totalAmount', key: 'totalAmount', align: 'right' },
+    { title: '行次', dataIndex: 'lineNo', width: 60, align: 'center' },
+    { title: '项目', dataIndex: 'itemName', ellipsis: true },
+    { title: '本月数', dataIndex: 'currentAmount', align: 'right', render: (v: number) => v ? <span className="amount-right">{v.toFixed(2)}</span> : '-' },
+    { title: '本年累计', dataIndex: 'yearAmount', align: 'right', render: (v: number) => v ? <span className="amount-right">{v.toFixed(2)}</span> : '-' },
   ];
 
   return (
-    <Card title="利润表">
-      <Space style={{ marginBottom: 16 }}>
-        <Select value={year} onChange={setYear} style={{ width: 100 }} options={Array.from({ length: 5 }, (_, i) => ({ label: String(dayjs().year() - 2 + i), value: dayjs().year() - 2 + i }))} />
-        <span>年</span>
-        <Select value={month} onChange={setMonth} style={{ width: 80 }} options={Array.from({ length: 12 }, (_, i) => ({ label: String(i + 1), value: i + 1 }))} />
-        <span>月</span>
-        <Button type="primary" onClick={loadData} loading={loading}>查询</Button>
-        <Button onClick={handleExport}>导出Excel</Button>
+    <Card title="利润表" extra={
+      <Space>
+        <Space size={4}><span>期间：</span>
+          <Select value={period} onChange={setPeriod} style={{ width: 140 }}
+            options={Array.from({ length: 12 }, (_, i) => ({ label: dayjs().subtract(11 - i, 'month').format('YYYY-MM'), value: dayjs().subtract(11 - i, 'month').format('YYYY-MM') }))} />
+        </Space>
+        <Select value={dataType} onChange={setDataType} style={{ width: 100 }} options={[{ label: '月度', value: 'month' }, { label: '年度', value: 'year' }]} />
+        <Space size={4}><span>显示零值：</span><Switch size="small" checked={showZero} onChange={setShowZero} /></Space>
+        <Button icon={<ReloadOutlined />} onClick={loadData}>刷新</Button>
+        <Button icon={<FileExcelOutlined />} onClick={handleExport}>导出</Button>
       </Space>
-      <Table columns={columns} dataSource={data} rowKey="lineNo" loading={loading} pagination={false} />
+    }>
+      <Table columns={columns} dataSource={data} rowKey={(r) => `${r.lineNo}-${r.itemName}`} loading={loading} pagination={false} size="middle" bordered />
     </Card>
   );
 };

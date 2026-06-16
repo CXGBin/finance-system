@@ -1,35 +1,50 @@
 import React, { useState } from 'react';
-import { Card, Select, DatePicker, Button, Table, Statistic, Row, Col } from 'antd';
+import { Card, Select, DatePicker, Button, Row, Col, Statistic, Table, Space } from 'antd';
+import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import { expenseApi } from '@/api/expense';
 import dayjs from 'dayjs';
 
 /** 费用统计 */
 const ExpenseStatistics: React.FC = () => {
-  const [data, setData] = useState<any[]>([]);
+  const [year, setYear] = useState(dayjs().year());
   const [loading, setLoading] = useState(false);
-  const [params, setParams] = useState({ startDate: dayjs().startOf('month').format('YYYY-MM-DD'), endDate: dayjs().format('YYYY-MM-DD') });
+  const [data, setData] = useState<any[]>([]);
 
   const loadData = async () => {
     setLoading(true);
-    try { const res = await expenseApi.statistics(params); setData(res.data || []); } finally { setLoading(false); }
+    try {
+      const res = await expenseApi.statistics({ year });
+      setData(res.data?.list ?? res.data ?? []);
+    } finally { setLoading(false); }
   };
 
-  const total = data.reduce((s, d) => s + (d.totalAmount || 0), 0);
+  React.useEffect(() => { loadData(); }, [year]);
+
+  const totalExpense = data.reduce((s: number, r: any) => s + (r.totalAmount ?? 0), 0);
+  const totalClaim = data.reduce((s: number, r: any) => s + (r.claimCount ?? 0), 0);
 
   const columns = [
-    { title: '费用类型', dataIndex: 'expenseTypeName', key: 'expenseTypeName' },
-    { title: '报销笔数', dataIndex: 'count', key: 'count', align: 'center' },
-    { title: '费用总额', dataIndex: 'totalAmount', key: 'totalAmount', align: 'right' },
+    { title: '费用类型', dataIndex: 'typeName', ellipsis: true },
+    { title: '报销单数', dataIndex: 'claimCount', align: 'right' },
+    { title: '总金额', dataIndex: 'totalAmount', align: 'right', render: (v: number) => <span className="amount-right">¥{(v ?? 0).toFixed(2)}</span> },
+    { title: '已审批', dataIndex: 'approvedAmount', align: 'right', render: (v: number) => <span className="amount-right">¥{(v ?? 0).toFixed(2)}</span> },
+    { title: '待审批', dataIndex: 'pendingAmount', align: 'right', render: (v: number) => <span className="amount-right">¥{(v ?? 0).toFixed(2)}</span> },
   ];
 
   return (
-    <Card title="费用统计">
+    <Card title="费用统计" extra={
+      <Space>
+        <Select value={year} onChange={setYear} style={{ width: 120 }}
+          options={Array.from({ length: 5 }, (_, i) => ({ label: String(dayjs().year() - 2 + i), value: dayjs().year() - 2 + i }))} />
+        <Button icon={<ReloadOutlined />} onClick={loadData}>刷新</Button>
+      </Space>
+    }>
       <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col><DatePicker.RangePicker value={[dayjs(params.startDate), dayjs(params.endDate)]} onChange={(dates) => { if (dates) setParams({ startDate: dates[0]!.format('YYYY-MM-DD'), endDate: dates[1]!.format('YYYY-MM-DD') }); }} /></Col>
-        <Col><Button type="primary" onClick={loadData} loading={loading}>统计</Button></Col>
+        <Col span={8}><Statistic title="费用总额" value={totalExpense} precision={2} prefix="¥" /></Col>
+        <Col span={8}><Statistic title="报销单数" value={totalClaim} suffix="单" /></Col>
+        <Col span={8}><Statistic title="人均费用" value={totalClaim > 0 ? totalExpense / totalClaim : 0} precision={2} prefix="¥" /></Col>
       </Row>
-      <Statistic title="费用总额" value={total} precision={2} style={{ marginBottom: 16 }} />
-      <Table columns={columns} dataSource={data} rowKey="expenseTypeId" loading={loading} pagination={false} />
+      <Table columns={columns} dataSource={data} rowKey={(r) => r.typeName} loading={loading} pagination={false} />
     </Card>
   );
 };

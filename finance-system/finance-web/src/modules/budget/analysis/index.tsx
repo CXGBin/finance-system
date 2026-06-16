@@ -1,31 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Select, Button, Row, Col, Statistic } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
 import { budgetApi } from '@/api/budget';
 import dayjs from 'dayjs';
 
-/** 预算分析页面 */
+/** 预算分析 */
 const BudgetAnalysis: React.FC = () => {
   const [year, setYear] = useState(dayjs().year());
-  const [data, setData] = useState<{ totalBudget: number; totalExecuted: number; totalRate: number; overBudgetCount: number } | null>(null);
+  const [overview, setOverview] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
 
-  const loadData = async () => {
+  const loadOverview = async () => {
     setLoading(true);
-    try { const res = await budgetApi.analysis({ year }); setData(res.data || null); } finally { setLoading(false); }
+    try {
+      const res = await budgetApi.analysisOverview(year);
+      setOverview(res.data ?? {});
+    } finally { setLoading(false); }
   };
 
+  useEffect(() => { loadOverview(); }, [year]);
+
   return (
-    <Card title="预算分析">
-      <Select value={year} onChange={setYear} style={{ width: 100, marginBottom: 16 }} options={Array.from({ length: 5 }, (_, i) => ({ label: String(dayjs().year() - 2 + i), value: dayjs().year() - 2 + i }))} />
-      <Button type="primary" onClick={loadData} loading={loading}>分析</Button>
-      {data && (
-        <Row gutter={16} style={{ marginTop: 16 }}>
-          <Col span={6}><Statistic title="年度总预算" value={data.totalBudget} precision={2} /></Col>
-          <Col span={6}><Statistic title="已执行金额" value={data.totalExecuted} precision={2} /></Col>
-          <Col span={6}><Statistic title="执行率" value={data.totalRate} suffix="%" precision={1} /></Col>
-          <Col span={6}><Statistic title="超预算科目数" value={data.overBudgetCount} valueStyle={{ color: '#ff4d4f' }} /></Col>
-        </Row>
-      )}
+    <Card title="预算分析" extra={
+      <Space>
+        <Select value={year} onChange={setYear} style={{ width: 120 }}
+          options={Array.from({ length: 5 }, (_, i) => ({ label: String(dayjs().year() - 2 + i), value: dayjs().year() - 2 + i }))} />
+        <Button icon={<ReloadOutlined />} onClick={loadOverview}>刷新</Button>
+      </Space>
+    }>
+      <Row gutter={16} style={{ marginBottom: 24 }}>
+        <Col span={6}><Statistic title="年度预算总额" value={overview.totalBudget ?? 0} precision={2} prefix="¥" loading={loading} /></Col>
+        <Col span={6}><Statistic title="已执行金额" value={overview.executedAmount ?? 0} precision={2} prefix="¥" loading={loading} /></Col>
+        <Col span={6}><Statistic title="执行率" value={overview.executionRate ?? 0} precision={1} suffix="%" loading={loading} /></Col>
+        <Col span={6}><Statistic title="超预警科目" value={overview.overBudgetCount ?? 0} loading={loading} valueStyle={{ color: (overview.overBudgetCount ?? 0) > 0 ? '#ff4d4f' : '#3f8600' }} /></Col>
+      </Row>
+      <Card><div style={{ textAlign: 'center', padding: 60, color: '#999' }}>预算分析图表开发中</div></Card>
     </Card>
   );
 };
