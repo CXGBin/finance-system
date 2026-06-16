@@ -1,8 +1,9 @@
-/* 全局字体大小 - 13px略微紧凑模式 */
+/* 全局样式 */
 html,
 body,
 #root {
-  font-size: 13px;
+  margin: 0;
+  padding: 0;
 }
 
 /* 金额右对齐 */

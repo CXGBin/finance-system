@@ -1,192 +1,141 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Card, Table, Button, Space, Input, Modal, Form, message, Popconfirm } from 'antd';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState, useRef } from 'react';
+import { Card, Tabs, Modal, Form, Input, InputNumber, Button, Space, message, Popconfirm } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { ProTable, type ProColumns, type ActionType } from '@ant-design/pro-components';
+import type { LedgerRecord } from '@/types/account.d';
 import { auxiliaryApi } from '@/api/account';
 
-/** 辅助核算类型配置 */
-const TYPE_CONFIG: Record<string, { label: string; codeField: string; nameField: string; columns: Array<{ title: string; dataIndex: string; search?: boolean }> }> = {
-  customer: {
-    label: '客户',
-    codeField: 'customerCode',
-    nameField: 'customerName',
-    columns: [
-      { title: '编码', dataIndex: 'customerCode', search: true },
-      { title: '客户名称', dataIndex: 'customerName', search: true },
-      { title: '联系人', dataIndex: 'contact' },
-      { title: '联系电话', dataIndex: 'phone' },
-      { title: '地址', dataIndex: 'address' },
-      { title: '税号', dataIndex: 'taxNo' },
-    ],
-  },
-  supplier: {
-    label: '供应商',
-    codeField: 'supplierCode',
-    nameField: 'supplierName',
-    columns: [
-      { title: '编码', dataIndex: 'supplierCode', search: true },
-      { title: '供应商名称', dataIndex: 'supplierName', search: true },
-      { title: '联系人', dataIndex: 'contact' },
-      { title: '联系电话', dataIndex: 'phone' },
-      { title: '地址', dataIndex: 'address' },
-      { title: '税号', dataIndex: 'taxNo' },
-    ],
-  },
-  project: {
-    label: '项目',
-    codeField: 'projectCode',
-    nameField: 'projectName',
-    columns: [
-      { title: '项目编码', dataIndex: 'projectCode', search: true },
-      { title: '项目名称', dataIndex: 'projectName', search: true },
-      { title: '负责人', dataIndex: 'manager' },
-      { title: '开始日期', dataIndex: 'beginDate' },
-      { title: '结束日期', dataIndex: 'endDate' },
-      { title: '状态', dataIndex: 'status' },
-    ],
-  },
-};
-
-/** 辅助核算管理页面 */
-const AuxiliaryPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const type = searchParams.get('type') || 'customer';
-  const config = TYPE_CONFIG[type] || TYPE_CONFIG.customer;
-
+/** 辅助核算管理 */
+const AuxiliaryList: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<string>('customer');
   const [data, setData] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<Record<string, unknown> | null>(null);
-  const [searchValues, setSearchValues] = useState<Record<string, string>>({});
-
   const [form] = Form.useForm();
 
-  const loadData = useCallback(async () => {
+  const loadData = async () => {
     setLoading(true);
     try {
-      const res = await auxiliaryApi.list(type);
-      let list = res.data || [];
-      // 前端过滤搜索
-      if (searchValues[config.codeField]) {
-        list = list.filter((item: Record<string, unknown>) =>
-          String(item[config.codeField] || '').includes(searchValues[config.codeField])
-        );
-      }
-      if (searchValues[config.nameField]) {
-        list = list.filter((item: Record<string, unknown>) =>
-          String(item[config.nameField] || '').includes(searchValues[config.nameField])
-        );
-      }
-      setData(list);
-    } catch {
-      message.error('加载辅助核算数据失败');
-    } finally {
-      setLoading(false);
-    }
-  }, [type, searchValues, config]);
-
-  useEffect(() => { loadData(); }, [loadData]);
-
-  const handleAdd = () => {
-    setEditingRecord(null);
-    form.resetFields();
-    setModalOpen(true);
+      const res = await auxiliaryApi.list(activeTab);
+      setData(res.data ?? []);
+    } finally { setLoading(false); }
   };
 
-  const handleEdit = (record: Record<string, unknown>) => {
-    setEditingRecord(record);
-    form.setFieldsValue(record);
-    setModalOpen(true);
-  };
+  React.useEffect(() => { loadData(); }, [activeTab]);
 
+  const handleAdd = () => { setEditingRecord(null); form.resetFields(); setModalOpen(true); };
+  const handleEdit = (record: Record<string, unknown>) => { setEditingRecord(record); form.setFieldsValue(record); setModalOpen(true); };
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
       if (editingRecord) {
-        await auxiliaryApi.update(type, Number(editingRecord.id), values);
+        await auxiliaryApi.update(activeTab, editingRecord.id as number, values);
         message.success('更新成功');
       } else {
-        await auxiliaryApi.add(type, values);
+        await auxiliaryApi.add(activeTab, values);
         message.success('新增成功');
       }
-      setModalOpen(false);
-      loadData();
-    } catch {}
+      setModalOpen(false); loadData();
+    } catch { /* validation */ }
   };
+  const handleDelete = async (id: number) => { await auxiliaryApi.remove(activeTab, id); message.success('删除成功'); loadData(); };
 
-  const handleDelete = async (id: number) => {
-    try {
-      await auxiliaryApi.remove(type, id);
-      message.success('删除成功');
-      loadData();
-    } catch {
-      message.error('删除失败');
+  // 动态列根据辅助核算类型变化
+  const getColumns = (): ProColumns<Record<string, unknown>>[] => {
+    if (activeTab === 'customer') {
+      return [
+        { title: '客户编码', dataIndex: 'customerCode', ellipsis: true },
+        { title: '客户名称', dataIndex: 'customerName', ellipsis: true },
+        { title: '联系人', dataIndex: 'contact', search: false, ellipsis: true },
+        { title: '联系电话', dataIndex: 'phone', search: false, ellipsis: true },
+        { title: '地址', dataIndex: 'address', search: false, ellipsis: true },
+        { title: '税号', dataIndex: 'taxNo', search: false, ellipsis: true },
+        {
+          title: '操作', valueType: 'option', width: 140,
+          render: (_, record) => (
+            <Space>
+              <a onClick={() => handleEdit(record)}>编辑</a>
+              <Popconfirm title="确认删除?" onConfirm={() => handleDelete(record.id as number)}>
+                <a style={{ color: '#ff4d4f' }}>删除</a>
+              </Popconfirm>
+            </Space>
+          ),
+        },
+      ];
     }
+    return [
+      { title: '供应商编码', dataIndex: 'supplierCode', ellipsis: true },
+      { title: '供应商名称', dataIndex: 'supplierName', ellipsis: true },
+      { title: '联系人', dataIndex: 'contact', search: false, ellipsis: true },
+      { title: '联系电话', dataIndex: 'phone', search: false, ellipsis: true },
+      { title: '地址', dataIndex: 'address', search: false, ellipsis: true },
+      { title: '税号', dataIndex: 'taxNo', search: false, ellipsis: true },
+      {
+        title: '操作', valueType: 'option', width: 140,
+        render: (_, record) => (
+          <Space>
+            <a onClick={() => handleEdit(record)}>编辑</a>
+            <Popconfirm title="确认删除?" onConfirm={() => handleDelete(record.id as number)}>
+              <a style={{ color: '#ff4d4f' }}>删除</a>
+            </Popconfirm>
+          </Space>
+        ),
+      },
+    ];
   };
 
-  const columns = [
-    ...config.columns.map((col) => ({
-      ...col,
-      key: col.dataIndex,
-      search: undefined,
-    })),
-    {
-      title: '操作',
-      key: 'action',
-      width: 150,
-      render: (_: unknown, record: Record<string, unknown>) => (
-        <Space>
-          <a onClick={() => handleEdit(record)}>编辑</a>
-          <Popconfirm title="确认删除?" onConfirm={() => handleDelete(Number(record.id))}>
-            <a style={{ color: '#ff4d4f' }}>删除</a>
-          </Popconfirm>
-        </Space>
-      ),
-    },
+  const getFormFields = () => {
+    if (activeTab === 'customer') return (
+      <>
+        <Form.Item name="customerCode" label="客户编码" rules={[{ required: true }]}><Input /></Form.Item>
+        <Form.Item name="customerName" label="客户名称" rules={[{ required: true }]}><Input /></Form.Item>
+        <Form.Item name="contact" label="联系人"><Input /></Form.Item>
+        <Form.Item name="phone" label="联系电话"><Input /></Form.Item>
+        <Form.Item name="address" label="地址"><Input /></Form.Item>
+        <Form.Item name="taxNo" label="税号"><Input /></Form.Item>
+      </>
+    );
+    return (
+      <>
+        <Form.Item name="supplierCode" label="供应商编码" rules={[{ required: true }]}><Input /></Form.Item>
+        <Form.Item name="supplierName" label="供应商名称" rules={[{ required: true }]}><Input /></Form.Item>
+        <Form.Item name="contact" label="联系人"><Input /></Form.Item>
+        <Form.Item name="phone" label="联系电话"><Input /></Form.Item>
+        <Form.Item name="address" label="地址"><Input /></Form.Item>
+        <Form.Item name="taxNo" label="税号"><Input /></Form.Item>
+      </>
+    );
+  };
+
+  const tabItems = [
+    { key: 'customer', label: '客户管理' },
+    { key: 'supplier', label: '供应商管理' },
   ];
 
   return (
-    <Card title={`${config.label}管理`} extra={<Button type="primary" onClick={handleAdd}>新增</Button>}>
-      <Space style={{ marginBottom: 16 }}>
-        <Input
-          placeholder="编码"
-          value={searchValues[config.codeField] || ''}
-          onChange={(e) => setSearchValues({ ...searchValues, [config.codeField]: e.target.value })}
-          allowClear
-          style={{ width: 150 }}
+    <>
+      <Card title="辅助核算">
+        <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
+        <ProTable<Record<string, unknown>>
+          headerTitle=""
+          rowKey="id"
+          columns={getColumns()}
+          search={{ labelWidth: 'auto' }}
+          dataSource={data}
+          loading={loading}
+          pagination={false}
+          toolBarRender={() => [
+            <Button key="add" type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新增</Button>,
+            <Button key="refresh" onClick={loadData}>刷新</Button>,
+          ]}
         />
-        <Input
-          placeholder="名称"
-          value={searchValues[config.nameField] || ''}
-          onChange={(e) => setSearchValues({ ...searchValues, [config.nameField]: e.target.value })}
-          allowClear
-          style={{ width: 150 }}
-        />
-        <Button type="primary" onClick={loadData}>查询</Button>
-      </Space>
-      <Table
-        columns={columns}
-        dataSource={data}
-        rowKey="id"
-        loading={loading}
-        pagination={{ showSizeChanger: true, showTotal: (t) => `共 ${t} 条` }}
-      />
-      <Modal
-        title={editingRecord ? `编辑${config.label}` : `新增${config.label}`}
-        open={modalOpen}
-        onOk={handleSave}
-        onCancel={() => setModalOpen(false)}
-        width={600}
-      >
-        <Form form={form} layout="vertical">
-          {config.columns.map((col) => (
-            <Form.Item key={col.dataIndex} name={col.dataIndex} label={col.title} rules={[{ required: col.dataIndex === config.codeField || col.dataIndex === config.nameField }]}>
-              <Input />
-            </Form.Item>
-          ))}
-        </Form>
+      </Card>
+      <Modal title={editingRecord ? '编辑' : '新增'} open={modalOpen} onOk={handleSave} onCancel={() => setModalOpen(false)} width={600}>
+        <Form form={form} layout="vertical">{getFormFields()}</Form>
       </Modal>
-    </Card>
+    </>
   );
 };
 
-export default AuxiliaryPage;
+export default AuxiliaryList;

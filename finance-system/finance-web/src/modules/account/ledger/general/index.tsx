@@ -1,72 +1,62 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Table, Select, Space, Button, Empty, message } from 'antd';
-import { ledgerApi } from '@/api/account';
-import { subjectApi } from '@/api/account';
-import type { Subject, LedgerRecord } from '@/types/account.d';
-import dayjs from 'dayjs';
+import React, { useRef } from 'react';
+import { Card, Space, Select, Button } from 'antd';
+import { ProTable, type ProColumns, type ActionType } from '@ant-design/pro-components';
+import { SearchOutlined } from '@ant-design/icons';
+import { useState, useEffect } from 'react';
+import type { LedgerRecord, Subject } from '@/types/account.d';
+import { ledgerApi, subjectApi } from '@/api/account';
 
-/** 总账页面 */
+/** 总账查询页面 */
 const GeneralLedger: React.FC = () => {
-  const [data, setData] = useState<LedgerRecord[]>([]);
+  const actionRef = useRef<ActionType>();
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [params, setParams] = useState({ subjectId: undefined as number | undefined, startPeriod: dayjs().startOf('year').format('YYYY-MM'), endPeriod: dayjs().format('YYYY-MM') });
+  const [loadingData, setLoadingData] = useState(false);
+  const [data, setData] = useState<LedgerRecord[]>([]);
 
-  useEffect(() => { loadSubjects(); loadData(); }, []);
+  useEffect(() => {
+    subjectApi.tree().then(res => {
+      const flat: Subject[] = [];
+      const walk = (list: Subject[]) => { list.forEach(s => { flat.push(s); if (s.children) walk(s.children); }); };
+      walk(res.data ?? []);
+      setSubjects(flat);
+    });
+  }, []);
 
-  const loadSubjects = async () => {
-    try {
-      const res = await subjectApi.list();
-      setSubjects(res.data || []);
-    } catch {
-      message.error('加载科目列表失败');
-    }
-  };
-
-  const loadData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await ledgerApi.general(params);
-      setData(res.data || []);
-    } catch {
-      setError('查询总账数据失败');
-      message.error('查询总账数据失败');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const columns = [
-    { title: '科目编码', dataIndex: 'subjectCode', key: 'subjectCode' },
-    { title: '科目名称', dataIndex: 'subjectName', key: 'subjectName' },
-    { title: '期间', dataIndex: 'period', key: 'period' },
-    { title: '期初借方', dataIndex: 'openingDebit', key: 'openingDebit', align: 'right' },
-    { title: '期初贷方', dataIndex: 'openingCredit', key: 'openingCredit', align: 'right' },
-    { title: '本期借方发生', dataIndex: 'currentDebit', key: 'currentDebit', align: 'right' },
-    { title: '本期贷方发生', dataIndex: 'currentCredit', key: 'currentCredit', align: 'right' },
-    { title: '期末借方', dataIndex: 'closingDebit', key: 'closingDebit', align: 'right' },
-    { title: '期末贷方', dataIndex: 'closingCredit', key: 'closingCredit', align: 'right' },
+  const columns: ProColumns<LedgerRecord>[] = [
+    { title: '科目编码', dataIndex: 'subjectCode', search: false, width: 120 },
+    { title: '科目名称', dataIndex: 'subjectName', search: false, ellipsis: true },
+    { title: '凭证号', dataIndex: 'voucherNo', search: false },
+    { title: '凭证日期', dataIndex: 'voucherDate', valueType: 'date', search: false, width: 120, sorter: true },
+    { title: '摘要', dataIndex: 'summary', search: false, ellipsis: true },
+    { title: '借方金额', dataIndex: 'debitAmount', align: 'right', search: false, render: (_, r) => <span className="amount-right">{(r.debitAmount ?? 0).toFixed(2)}</span> },
+    { title: '贷方金额', dataIndex: 'creditAmount', align: 'right', search: false, render: (_, r) => <span className="amount-right">{(r.creditAmount ?? 0).toFixed(2)}</span> },
+    { title: '余额', dataIndex: 'balance', align: 'right', search: false, render: (_, r) => <span className="amount-right">{(r.balance ?? 0).toFixed(2)}</span> },
+    { title: '方向', dataIndex: 'direction', search: false, width: 60 },
   ];
 
   return (
     <Card title="总账">
-      <Space style={{ marginBottom: 16 }}>
-        <Select allowClear placeholder="选择科目" style={{ width: 200 }} value={params.subjectId} onChange={(v) => setParams({ ...params, subjectId: v })} options={subjects.map(s => ({ label: `${s.subjectCode} ${s.subjectName}`, value: s.id }))} />
-        <span>期间：</span>
-        <Select value={params.startPeriod} onChange={(v) => setParams({ ...params, startPeriod: v })} style={{ width: 120 }} options={Array.from({ length: 12 }, (_, i) => ({ label: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}`, value: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}` }))} />
-        <span>至</span>
-        <Select value={params.endPeriod} onChange={(v) => setParams({ ...params, endPeriod: v })} style={{ width: 120 }} options={Array.from({ length: 12 }, (_, i) => ({ label: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}`, value: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}` }))} />
-        <Button type="primary" onClick={loadData}>查询</Button>
-      </Space>
-      {error ? (
-        <Empty description={error} />
-      ) : (
-        <Table columns={columns} dataSource={data} rowKey="id" loading={loading} pagination={false}
-          locale={{ emptyText: <Empty description="暂无总账数据，请选择科目和期间后查询" /> }}
-        />
-      )}
+      <ProTable<LedgerRecord>
+        actionRef={actionRef}
+        headerTitle=""
+        rowKey={(record) => `${record.voucherNo}-${record.subjectId}-${record.summary}`}
+        columns={columns}
+        search={{ labelWidth: 'auto' }}
+        request={async (params) => {
+          setLoadingData(true);
+          try {
+            const res = await ledgerApi.general({
+              subjectId: params.subjectId as number,
+              startPeriod: (params.startPeriod as string) || '',
+              endPeriod: (params.endPeriod as string) || '',
+            });
+            setData(res.data ?? []);
+            return { data: res.data ?? [], success: true, total: (res.data ?? []).length };
+          } finally { setLoadingData(false); }
+        }}
+        columnsState={{ persistenceKey: 'general-ledger-columns' }}
+        pagination={false}
+      />
     </Card>
   );
 };

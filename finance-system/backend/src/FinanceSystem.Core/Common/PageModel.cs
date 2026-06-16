@@ -17,6 +17,16 @@ public class PageRequest
     /// 每页条数
     /// </summary>
     public int PageSize { get; set; } = 20;
+
+    /// <summary>
+    /// 排序字段
+    /// </summary>
+    public string? SortField { get; set; }
+
+    /// <summary>
+    /// 排序方向：asc/desc
+    /// </summary>
+    public string? SortOrder { get; set; }
 }
 
 /// <summary>

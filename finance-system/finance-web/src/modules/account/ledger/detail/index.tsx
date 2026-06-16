@@ -1,69 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import { Card, Table, Select, Space, Button, Empty, message } from 'antd';
+import React, { useRef, useState, useEffect } from 'react';
+import { Card, Select, DatePicker, Button, Space, Button as AntButton } from 'antd';
+import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
+import { ProTable, type ProColumns, type ActionType } from '@ant-design/pro-components';
+import type { LedgerRecord, Subject } from '@/types/account.d';
 import { ledgerApi, subjectApi } from '@/api/account';
-import type { Subject, LedgerRecord } from '@/types/account.d';
-import dayjs from 'dayjs';
 
-/** 明细账页面 */
+/** 明细账查询页面 */
 const DetailLedger: React.FC = () => {
-  const [data, setData] = useState<LedgerRecord[]>([]);
+  const actionRef = useRef<ActionType>();
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [params, setParams] = useState({ subjectId: undefined as number | undefined, startPeriod: dayjs().startOf('year').format('YYYY-MM'), endPeriod: dayjs().format('YYYY-MM') });
 
-  useEffect(() => { loadSubjects(); }, []);
+  useEffect(() => {
+    subjectApi.tree().then(res => {
+      const flat: Subject[] = [];
+      const walk = (list: Subject[]) => { list.forEach(s => { flat.push(s); if (s.children) walk(s.children); }); };
+      walk(res.data ?? []);
+      setSubjects(flat);
+    });
+  }, []);
 
-  const loadSubjects = async () => {
-    try {
-      const res = await subjectApi.list();
-      setSubjects(res.data || []);
-    } catch {
-      message.error('加载科目列表失败');
-    }
-  };
-
-  const loadData = async () => {
-    if (!params.subjectId) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await ledgerApi.detail(params);
-      setData(res.data || []);
-    } catch {
-      setError('查询明细账数据失败');
-      message.error('查询明细账数据失败');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const columns = [
-    { title: '日期', dataIndex: 'voucherDate', key: 'voucherDate' },
-    { title: '凭证号', dataIndex: 'voucherNo', key: 'voucherNo' },
-    { title: '摘要', dataIndex: 'summary', key: 'summary', ellipsis: true },
-    { title: '借方金额', dataIndex: 'debitAmount', key: 'debitAmount', align: 'right' },
-    { title: '贷方金额', dataIndex: 'creditAmount', key: 'creditAmount', align: 'right' },
-    { title: '方向', dataIndex: 'direction', key: 'direction' },
-    { title: '余额', dataIndex: 'balance', key: 'balance', align: 'right' },
+  const columns: ProColumns<LedgerRecord>[] = [
+    { title: '科目编码', dataIndex: 'subjectCode', search: false, width: 120 },
+    { title: '科目名称', dataIndex: 'subjectName', search: false, ellipsis: true },
+    { title: '凭证号', dataIndex: 'voucherNo', search: false },
+    { title: '凭证日期', dataIndex: 'voucherDate', valueType: 'date', search: false, width: 120, sorter: true },
+    { title: '摘要', dataIndex: 'summary', search: false, ellipsis: true },
+    { title: '借方金额', dataIndex: 'debitAmount', align: 'right', search: false, render: (_, r) => <span className="amount-right">{(r.debitAmount ?? 0).toFixed(2)}</span> },
+    { title: '贷方金额', dataIndex: 'creditAmount', align: 'right', search: false, render: (_, r) => <span className="amount-right">{(r.creditAmount ?? 0).toFixed(2)}</span> },
+    { title: '余额', dataIndex: 'balance', align: 'right', search: false, render: (_, r) => <span className="amount-right">{(r.balance ?? 0).toFixed(2)}</span> },
+    { title: '方向', dataIndex: 'direction', search: false, width: 60 },
   ];
 
   return (
     <Card title="明细账">
-      <Space style={{ marginBottom: 16 }}>
-        <Select allowClear placeholder="选择科目（必填）" style={{ width: 200 }} value={params.subjectId} onChange={(v) => setParams({ ...params, subjectId: v })} options={subjects.map(s => ({ label: `${s.subjectCode} ${s.subjectName}`, value: s.id }))} />
-        <Select value={params.startPeriod} onChange={(v) => setParams({ ...params, startPeriod: v })} style={{ width: 120 }} options={Array.from({ length: 12 }, (_, i) => ({ label: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}`, value: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}` }))} />
-        <span>至</span>
-        <Select value={params.endPeriod} onChange={(v) => setParams({ ...params, endPeriod: v })} style={{ width: 120 }} options={Array.from({ length: 12 }, (_, i) => ({ label: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}`, value: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}` }))} />
-        <Button type="primary" onClick={loadData} disabled={!params.subjectId}>查询</Button>
-      </Space>
-      {error ? (
-        <Empty description={error} />
-      ) : (
-        <Table columns={columns} dataSource={data} rowKey="id" loading={loading} pagination={false} scroll={{ y: 500 }}
-          locale={{ emptyText: <Empty description="暂无明细账数据，请选择科目和期间后查询" /> }}
-        />
-      )}
+      <ProTable<LedgerRecord>
+        actionRef={actionRef}
+        headerTitle=""
+        rowKey={(record) => `${record.voucherNo}-${record.subjectId}`}
+        columns={columns}
+        search={{ labelWidth: 'auto' }}
+        request={async (params) => {
+          const res = await ledgerApi.detail({
+            subjectId: params.subjectId as number,
+            startPeriod: (params.startPeriod as string) || '',
+            endPeriod: (params.endPeriod as string) || '',
+          });
+          return { data: res.data ?? [], success: true, total: (res.data ?? []).length };
+        }}
+        pagination={false}
+      />
     </Card>
   );
 };

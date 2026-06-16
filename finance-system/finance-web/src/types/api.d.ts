@@ -17,6 +17,8 @@ export interface PagedResult<T> {
 export interface PageParams {
   pageIndex: number;
   pageSize: number;
+  sortField?: string;
+  sortOrder?: string;
 }
 
 /** 搜索表单类型（各模块可扩展） */

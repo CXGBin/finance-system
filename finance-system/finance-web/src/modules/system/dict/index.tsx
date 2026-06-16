@@ -1,148 +1,136 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, InputNumber, message, Popconfirm, Space } from 'antd';
+import React, { useState, useRef } from 'react';
+import { Modal, Form, Input, InputNumber, Switch, message, Popconfirm, Space, Button, Tag, Card } from 'antd';
+import { ProTable, type ProColumns, type ActionType } from '@ant-design/pro-components';
+import { PlusOutlined } from '@ant-design/icons';
 import type { DictType, DictItem } from '@/types/system.d';
 import { dictApi } from '@/api/system';
+import { createProTableRequest } from '@/utils/proTableRequest';
 
 /** 数据字典管理页面 */
 const DictList: React.FC = () => {
-  const [types, setTypes] = useState<DictType[]>([]);
-  const [selectedType, setSelectedType] = useState<number | null>(null);
-  const [items, setItems] = useState<DictItem[]>([]);
+  const typeActionRef = useRef<ActionType>();
   const [typeModalOpen, setTypeModalOpen] = useState(false);
-  const [itemModalOpen, setItemModalOpen] = useState(false);
   const [editingType, setEditingType] = useState<DictType | null>(null);
-  const [editingItem, setEditingItem] = useState<DictItem | null>(null);
   const [typeForm] = Form.useForm();
+
+  // 字典项相关
+  const [selectedType, setSelectedType] = useState<string>('');
+  const [items, setItems] = useState<DictItem[]>([]);
+  const [itemModalOpen, setItemModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<DictItem | null>(null);
   const [itemForm] = Form.useForm();
 
-  useEffect(() => { loadTypes(); }, []);
+  const typeColumns: ProColumns<DictType>[] = [
+    { title: '字典名称', dataIndex: 'dictName', ellipsis: true },
+    { title: '字典类型', dataIndex: 'dictType', ellipsis: true },
+    {
+      title: '状态', dataIndex: 'status', valueType: 'select',
+      valueEnum: { 1: { text: '启用', status: 'Success' }, 0: { text: '停用', status: 'Default' } },
+    },
+    { title: '备注', dataIndex: 'remark', search: false, ellipsis: true },
+    {
+      title: '操作', valueType: 'option', width: 180,
+      render: (_, record) => (
+        <Space>
+          <a onClick={() => loadItems(record.dictType)}>字典项</a>
+          <a onClick={() => handleEditType(record)}>编辑</a>
+          <Popconfirm title="确认删除?" onConfirm={() => handleDeleteType(record)}>
+            <a style={{ color: '#ff4d4f' }}>删除</a>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
 
-  const loadTypes = async () => {
-    const res = await dictApi.typeList();
-    const d = res.data;
-    setTypes(Array.isArray(d) ? d : ((d as any)?.list || []));
-  };
-
-  const loadItems = async (dictTypeCode: string) => {
-    setSelectedType(dictTypeCode as any);
-    const res = await dictApi.itemList(dictTypeCode);
-    const d = res.data;
-    setItems(Array.isArray(d) ? d : ((d as any)?.list || []));
-  };
-
-  const handleAddType = () => {
-    setEditingType(null);
-    typeForm.resetFields();
-    setTypeModalOpen(true);
-  };
-
-  const handleEditType = (record: DictType) => {
-    setEditingType(record);
-    typeForm.setFieldsValue(record);
-    setTypeModalOpen(true);
-  };
-
+  const handleAddType = () => { setEditingType(null); typeForm.resetFields(); typeForm.setFieldsValue({ status: 1 }); setTypeModalOpen(true); };
+  const handleEditType = (record: DictType) => { setEditingType(record); typeForm.setFieldsValue(record); setTypeModalOpen(true); };
   const handleSaveType = async () => {
     try {
       const values = await typeForm.validateFields();
-      if (editingType) {
-        await dictApi.typeUpdate({ ...editingType, ...values });
-        message.success('更新成功');
-      } else {
-        await dictApi.typeAdd(values as any);
-        message.success('新增成功');
-      }
-      setTypeModalOpen(false);
-      loadTypes();
-    } catch {}
+      if (editingType) { await dictApi.typeUpdate({ ...editingType, ...values }); message.success('更新成功'); }
+      else { await dictApi.typeAdd(values as any); message.success('新增成功'); }
+      setTypeModalOpen(false); typeActionRef.current?.reload();
+    } catch { /* validation */ }
+  };
+  const handleDeleteType = async (record: DictType) => { await dictApi.typeRemove(record.id); message.success('删除成功'); typeActionRef.current?.reload(); };
+
+  const loadItems = async (dictType: string) => {
+    setSelectedType(dictType);
+    const data = await dictApi.itemList(dictType);
+    setItems(data.data ?? []);
   };
 
-  const handleAddItem = () => {
-    setEditingItem(null);
-    itemForm.resetFields();
-    itemForm.setFieldsValue({ dictType: selectedType });
-    setItemModalOpen(true);
-  };
-
-  const handleEditItem = (record: DictItem) => {
-    setEditingItem(record);
-    itemForm.setFieldsValue(record);
-    setItemModalOpen(true);
-  };
-
+  const handleAddItem = () => { setEditingItem(null); itemForm.resetFields(); itemForm.setFieldsValue({ dictType: selectedType, sortOrder: 0, status: 1 }); setItemModalOpen(true); };
+  const handleEditItem = (record: DictItem) => { setEditingItem(record); itemForm.setFieldsValue(record); setItemModalOpen(true); };
   const handleSaveItem = async () => {
     try {
       const values = await itemForm.validateFields();
-      if (editingItem) {
-        await dictApi.itemUpdate({ ...editingItem, ...values });
-        message.success('更新成功');
-      } else {
-        await dictApi.itemAdd(values as any);
-        message.success('新增成功');
-      }
-      setItemModalOpen(false);
-      if (selectedType) loadItems(selectedType);
-    } catch {}
+      if (editingItem) { await dictApi.itemUpdate({ ...editingItem, ...values }); message.success('更新成功'); }
+      else { await dictApi.itemAdd(values as any); message.success('新增成功'); }
+      setItemModalOpen(false); loadItems(selectedType);
+    } catch { /* validation */ }
   };
+  const handleDeleteItem = async (record: DictItem) => { await dictApi.itemRemove(record.id); message.success('删除成功'); loadItems(selectedType); };
 
-  const typeColumns = [
-    { title: '字典名称', dataIndex: 'dictName', key: 'dictName' },
-    { title: '字典类型', dataIndex: 'dictType', key: 'dictType' },
-    { title: '操作', key: 'action', render: (_: unknown, record: DictType) => (
-      <Space>
-        <a onClick={() => handleEditType(record as DictType)}>编辑</a>
-        <Popconfirm title="确认删除?" onConfirm={() => dictApi.typeRemove(record.id).then(() => { message.success('删除成功'); loadTypes(); })}>
-          <a style={{ color: '#ff4d4f' }}>删除</a>
-        </Popconfirm>
-      </Space>
-    )},
-  ];
-
-  const itemColumns = [
-    { title: '字典标签', dataIndex: 'dictLabel', key: 'dictLabel' },
-    { title: '字典键值', dataIndex: 'dictValue', key: 'dictValue' },
-    { title: '排序', dataIndex: 'sortOrder', key: 'sortOrder' },
-    { title: '操作', key: 'action', render: (_: unknown, record: DictItem) => (
-      <Space>
-        <a onClick={() => handleEditItem(record as DictItem)}>编辑</a>
-        <Popconfirm title="确认删除?" onConfirm={() => dictApi.itemRemove(record.id).then(() => { message.success('删除成功'); if (selectedType) loadItems(selectedType); })}>
-          <a style={{ color: '#ff4d4f' }}>删除</a>
-        </Popconfirm>
-      </Space>
-    )},
+  const itemColumns: ProColumns<DictItem>[] = [
+    { title: '字典标签', dataIndex: 'dictLabel', ellipsis: true },
+    { title: '字典值', dataIndex: 'dictValue', ellipsis: true },
+    { title: '排序', dataIndex: 'sortOrder', sorter: true, search: false, width: 80, align: 'right' },
+    {
+      title: '状态', dataIndex: 'status', valueType: 'select', search: false,
+      valueEnum: { 1: { text: '启用', status: 'Success' }, 0: { text: '停用', status: 'Default' } },
+    },
+    { title: '备注', dataIndex: 'remark', search: false, ellipsis: true },
+    {
+      title: '操作', valueType: 'option', width: 140,
+      render: (_, record) => (
+        <Space>
+          <a onClick={() => handleEditItem(record)}>编辑</a>
+          <Popconfirm title="确认删除?" onConfirm={() => handleDeleteItem(record)}>
+            <a style={{ color: '#ff4d4f' }}>删除</a>
+          </Popconfirm>
+        </Space>
+      ),
+    },
   ];
 
   return (
-    <div>
-      <Button type="primary" onClick={handleAddType} style={{ marginBottom: 16 }}>新增字典类型</Button>
-      <Table
-        dataSource={types}
-        columns={typeColumns}
-        rowKey="id"
-        onRow={(record) => ({ onClick: () => loadItems(record.dictType), style: { cursor: selectedType === record.dictType ? 'default' : 'pointer', background: selectedType === record.dictType ? '#e6f7ff' : undefined } })}
+    <>
+      <ProTable<DictType>
+        actionRef={typeActionRef} headerTitle="字典类型" rowKey="id" columns={typeColumns}
+        search={{ labelWidth: 'auto' }}
+        request={createProTableRequest((params) => dictApi.typePage(params as any))}
+        toolBarRender={() => [<Button key="add" type="primary" icon={<PlusOutlined />} onClick={handleAddType}>新增类型</Button>]}
+        pagination={{ defaultPageSize: 10, showSizeChanger: true }}
       />
       {selectedType && (
-        <div style={{ marginTop: 24 }}>
-          <div style={{ marginBottom: 12, fontWeight: 'bold' }}>字典项列表 <Button type="link" onClick={handleAddItem}>新增字典项</Button></div>
-          <Table dataSource={items} columns={itemColumns} rowKey="id" pagination={false} />
-        </div>
+        <Card title={`字典项 - ${selectedType}`} style={{ marginTop: 16 }} extra={<Button type="primary" size="small" onClick={handleAddItem}>新增字典项</Button>}>
+          <ProTable<DictItem>
+            headerTitle="" rowKey="id" columns={itemColumns} search={false}
+            dataSource={items} pagination={false}
+            toolBarRender={false}
+          />
+        </Card>
       )}
-      <Modal title={editingType ? '编辑字典类型' : '新增字典类型'} open={typeModalOpen} onOk={handleSaveType} onCancel={() => setTypeModalOpen(false)}>
+      <Modal title={editingType ? '编辑字典类型' : '新增字典类型'} open={typeModalOpen} onOk={handleSaveType} onCancel={() => setTypeModalOpen(false)} width={500}>
         <Form form={typeForm} layout="vertical">
           <Form.Item name="dictName" label="字典名称" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="dictType" label="字典类型" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="status" label="状态" initialValue={0}><Input type="number" /></Form.Item>
+          <Form.Item name="dictType" label="字典类型" rules={[{ required: true }]}><Input disabled={!!editingType} /></Form.Item>
+          <Form.Item name="status" label="状态" valuePropName="checked"><Switch checkedChildren="启用" unCheckedChildren="禁用" /></Form.Item>
+          <Form.Item name="remark" label="备注"><Input.TextArea rows={2} /></Form.Item>
         </Form>
       </Modal>
-      <Modal title={editingItem ? '编辑字典项' : '新增字典项'} open={itemModalOpen} onOk={handleSaveItem} onCancel={() => setItemModalOpen(false)}>
+      <Modal title={editingItem ? '编辑字典项' : '新增字典项'} open={itemModalOpen} onOk={handleSaveItem} onCancel={() => setItemModalOpen(false)} width={500}>
         <Form form={itemForm} layout="vertical">
           <Form.Item name="dictType" label="字典类型" hidden><Input /></Form.Item>
           <Form.Item name="dictLabel" label="字典标签" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="dictValue" label="字典键值" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="sortOrder" label="排序" initialValue={0}><InputNumber /></Form.Item>
+          <Form.Item name="dictValue" label="字典值" rules={[{ required: true }]}><Input /></Form.Item>
+          <Form.Item name="sortOrder" label="排序"><InputNumber style={{ width: '100%' }} /></Form.Item>
+          <Form.Item name="status" label="状态" valuePropName="checked"><Switch checkedChildren="启用" unCheckedChildren="禁用" /></Form.Item>
+          <Form.Item name="remark" label="备注"><Input.TextArea rows={2} /></Form.Item>
         </Form>
       </Modal>
-    </div>
+    </>
   );
 };
 

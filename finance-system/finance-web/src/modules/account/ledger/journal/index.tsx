@@ -1,42 +1,40 @@
-import React, { useState } from 'react';
-import { Card, Table, Select, Space, Button } from 'antd';
-import { ledgerApi } from '@/api/account';
+import React, { useRef } from 'react';
+import { Card } from 'antd';
+import { ProTable, type ProColumns, type ActionType } from '@ant-design/pro-components';
 import type { LedgerRecord } from '@/types/account.d';
-import dayjs from 'dayjs';
+import { ledgerApi } from '@/api/account';
 
-/** 日记账页面 */
+/** 日记账查询页面（现金/银行日记账） */
 const JournalLedger: React.FC = () => {
-  const [data, setData] = useState<LedgerRecord[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [params, setParams] = useState({ startPeriod: dayjs().startOf('year').format('YYYY-MM'), endPeriod: dayjs().format('YYYY-MM') });
+  const actionRef = useRef<ActionType>();
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const res = await ledgerApi.journal(params);
-      setData(res.data || []);
-    } finally { setLoading(false); }
-  };
-
-  const columns = [
-    { title: '日期', dataIndex: 'voucherDate', key: 'voucherDate' },
-    { title: '凭证号', dataIndex: 'voucherNo', key: 'voucherNo' },
-    { title: '摘要', dataIndex: 'summary', key: 'summary', ellipsis: true },
-    { title: '科目编码', dataIndex: 'subjectCode', key: 'subjectCode' },
-    { title: '科目名称', dataIndex: 'subjectName', key: 'subjectName' },
-    { title: '借方金额', dataIndex: 'debitAmount', key: 'debitAmount', align: 'right' },
-    { title: '贷方金额', dataIndex: 'creditAmount', key: 'creditAmount', align: 'right' },
+  const columns: ProColumns<LedgerRecord>[] = [
+    { title: '科目编码', dataIndex: 'subjectCode', search: false, width: 120 },
+    { title: '科目名称', dataIndex: 'subjectName', search: false, ellipsis: true },
+    { title: '凭证号', dataIndex: 'voucherNo', search: false },
+    { title: '凭证日期', dataIndex: 'voucherDate', valueType: 'date', search: false, width: 120, sorter: true },
+    { title: '摘要', dataIndex: 'summary', search: false, ellipsis: true },
+    { title: '借方金额', dataIndex: 'debitAmount', align: 'right', search: false, render: (_, r) => <span className="amount-right">{(r.debitAmount ?? 0).toFixed(2)}</span> },
+    { title: '贷方金额', dataIndex: 'creditAmount', align: 'right', search: false, render: (_, r) => <span className="amount-right">{(r.creditAmount ?? 0).toFixed(2)}</span> },
   ];
 
   return (
-    <Card title="日记账">
-      <Space style={{ marginBottom: 16 }}>
-        <Select value={params.startPeriod} onChange={(v) => setParams({ ...params, startPeriod: v })} style={{ width: 120 }} options={Array.from({ length: 12 }, (_, i) => ({ label: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}`, value: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}` }))} />
-        <span>至</span>
-        <Select value={params.endPeriod} onChange={(v) => setParams({ ...params, endPeriod: v })} style={{ width: 120 }} options={Array.from({ length: 12 }, (_, i) => ({ label: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}`, value: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}` }))} />
-        <Button type="primary" onClick={loadData}>查询</Button>
-      </Space>
-      <Table columns={columns} dataSource={data} rowKey="id" loading={loading} pagination={false} scroll={{ y: 500 }} />
+    <Card title="日记账（现金/银行）">
+      <ProTable<LedgerRecord>
+        actionRef={actionRef}
+        headerTitle=""
+        rowKey={(record) => `${record.voucherNo}-${record.subjectId}`}
+        columns={columns}
+        search={{ labelWidth: 'auto' }}
+        request={async (params) => {
+          const res = await ledgerApi.journal({
+            startPeriod: (params.startPeriod as string) || '',
+            endPeriod: (params.endPeriod as string) || '',
+          });
+          return { data: res.data ?? [], success: true, total: (res.data ?? []).length };
+        }}
+        pagination={false}
+      />
     </Card>
   );
 };

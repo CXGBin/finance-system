@@ -9,17 +9,10 @@ const App: React.FC = () => {
     <ConfigProvider
       locale={zhCN}
       theme={{
-        algorithm: theme.compactAlgorithm,
+      algorithm: theme.defaultAlgorithm,
         token: {
           colorPrimary: '#1890ff',
           borderRadius: 6,
-          fontSize: 13,
-          fontSizeHeading1: 30,
-          fontSizeHeading2: 24,
-          fontSizeHeading3: 20,
-          fontSizeHeading4: 16,
-          sizeStep: 4,
-          sizeUnit: 4,
         },
         components: {
           Layout: {

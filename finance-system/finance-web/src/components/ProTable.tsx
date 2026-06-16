@@ -1,141 +1,101 @@
-import React, { useState, useCallback, useEffect, useImperativeHandle, forwardRef } from 'react';
-import { Table, Button, Space, Input, Row, Col, Form, Empty } from 'antd';
-import type { TableProps, ColumnType } from 'antd';
-import { ReloadOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
-import type { PagedResult, PageParams, SearchParams } from '@/types/api.d';
-
-export interface ProTableColumn<T = Record<string, unknown>> extends ColumnType<T> {
-  search?: boolean;
-  searchRender?: React.ReactNode;
-}
+/**
+ * 兼容性 ProTable 包装器
+ * 供尚未迁移到官方 ProTable 的旧页面使用
+ * 新页面请直接使用 @ant-design/pro-components 的 ProTable
+ */
+import React, { useRef, useMemo, useImperativeHandle, forwardRef } from 'react';
+import { ProTable, type ProColumns, type ActionType } from '@ant-design/pro-components';
+import type { PageParams, SearchParams, PagedResult } from '@/types/api.d';
 
 export interface ProTableRef {
   refresh: () => void;
 }
 
-export interface ProTableProps<T = Record<string, unknown>> {
+export interface ProTableColumn<T = Record<string, unknown>> {
+  title: string;
+  dataIndex: string;
+  key?: string;
+  search?: boolean;
+  searchRender?: React.ReactNode;
+  sorter?: boolean;
+  align?: 'left' | 'center' | 'right';
+  width?: number;
+  ellipsis?: boolean;
+  render?: (val: unknown, record: T, index: number) => React.ReactNode;
+  [key: string]: unknown;
+}
+
+interface LegacyProTableProps<T = Record<string, unknown>> {
   columns: ProTableColumn<T>[];
   fetchData: (params: PageParams & SearchParams) => Promise<PagedResult<T>>;
-  rowKey?: string | ((record: T) => string);
+  rowKey?: string;
   toolbarActions?: React.ReactNode;
   searchInitialValues?: SearchParams;
-  tableProps?: Partial<TableProps<T>>;
+  tableProps?: Record<string, unknown>;
   defaultPageSize?: number;
 }
 
-const ProTableInner = forwardRef<ProTableRef, ProTableProps>(function ProTableInner<T extends Record<string, unknown>>({
+const LegacyProTableInner = forwardRef<ProTableRef, LegacyProTableProps>(function LegacyProTableInner<T extends Record<string, unknown>>({
   columns,
   fetchData,
-  rowKey = 'id' as string | ((record: T) => string),
+  rowKey = 'id',
   toolbarActions,
   searchInitialValues = {},
-  tableProps,
   defaultPageSize = 10,
 }, ref) {
-  const [form] = Form.useForm();
-  const [data, setData] = useState<T[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [total, setTotal] = useState(0);
-  const [pageParams, setPageParams] = useState<PageParams>({ pageIndex: 1, pageSize: defaultPageSize });
-  const [searchExpanded, setSearchExpanded] = useState(false);
+  const actionRef = useRef<ActionType>();
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  useImperativeHandle(ref, () => ({
+    refresh: () => actionRef.current?.reload(),
+  }), []);
+
+  const proColumns: ProColumns<T>[] = useMemo(() =>
+    columns.map((col) => {
+      const proCol: ProColumns<T> = {
+        title: col.title,
+        dataIndex: col.dataIndex as string,
+        key: col.key ?? col.dataIndex,
+        ellipsis: col.ellipsis,
+        align: col.align,
+        width: col.width,
+        render: col.render as ProColumns<T>['render'],
+      };
+      if (col.sorter) proCol.sorter = true;
+      return proCol;
+    }),
+    [columns],
+  );
+
+  const request = async (params: Record<string, unknown>) => {
+    const { current, pageSize, ...rest } = params as Record<string, unknown>;
+    const requestParams: PageParams & SearchParams = {
+      pageIndex: (current as number) ?? 1,
+      pageSize: (pageSize as number) ?? defaultPageSize,
+    };
+    Object.entries(rest).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        requestParams[key] = value;
+      }
+    });
     try {
-      const values = form.getFieldsValue();
-      const res = await fetchData({ ...pageParams, ...values });
-      setData(res.data?.list || []);
-      setTotal(res.data?.total || 0);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : '加载失败');
-    } finally {
-      setLoading(false);
+      const res = await fetchData(requestParams);
+      return { data: res.data?.list ?? [], success: true, total: res.data?.total ?? 0 };
+    } catch {
+      return { data: [], success: false, total: 0 };
     }
-  }, [fetchData, pageParams, form]);
-
-  useImperativeHandle(ref, () => ({ refresh: loadData }), [loadData]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
-
-  const handleSearch = () => {
-    setPageParams((p) => ({ ...p, pageIndex: 1 }));
   };
-
-  const handleReset = () => {
-    form.resetFields();
-    setPageParams((p) => ({ ...p, pageIndex: 1 }));
-  };
-
-  const handlePageChange = (page: number, pageSize: number) => {
-    setPageParams({ pageIndex: page, pageSize });
-  };
-
-  const searchColumns = columns.filter((col) => col.search);
-  const showSearch = searchColumns.length > 0;
-  const visibleSearchCols = searchExpanded ? searchColumns : searchColumns.slice(0, 3);
 
   return (
-    <div>
-      {showSearch && (
-        <Form form={form} initialValues={searchInitialValues} className="pro-table-search">
-          <Row gutter={[16, 16]}>
-            {visibleSearchCols.map((col) => (
-              <Col span={6} key={col.dataIndex as string}>
-                <Form.Item name={col.dataIndex as string} label={col.title as string}>
-                  {col.searchRender || <Input placeholder={`请输入${col.title}`} allowClear />}
-                </Form.Item>
-              </Col>
-            ))}
-            <Col span={6} style={{ textAlign: 'right' }}>
-              <Space>
-                <Button type="primary" onClick={handleSearch}>查询</Button>
-                <Button onClick={handleReset}>重置</Button>
-                {searchColumns.length > 3 && (
-                  <Button type="link" onClick={() => setSearchExpanded(!searchExpanded)}
-                    icon={searchExpanded ? <UpOutlined /> : <DownOutlined />}>
-                    {searchExpanded ? '收起' : '展开'}
-                  </Button>
-                )}
-              </Space>
-            </Col>
-          </Row>
-        </Form>
-      )}
-
-      <div className="pro-table-toolbar" style={{ marginBottom: 16 }}>
-        <Space>
-          <Button type="primary" icon={<ReloadOutlined />} onClick={loadData} loading={loading}>刷新</Button>
-          {toolbarActions}
-        </Space>
-      </div>
-
-      {error ? (
-        <Empty description={error} />
-      ) : (
-        <Table<T>
-          {...tableProps}
-          rowKey={rowKey}
-          columns={columns}
-          dataSource={data}
-          loading={loading}
-          pagination={{
-            current: pageParams.pageIndex,
-            pageSize: pageParams.pageSize,
-            total,
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (t) => `共 ${t} 条`,
-            onChange: handlePageChange,
-          }}
-          scroll={{ x: 'max-content' }}
-        />
-      )}
-    </div>
+    <ProTable<T>
+      actionRef={actionRef}
+      rowKey={rowKey as string}
+      columns={proColumns}
+      search={columns.some(c => c.search) ? { labelWidth: 'auto' } : false}
+      request={request}
+      pagination={{ defaultPageSize, showSizeChanger: true }}
+      toolBarRender={toolbarActions ? () => [toolbarActions] : undefined}
+    />
   );
 });
 
-export default ProTableInner;
+export default LegacyProTableInner;

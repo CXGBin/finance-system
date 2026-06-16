@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Tree, Button, Modal, Form, Input, InputNumber, Select, Tag, message, Popconfirm, Space } from 'antd';
+import React, { useState, useRef } from 'react';
+import { Modal, Form, Input, InputNumber, Select, Switch, Space, Button, message, Popconfirm, Tree, Card, Tag, Dropdown } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, ExportOutlined, ImportOutlined } from '@ant-design/icons';
 import type { Subject } from '@/types/account.d';
 import { subjectApi, subjectImportExportApi } from '@/api/account';
 
@@ -10,17 +11,17 @@ const SubjectList: React.FC = () => {
   const [editingRecord, setEditingRecord] = useState<Subject | null>(null);
   const [form] = Form.useForm();
 
-  useEffect(() => { loadTree(); }, []);
-
   const loadTree = async () => {
-    const res = await subjectApi.tree();
-    setTreeData(res.data || []);
+    const data = await subjectApi.tree();
+    setTreeData(data.data ?? []);
   };
+
+  React.useEffect(() => { loadTree(); }, []);
 
   const handleAdd = (parent?: Subject) => {
     setEditingRecord(null);
     form.resetFields();
-    if (parent) form.setFieldsValue({ parentId: parent.id, parentName: parent.subjectName });
+    form.setFieldsValue({ parentId: parent?.id ?? 0, isEnabled: 1, balanceDirection: 1 });
     setModalOpen(true);
   };
 
@@ -33,82 +34,88 @@ const SubjectList: React.FC = () => {
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
-      if (editingRecord) {
-        await subjectApi.update({ ...editingRecord, ...values });
-        message.success('更新成功');
-      } else {
-        await subjectApi.add(values as any);
-        message.success('新增成功');
-      }
-      setModalOpen(false);
-      loadTree();
-    } catch {}
+      if (editingRecord) { await subjectApi.update({ ...editingRecord, ...values }); message.success('更新成功'); }
+      else { await subjectApi.add(values as any); message.success('新增成功'); }
+      setModalOpen(false); loadTree();
+    } catch { /* validation */ }
   };
 
-  const handleDelete = async (id: number) => {
-    await subjectApi.remove(id);
+  const handleDelete = async (record: Subject) => {
+    await subjectApi.remove(record.id);
     message.success('删除成功');
     loadTree();
   };
 
-  /** 导出科目 */
-  const handleExport = async () => {
-    try {
-      message.loading({ content: '正在导出...', key: 'export' });
-      const res = await subjectImportExportApi.exportSubjects();
-      // 下载blob文件
-      const link = document.createElement('a');
-      link.href = res.data as string;
-      link.download = '科目导出.xlsx';
-      link.click();
-      message.success({ content: '导出成功', key: 'export' });
-    } catch {
-      message.error({ content: '导出失败', key: 'export' });
-    }
+  const typeTag = (type: number) => {
+    const map: Record<number, { color: string; text: string }> = { 1: { color: 'blue', text: '资产' }, 2: { color: 'green', text: '负债' }, 3: { color: 'orange', text: '权益' }, 4: { color: 'purple', text: '成本' }, 5: { color: 'red', text: '损益' } };
+    const info = map[type] || { color: 'default', text: '其他' };
+    return <Tag color={info.color}>{info.text}</Tag>;
   };
 
-  const buildTreeNodes = (list: Subject[]): DataNode[] =>
-    list.map(item => ({
+  const buildTreeNodes = (data: Subject[]) =>
+    data.map((item) => ({
       key: item.id,
       title: (
-        <span>
-          {item.subjectCode} {item.subjectName}
-          {item.isEnabled === 0 && <Tag color="red" style={{ marginLeft: 4 }}>停用</Tag>}
-          <Button type="link" size="small" onClick={(e) => { e.stopPropagation(); handleAdd(item); }}>新增</Button>
-          <Button type="link" size="small" onClick={(e) => { e.stopPropagation(); handleEdit(item); }}>编辑</Button>
-          <Popconfirm title="确认删除?" onConfirm={() => handleDelete(item.id)}>
-            <Button type="link" size="small" danger onClick={(e) => e.stopPropagation()}>删除</Button>
-          </Popconfirm>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          <span style={{ fontFamily: 'monospace' }}>{item.subjectCode}</span>
+          <span>{item.subjectName}</span>
+          {typeTag(item.subjectType)}
+          {item.isEnabled === 1 ? <Tag color="success" style={{ fontSize: 10 }}>启用</Tag> : <Tag color="default" style={{ fontSize: 10 }}>停用</Tag>}
+          {item.isCash === 1 && <Tag color="cyan" style={{ fontSize: 10 }}>现金</Tag>}
+          {item.isBank === 1 && <Tag color="blue" style={{ fontSize: 10 }}>银行</Tag>}
+          <Space size={4}>
+            <a onClick={() => handleAdd(item)} style={{ fontSize: 12 }}><PlusOutlined /></a>
+            <a onClick={() => handleEdit(item)} style={{ fontSize: 12 }}><EditOutlined /></a>
+            <Popconfirm title="确认删除该科目?" onConfirm={() => handleDelete(item)}>
+              <a style={{ fontSize: 12, color: '#ff4d4f' }}><DeleteOutlined /></a>
+            </Popconfirm>
+          </Space>
         </span>
       ),
-      children: item.children ? buildTreeNodes(item.children) : [],
+      children: item.children ? buildTreeNodes(item.children) : undefined,
     }));
 
   return (
-    <div>
-      <div style={{ marginBottom: 16 }}>
-        <Button type="primary" onClick={() => handleAdd()}>新增科目</Button>
-        <Button style={{ marginLeft: 8 }} onClick={handleExport}>导出</Button>
-      </div>
-      <Tree showLine defaultExpandAll treeData={buildTreeNodes(treeData)} />
+    <>
+      <Card title="科目管理" extra={
+        <Space>
+          <Button icon={<ExportOutlined />} onClick={() => subjectImportExportApi.exportSubjects()}>导出</Button>
+          <Button icon={<ImportOutlined />}>导入</Button>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => handleAdd()}>新增科目</Button>
+        </Space>
+      }>
+        {treeData.length > 0 ? (
+          <Tree showLine defaultExpandAll treeData={buildTreeNodes(treeData)} blockNode />
+        ) : (
+          <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>暂无科目数据，请先初始化</div>
+        )}
+      </Card>
       <Modal title={editingRecord ? '编辑科目' : '新增科目'} open={modalOpen} onOk={handleSave} onCancel={() => setModalOpen(false)} width={600}>
         <Form form={form} layout="vertical">
-          <Form.Item name="parentId" label="上级科目" hidden><Input /></Form.Item>
+          <Form.Item name="parentId" label="上级科目" hidden><InputNumber /></Form.Item>
           <Form.Item name="subjectCode" label="科目编码" rules={[{ required: true }]}><Input /></Form.Item>
           <Form.Item name="subjectName" label="科目名称" rules={[{ required: true }]}><Input /></Form.Item>
           <Form.Item name="subjectType" label="科目类型" rules={[{ required: true }]}>
-            <Select options={[{ label: '资产', value: 1 }, { label: '负债', value: 2 }, { label: '权益', value: 3 }, { label: '成本', value: 4 }, { label: '损益', value: 5 }]} />
+            <Select options={[
+              { label: '资产', value: 1 }, { label: '负债', value: 2 }, { label: '权益', value: 3 },
+              { label: '成本', value: 4 }, { label: '损益', value: 5 },
+            ]} />
           </Form.Item>
-          <Form.Item name="balanceDirection" label="余额方向">
+          <Form.Item name="balanceDirection" label="余额方向" rules={[{ required: true }]}>
             <Select options={[{ label: '借方', value: 1 }, { label: '贷方', value: 2 }]} />
           </Form.Item>
-          <Form.Item name="auxiliaryType" label="辅助核算">
-            <Select allowClear options={[{ label: '无', value: '' }, { label: '客户', value: 'customer' }, { label: '供应商', value: 'supplier' }, { label: '项目', value: 'project' }]} />
+          <Form.Item name="isEnabled" label="状态">
+            <Select options={[{ label: '启用', value: 1 }, { label: '停用', value: 0 }]} />
           </Form.Item>
-          <Form.Item name="isEnabled" label="状态" initialValue={1}><Input type="number" /></Form.Item>
+          <Form.Item name="isCash" label="现金科目">
+            <Select options={[{ label: '否', value: 0 }, { label: '是', value: 1 }]} />
+          </Form.Item>
+          <Form.Item name="isBank" label="银行科目">
+            <Select options={[{ label: '否', value: 0 }, { label: '是', value: 1 }]} />
+          </Form.Item>
         </Form>
       </Modal>
-    </div>
+    </>
   );
 };
 

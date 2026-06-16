@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Table, Switch, Tag, message } from 'antd';
+import React, { useState } from 'react';
+import { Card, Switch, Tag, Empty, Space, message } from 'antd';
 import type { SysModule } from '@/types/system.d';
 import { moduleApi } from '@/api/system';
 
@@ -8,41 +8,45 @@ const ModuleList: React.FC = () => {
   const [modules, setModules] = useState<SysModule[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => { loadModules(); }, []);
-
   const loadModules = async () => {
     setLoading(true);
-    const res = await moduleApi.list();
-    setModules(res.data || []);
-    setLoading(false);
+    try {
+      const data = await moduleApi.list();
+      setModules(data.data ?? []);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleToggle = async (record: SysModule) => {
-    if (record.isCore) {
-      message.warning('核心模块不可关闭');
-      return;
-    }
-    await moduleApi.update(record.id, !record.isEnabled);
-    message.success(record.isEnabled ? '已关闭' : '已启用');
+  React.useEffect(() => { loadModules(); }, []);
+
+  const handleToggle = async (module: SysModule, enabled: boolean) => {
+    await moduleApi.toggle(module.moduleId, enabled);
+    message.success(enabled ? '已启用' : '已停用');
     loadModules();
   };
 
-  const columns = [
-    { title: '模块标识', dataIndex: 'moduleId', key: 'moduleId' },
-    { title: '模块名称', dataIndex: 'moduleName', key: 'moduleName' },
-    { title: '排序', dataIndex: 'sortOrder', key: 'sortOrder' },
-    { title: '描述', dataIndex: 'description', key: 'description', ellipsis: true },
-    {
-      title: '状态', dataIndex: 'isEnabled', key: 'isEnabled',
-      render: (val: number, record: SysModule) => (
-        record.isCore ? <Tag color="blue">核心</Tag> : (
-          <Switch checked={val === 1} onChange={() => handleToggle(record as SysModule)} />
-        )
-      ),
-    },
-  ];
-
-  return <Table dataSource={modules} columns={columns} rowKey="id" loading={loading} pagination={false} />;
+  return (
+    <Card title="模块管理" loading={loading}>
+      {modules.length > 0 ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
+          {modules.map((m) => (
+            <Card key={m.moduleId} size="small" title={m.moduleName}
+              extra={<Switch checked={m.isEnabled} checkedChildren="启用" unCheckedChildren="禁用"
+                onChange={(checked) => handleToggle(m, checked)} />}>
+              <p style={{ margin: '4px 0', color: '#666' }}>{m.description || '暂无描述'}</p>
+              <Space>
+                <Tag color={m.isCore ? 'blue' : 'default'}>{m.isCore ? '核心' : '扩展'}</Tag>
+                {m.moduleId && <Tag>{m.moduleId}</Tag>}
+              </Space>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <Empty description="暂无模块数据" />
+      )}
+    </Card>
+  );
 };
 
 export default ModuleList;

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, InputNumber, Select, Tree, message, Popconfirm } from 'antd';
+import React, { useState } from 'react';
+import { Modal, Form, Input, InputNumber, Select, Space, Button, message, Popconfirm, Tree, Card, Tag } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { Menu } from '@/types/system.d';
 import { menuApi } from '@/api/system';
-import { Button } from 'antd';
 
 /** 菜单管理页面 */
 const MenuList: React.FC = () => {
@@ -11,17 +11,17 @@ const MenuList: React.FC = () => {
   const [editingRecord, setEditingRecord] = useState<Menu | null>(null);
   const [form] = Form.useForm();
 
-  useEffect(() => { loadTree(); }, []);
-
   const loadTree = async () => {
-    const res = await menuApi.tree();
-    setTreeData(res.data || []);
+    const data = await menuApi.tree();
+    setTreeData(data.data ?? []);
   };
+
+  React.useEffect(() => { loadTree(); }, []);
 
   const handleAdd = (parent?: Menu) => {
     setEditingRecord(null);
     form.resetFields();
-    if (parent) form.setFieldsValue({ parentId: parent.id, parentName: parent.menuName });
+    form.setFieldsValue({ parentId: parent?.id ?? 0, menuType: 2, sortOrder: 0 });
     setModalOpen(true);
   };
 
@@ -43,54 +43,68 @@ const MenuList: React.FC = () => {
       }
       setModalOpen(false);
       loadTree();
-    } catch {}
+    } catch { /* validation */ }
   };
 
-  const handleDelete = async (id: number) => {
-    await menuApi.remove(id);
+  const handleDelete = async (record: Menu) => {
+    await menuApi.remove(record.id);
     message.success('删除成功');
     loadTree();
   };
 
-  const buildTreeNodes = (list: Menu[]): DataNode[] =>
-    list.map(item => ({
+  const typeTag = (type: number) => {
+    const map: Record<number, { color: string; text: string }> = { 1: { color: 'blue', text: '目录' }, 2: { color: 'green', text: '菜单' }, 3: { color: 'orange', text: '按钮' } };
+    const info = map[type] || { color: 'default', text: '未知' };
+    return <Tag color={info.color}>{info.text}</Tag>;
+  };
+
+  const buildTreeNodes = (data: Menu[]) =>
+    data.map((item) => ({
       key: item.id,
       title: (
-        <span>
-          {item.menuName}
-          <Button type="link" size="small" onClick={(e) => { e.stopPropagation(); handleAdd(item); }}>新增</Button>
-          <Button type="link" size="small" onClick={(e) => { e.stopPropagation(); handleEdit(item); }}>编辑</Button>
-          <Popconfirm title="确认删除?" onConfirm={() => handleDelete(item.id)}>
-            <Button type="link" size="small" danger onClick={(e) => e.stopPropagation()}>删除</Button>
-          </Popconfirm>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          {typeTag(item.menuType)}
+          <span>{item.menuName}</span>
+          {item.path && <span style={{ color: '#999', fontSize: 12 }}>{item.path}</span>}
+          <Space size={4}>
+            <a onClick={() => handleAdd(item)} style={{ fontSize: 12 }}><PlusOutlined /></a>
+            <a onClick={() => handleEdit(item)} style={{ fontSize: 12 }}><EditOutlined /></a>
+            <Popconfirm title="确认删除?" onConfirm={() => handleDelete(item)}>
+              <a style={{ fontSize: 12, color: '#ff4d4f' }}><DeleteOutlined /></a>
+            </Popconfirm>
+          </Space>
         </span>
       ),
-      children: item.children ? buildTreeNodes(item.children) : [],
+      children: item.children ? buildTreeNodes(item.children) : undefined,
     }));
 
   return (
-    <div>
-      <div style={{ marginBottom: 16 }}>
-        <Button type="primary" onClick={() => handleAdd()}>新增根菜单</Button>
-      </div>
-      <Tree showLine defaultExpandAll treeData={buildTreeNodes(treeData)} />
+    <>
+      <Card title="菜单管理" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => handleAdd()}>新增菜单</Button>}>
+        {treeData.length > 0 ? (
+          <Tree showLine defaultExpandAll treeData={buildTreeNodes(treeData)} blockNode />
+        ) : (
+          <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>暂无菜单数据</div>
+        )}
+      </Card>
       <Modal title={editingRecord ? '编辑菜单' : '新增菜单'} open={modalOpen} onOk={handleSave} onCancel={() => setModalOpen(false)} width={600}>
         <Form form={form} layout="vertical">
-          <Form.Item name="parentId" label="父菜单" hidden><Input /></Form.Item>
+          <Form.Item name="parentId" label="上级菜单" hidden><InputNumber /></Form.Item>
           <Form.Item name="menuName" label="菜单名称" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="path" label="路由地址"><Input /></Form.Item>
-          <Form.Item name="component" label="组件路径"><Input /></Form.Item>
-          <Form.Item name="icon" label="图标"><Input /></Form.Item>
           <Form.Item name="menuType" label="类型" rules={[{ required: true }]}>
             <Select options={[{ label: '目录', value: 1 }, { label: '菜单', value: 2 }, { label: '按钮', value: 3 }]} />
           </Form.Item>
-          <Form.Item name="sortOrder" label="排序" initialValue={0}><InputNumber /></Form.Item>
-          <Form.Item name="status" label="状态" initialValue={1}>
-            <Select options={[{ label: '正常', value: 1 }, { label: '停用', value: 0 }]} />
+          <Form.Item name="path" label="路由路径"><Input /></Form.Item>
+          <Form.Item name="component" label="组件路径"><Input /></Form.Item>
+          <Form.Item name="icon" label="图标"><Input /></Form.Item>
+          <Form.Item name="permission" label="权限标识"><Input /></Form.Item>
+          <Form.Item name="sortOrder" label="排序"><InputNumber style={{ width: '100%' }} /></Form.Item>
+          <Form.Item name="visible" label="可见" valuePropName="checked">
+            <Select options={[{ label: '显示', value: 1 }, { label: '隐藏', value: 0 }]} />
           </Form.Item>
         </Form>
       </Modal>
-    </div>
+    </>
   );
 };
 
