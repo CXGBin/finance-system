@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Table, Input, Button, Space, message, Tag, Popconfirm } from 'antd';
 import { DatePicker } from 'antd';
 import { voucherApi, voucherBatchApi } from '@/api/account';
+import type { PageParams } from '@/types/api.d';
 import { useNavigate } from 'react-router-dom';
 import type { Voucher } from '@/types/account.d';
 
@@ -12,7 +13,7 @@ const VoucherList: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [searchParams, setSearchParams] = useState<any>({});
+  const [searchParams, setSearchParams] = useState<Record<string, string>>({});
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
   const navigate = useNavigate();
 
@@ -21,10 +22,9 @@ const VoucherList: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const res = await voucherApi.list({ page, pageSize, ...searchParams });
-      const pageData = res.data as { list?: typeof data; total?: number };
-      setData(pageData.list || (Array.isArray(res.data) ? res.data : []));
-      setTotal(pageData.total || 0);
+      const res = await voucherApi.page({ page, pageSize, ...searchParams } as PageParams);
+      setData(res.list || []);
+      setTotal(res.total || 0);
     } finally { setLoading(false); }
   };
 
@@ -43,7 +43,7 @@ const VoucherList: React.FC = () => {
   /** 批量审核凭证 */
   const handleBatchAudit = async () => {
     try {
-      await voucherApi.batchAudit(selectedRowKeys);
+      await voucherBatchApi.batchAudit(selectedRowKeys);
       message.success('批量审核成功');
       setSelectedRowKeys([]);
       loadData();
@@ -62,7 +62,7 @@ const VoucherList: React.FC = () => {
   /** 红字冲销凭证 */
   const handleReverse = async (id: number) => {
     try {
-      await voucherApi.reverse(id);
+      await voucherBatchApi.reverse(id);
       message.success('红字冲销凭证已生成');
       loadData();
     } catch { message.error('冲销失败'); }

@@ -90,4 +90,14 @@ public class RoleController : ControllerBase
     {
         return ApiResult<List<long>>.Success(await _roleService.GetRoleMenuIdsAsync(id));
     }
+
+    /// <summary>
+    /// 保存角色菜单分配
+    /// </summary>
+    [HttpPut("{id}/menus")]
+    public async Task<ApiResult<bool>> SaveRoleMenus(long id, [FromBody] List<long> menuIds)
+    {
+        await _roleService.SaveRoleMenuIdsAsync(id, menuIds);
+        return ApiResult<bool>.Success(true);
+    }
 }

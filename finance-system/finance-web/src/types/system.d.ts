@@ -91,13 +91,18 @@ export interface DictItem {
 /** 操作日志 */
 export interface OperLog {
   id: number;
-  module: string;
-  type: string;
-  operator: string;
-  operTime: string;
-  ip: string;
-  description: string;
-  status: number;
+  userId: number;
+  userName?: string;
+  module?: string;
+  action?: string;
+  description?: string;
+  ipAddress?: string;
+  requestUrl?: string;
+  requestMethod?: string;
+  requestBody?: string;
+  responseCode?: number;
+  durationMs: number;
+  createdTime: string;
 }
 
 /** 模块配置 */

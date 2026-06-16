@@ -42,6 +42,8 @@ export const roleApi = {
   remove: (id: number) => del(`/system/role/${id}`),
   /** 获取角色已分配菜单 */
   menus: (id: number) => get<number[]>(`/system/role/${id}/menus`),
+  /** 保存角色菜单分配 */
+  saveMenus: (id: number, menuIds: number[]) => put(`/system/role/${id}/menus`, menuIds),
   /** 兼容旧调用（别名） */
   list: (params: PageParams & Partial<SysRole>) => get<PagedResult<SysRole>>('/system/role/page', params),
 };

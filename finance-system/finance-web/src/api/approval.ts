@@ -1,4 +1,4 @@
-import { get, post, put } from './request';
+import { get, post, put, del } from './request';
 import type { ApprovalInstance, ApprovalTemplate } from '@/types/approval.d';
 import type { PageParams, PagedResult } from '@/types/api.d';
 
@@ -11,7 +11,7 @@ export const approvalApi = {
   /** 修改流程 */
   templateUpdate: (data: Partial<ApprovalTemplate>) => put(`/approval/flow/${data.id}`, data),
   /** 删除流程 */
-  templateRemove: (id: number) => put(`/approval/flow/${id}`, { deleted: true }),
+  templateRemove: (id: number) => del(`/approval/flow/${id}`),
 
   // ========== 审批实例（后端路由: api/approval/instance）==========
   /** 分页查询审批实例（支持 status 参数筛选: pending/done/my） */
@@ -22,6 +22,12 @@ export const approvalApi = {
   done: (params: PageParams) => get<PagedResult<ApprovalInstance>>('/approval/instance/list', { ...params, status: "done" }),
   /** 我的申请（便捷方法） */
   my: (params: PageParams) => get<PagedResult<ApprovalInstance>>('/approval/instance/list', { ...params, type: "mine" }),
+  /** 我的待办（我需要审批的） */
+  myPending: (moduleType?: string) => get<ApprovalInstance[]>('/approval/instance/my-pending', { moduleType }),
+  /** 我的已办（我已经审批过的） */
+  myDone: (moduleType?: string) => get<ApprovalInstance[]>('/approval/instance/my-done', { moduleType }),
+  /** 我的申请（我发起的） */
+  myInitiated: (params: PageParams & { moduleType?: string }) => get<PagedResult<ApprovalInstance>>('/approval/instance/my-initiated', params),
   /** 获取审批详情 */
   detail: (id: number) => get<ApprovalInstance>(`/approval/instance/${id}`),
   /** 发起审批 */

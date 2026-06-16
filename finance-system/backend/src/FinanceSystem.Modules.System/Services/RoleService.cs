@@ -140,4 +140,23 @@ public class RoleService : IRoleService
             .Select(rm => rm.MenuId)
             .ToListAsync();
     }
+
+    /// <inheritdoc/>
+    public async Task SaveRoleMenuIdsAsync(long roleId, List<long> menuIds)
+    {
+        var role = await _db.Queryable<SysRole>().FirstAsync(r => r.Id == roleId)
+            ?? throw new NotFoundException("角色不存在");
+
+        // 先删后插
+        await _db.Deleteable<SysRoleMenu>().Where(rm => rm.RoleId == roleId).ExecuteCommandAsync();
+        if (menuIds != null && menuIds.Any())
+        {
+            var roleMenus = menuIds.Select(menuId => new SysRoleMenu
+            {
+                RoleId = roleId,
+                MenuId = menuId
+            }).ToList();
+            await _db.Insertable(roleMenus).ExecuteCommandAsync();
+        }
+    }
 }

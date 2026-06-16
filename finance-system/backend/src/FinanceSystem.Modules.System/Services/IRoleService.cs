@@ -58,4 +58,11 @@ public interface IRoleService
     /// <param name="roleId">角色ID</param>
     /// <returns>菜单ID列表</returns>
     Task<List<long>> GetRoleMenuIdsAsync(long roleId);
+
+    /// <summary>
+    /// 保存角色菜单分配
+    /// </summary>
+    /// <param name="roleId">角色ID</param>
+    /// <param name="menuIds">菜单ID列表</param>
+    Task SaveRoleMenuIdsAsync(long roleId, List<long> menuIds);
 }

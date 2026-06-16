@@ -71,10 +71,13 @@ export interface ExpenseLoan {
   id: number;
   loanNo: string;
   applicantId: number;
-  applicantName: string;
-  amount: number;
-  remainAmount: number;
-  status: 'pending' | 'approved' | 'rejected' | 'settled';
-  createTime: string;
+  loanAmount: number;
+  settledAmount: number;
+  reason?: string;
+  expectedReturnDate?: string;
+  voucherId?: number;
+  status: number; // 0待审批 1已借出 2已核销 3已退回
+  approvalInstanceId?: number;
+  createdTime: string;
   remark?: string;
 }

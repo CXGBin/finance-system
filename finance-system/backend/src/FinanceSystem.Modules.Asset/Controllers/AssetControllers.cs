@@ -179,6 +179,8 @@ public class AssetReportController : ControllerBase
 }
 
 /// <summary>资产处置控制器</summary>
+[ApiController]
+[Route("api/asset")]
 public class AssetDisposeController : ControllerBase
 {
     private readonly IAssetCardService _cardService;
