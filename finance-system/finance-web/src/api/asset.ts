@@ -54,4 +54,23 @@ export const assetApi = {
   changeAdd: (data: Partial<AssetChange>) => post('/asset/card', data),
   /** 新增盘点 */
   inventoryAdd: (data: Partial<AssetInventory>) => post('/asset/card', data),
+
+  // ========== 盘点管理（后端: api/asset/inventory）==========
+  /** 分页查询盘点列表 */
+  inventoryPage: (params: PageParams) => get<PagedResult<AssetInventory>>('/asset/inventory/list', params),
+  /** 创建盘点单 */
+  inventoryCreate: (data: Partial<AssetInventory>) => post('/asset/inventory', data),
+  /** 完成盘点 */
+  inventoryComplete: (id: number) => post(`/asset/inventory/${id}/complete`),
+
+  // ========== 资产报表（后端: api/asset/report）==========
+  /** 资产台账 */
+  reportLedger: (params: PageParams & { categoryId?: number; status?: number }) =>
+    get<PagedResult<AssetCard>>('/asset/report/ledger', params),
+  /** 折旧汇总报表 */
+  reportDepreciationSummary: (year: number) => get<Record<string, unknown>[]>('/asset/report/depreciation-summary', { year }),
+  /** 资产价值统计 */
+  reportValueStats: () => get<Record<string, unknown>>('/asset/report/value-stats'),
+  /** 资产处置（报废/出售） */
+  dispose: (id: number, data: Record<string, unknown>) => post<number>(`/asset/card/${id}/dispose`, data),
 };

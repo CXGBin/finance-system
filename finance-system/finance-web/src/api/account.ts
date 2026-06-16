@@ -79,3 +79,41 @@ export const ledgerApi = {
   subjectSummary: (year: number, month: number) =>
     get<LedgerRecord[]>('/account/ledger/subject-summary', { year, month }),
 };
+
+// 辅助核算（后端: api/account/auxiliary/{type}）
+export const auxiliaryApi = {
+  /** 获取辅助核算列表 */
+  list: (type: string) => get<Record<string, unknown>[]>(`/account/auxiliary/${type}/list`),
+  /** 新增辅助核算项 */
+  add: (type: string, data: Record<string, unknown>) => post(`/account/auxiliary/${type}`, data),
+  /** 修改辅助核算项 */
+  update: (type: string, id: number, data: Record<string, unknown>) => put(`/account/auxiliary/${type}/${id}`, data),
+  /** 删除辅助核算项 */
+  remove: (type: string, id: number) => del(`/account/auxiliary/${type}/${id}`),
+};
+
+// 凭证增强操作
+export const voucherBatchApi = {
+  /** 批量审核凭证 */
+  batchAudit: (ids: number[]) => post('/account/voucher/batch-audit', { ids }),
+  /** 批量作废凭证 */
+  batchVoid: (ids: number[]) => post('/account/voucher/batch-void', { ids }),
+  /** 复制凭证 */
+  copy: (id: number) => post<number>(`/account/voucher/${id}/copy`),
+  /** 凭证打印数据 */
+  printData: (id: number) => get<Record<string, unknown>>(`/account/voucher/${id}/print-data`),
+  /** 凭证冲销（红字冲销） */
+  reverse: (id: number) => post<number>(`/account/voucher/${id}/reverse`),
+};
+
+// 科目导入导出
+export const subjectImportExportApi = {
+  /** 导出科目 */
+  exportSubjects: () => get<string>('/account/subject/export'),
+  /** 导入科目 */
+  importSubjects: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return post('/account/subject/import', formData);
+  },
+};

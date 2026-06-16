@@ -96,4 +96,9 @@ public class SysUser : FullEntity
     /// </summary>
     [SugarColumn(IsIgnore = true)]
     public List<SysMenu>? Menus { get; set; }
+
+    /// <summary>
+    /// 是否需要强制修改密码（首次登录时为true）
+    /// </summary>
+    public bool MustChangePassword { get; set; } = false;
 }

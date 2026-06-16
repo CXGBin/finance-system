@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using FinanceSystem.Core.Common;
 using FinanceSystem.Core.Interfaces;
+using FinanceSystem.Infrastructure.Services;
 using FinanceSystem.Modules.System.DTOs;
 using FinanceSystem.Modules.System.Entities;
 using SqlSugar;
@@ -12,23 +14,44 @@ using System.IdentityModel.Tokens.Jwt;
 namespace FinanceSystem.Modules.System.Services;
 
 /// <summary>
-/// 认证服务实现
-/// </summary>
-/// <summary>
-/// 认证服务实现
+/// 认证服务实现（登录/登出/刷新Token/修改密码）
 /// </summary>
 public class AuthService : IAuthService
 {
     private readonly ISqlSugarClient _db;
     private readonly IConfiguration _config;
+    private readonly ITokenBlacklistService _tokenBlacklist;
+    private readonly IRefreshTokenStoreService _refreshTokenStore;
+    private readonly ILogger<AuthService> _logger;
 
-    public AuthService(ISqlSugarClient db, IConfiguration config)
+    /// <summary>
+    /// 构造认证服务
+    /// </summary>
+    /// <param name="db">数据库客户端</param>
+    /// <param name="config">配置</param>
+    /// <param name="tokenBlacklist">Token黑名单服务</param>
+    /// <param name="refreshTokenStore">RefreshToken存储服务</param>
+    /// <param name="logger">日志</param>
+    public AuthService(
+        ISqlSugarClient db,
+        IConfiguration config,
+        ITokenBlacklistService tokenBlacklist,
+        IRefreshTokenStoreService refreshTokenStore,
+        ILogger<AuthService> logger)
     {
         _db = db;
         _config = config;
+        _tokenBlacklist = tokenBlacklist;
+        _refreshTokenStore = refreshTokenStore;
+        _logger = logger;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 用户登录
+    /// </summary>
+    /// <param name="request">登录请求参数</param>
+    /// <param name="ip">客户端IP</param>
+    /// <returns>登录响应数据（含Token和用户信息）</returns>
     public async Task<LoginResponse> LoginAsync(LoginRequest request, string ip)
     {
         // 查询用户
@@ -43,7 +66,9 @@ public class AuthService : IAuthService
         }
 
         // 验证密码（BCrypt）
-        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        var pwHash = user.PasswordHash ?? "";
+        var verifyResult = BCrypt.Net.BCrypt.Verify(request.Password, pwHash);
+        if (!verifyResult)
         {
             // 累计登录失败次数
             user.LoginFailCount++;
@@ -70,7 +95,8 @@ public class AuthService : IAuthService
         // 生成Token
         var accessToken = GenerateToken(user);
         var refreshToken = GenerateRefreshToken();
-        _refreshTokenStore[refreshToken] = user.Id; // 登录成功后更新为真实userId
+        var refreshExpireDays = int.Parse(_config["JwtSettings:RefreshTokenExpireDays"] ?? "7");
+        await _refreshTokenStore.StoreAsync(refreshToken, user.Id, refreshExpireDays);
         var expiresIn = int.Parse(_config["JwtSettings:AccessTokenExpireMinutes"] ?? "120");
 
         var userInfo = await BuildUserInfoAsync(user);
@@ -83,40 +109,58 @@ public class AuthService : IAuthService
             AccessToken = accessToken,
             RefreshToken = refreshToken,
             ExpiresIn = expiresIn * 60,
-            UserInfo = userInfo
+            UserInfo = userInfo,
+            MustChangePassword = user.MustChangePassword
         };
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 用户登出（使Token失效）
+    /// </summary>
+    /// <param name="userId">当前用户ID</param>
+    /// <param name="accessToken">当前访问令牌</param>
     public async Task LogoutAsync(long userId, string accessToken)
     {
-        // 将Token加入内存黑名单（生产环境应使用Redis）
-        TokenBlacklist.Add(accessToken);
+        try
+        {
+            var expireMinutes = int.Parse(_config["JwtSettings:AccessTokenExpireMinutes"] ?? "120");
+            await _tokenBlacklist.AddAsync(accessToken, expireMinutes);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Token加入黑名单失败");
+        }
+
         // 记录登出日志
         await SaveLogAsync(userId, null, "system", "LOGOUT", "用户登出", null);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 刷新Token
+    /// </summary>
+    /// <param name="request">刷新Token请求</param>
+    /// <returns>新的登录响应数据</returns>
     public async Task<LoginResponse> RefreshTokenAsync(RefreshTokenRequest request)
     {
-        // 验证refresh_token有效性（简化实现：内存存储）
-        if (!_refreshTokenStore.TryGetValue(request.RefreshToken, out var storedUserId))
+        // 验证refresh_token有效性
+        var storedUserId = await _refreshTokenStore.GetUserIdAsync(request.RefreshToken);
+        if (!storedUserId.HasValue)
         {
             throw new UnauthorizedException("刷新令牌无效或已过期");
         }
-        _refreshTokenStore.Remove(request.RefreshToken);
+        await _refreshTokenStore.RemoveAsync(request.RefreshToken);
 
         var user = await _db.Queryable<SysUser>()
-            .FirstAsync(u => u.Id == storedUserId)
+            .FirstAsync(u => u.Id == storedUserId.Value)
             ?? throw new NotFoundException("用户不存在");
 
         var userInfo = await BuildUserInfoAsync(user);
         var token = GenerateToken(user);
-        var refreshToken = Guid.NewGuid().ToString("N");
+        var refreshToken = GenerateRefreshToken();
         var expiresIn = int.Parse(_config["JwtSettings:AccessTokenExpireMinutes"] ?? "120");
+        var refreshExpireDays = int.Parse(_config["JwtSettings:RefreshTokenExpireDays"] ?? "7");
 
-        _refreshTokenStore[refreshToken] = user.Id;
-        _cleanupExpiredRefreshTokens();
+        await _refreshTokenStore.StoreAsync(refreshToken, user.Id, refreshExpireDays);
 
         return new LoginResponse
         {
@@ -127,7 +171,11 @@ public class AuthService : IAuthService
         };
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 修改密码
+    /// </summary>
+    /// <param name="userId">用户ID</param>
+    /// <param name="request">修改密码请求</param>
     public async Task ChangePasswordAsync(long userId, ChangePasswordRequest request)
     {
         if (request.NewPassword != request.ConfirmPassword)
@@ -146,10 +194,20 @@ public class AuthService : IAuthService
 
         // 生成新密码哈希
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        user.MustChangePassword = false;
         user.UpdatedTime = DateTime.Now;
-        await _db.Updateable(user).UpdateColumns(u => new { u.PasswordHash, u.UpdatedTime }).ExecuteCommandAsync();
+        await _db.Updateable(user).UpdateColumns(u => new { u.PasswordHash, u.MustChangePassword, u.UpdatedTime }).ExecuteCommandAsync();
+    }
 
-        // 使当前Token失效（需从请求头获取Token），此操作可选
+    /// <summary>
+    /// 判断Token是否在黑名单中（异步方法，供中间件调用）
+    /// </summary>
+    /// <param name="tokenBlacklist">Token黑名单服务</param>
+    /// <param name="token">要检查的Token</param>
+    /// <returns>是否在黑名单中</returns>
+    public static async Task<bool> IsTokenBlacklistedAsync(ITokenBlacklistService tokenBlacklist, string token)
+    {
+        return await tokenBlacklist.IsBlacklistedAsync(token);
     }
 
     /// <summary>
@@ -187,33 +245,11 @@ public class AuthService : IAuthService
     }
 
     /// <summary>
-    /// Token黑名单（内存存储，生产环境应替换为Redis）
-    /// </summary>
-    private static readonly HashSet<string> TokenBlacklist = new();
-
-    /// <summary>
-    /// 判断Token是否在黑名单中
-    /// </summary>
-    public static bool IsTokenBlacklisted(string token) => TokenBlacklist.Contains(token);
-
-    /// <summary>
-    /// RefreshToken存储（内存存储，生产环境应替换为Redis）
-    /// </summary>
-    private static readonly Dictionary<string, long> _refreshTokenStore = new();
-
-    /// <summary>
-    /// 清理过期的refresh_token
-    /// </summary>
-    private static void _cleanupExpiredRefreshTokens() { /* 简化实现，不做过期清理 */ }
-
-    /// <summary>
     /// 生成刷新令牌（随机字符串）
     /// </summary>
     private string GenerateRefreshToken()
     {
-        var token = Guid.NewGuid().ToString("N");
-        _refreshTokenStore[token] = 0; // 占位，登录成功后会更新为真实userId
-        return token;
+        return Guid.NewGuid().ToString("N");
     }
 
     /// <summary>

@@ -389,7 +389,7 @@ public class TaxReportService : ITaxReportService
         var periodIds = await _db.Queryable<AccountingPeriod>()
             .Where(p => p.PeriodYear == year).Select(p => p.Id).ToListAsync();
         var revenueSubjectIds = await _db.Queryable<AccountSubject>()
-            .Where(s => s.SubjectCode.StartsWith("6001") || s.SubjectCode.StartsWith("6051"))
+            .Where(s => AccountingConstants.RevenueSubjectCodes.Any(c => s.SubjectCode.StartsWith(c)))
             .Select(s => s.Id).ToListAsync();
 
         decimal revenue = 0;

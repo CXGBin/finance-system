@@ -44,6 +44,12 @@ export const expenseApi = {
   allocateList: (params: PageParams) => get<PagedResult<ExpenseAllocate>>('/expense/allocate', params),
   /** 新增分摊 */
   allocateAdd: (data: Partial<ExpenseAllocate>) => post('/expense/allocate', data),
+
+  // ========== 费用分摊（后端: api/expense/allocate）==========
+  /** 分页查询分摊列表 */
+  allocatePage: (params: PageParams) => get<PagedResult<ExpenseAllocate>>('/expense/allocate/list', params),
+  /** 创建分摊 */
+  allocateCreate: (data: Partial<ExpenseAllocate>) => post('/expense/allocate', data),
 };
 
 /** 借款申请 */

@@ -62,4 +62,14 @@ export const budgetApi = {
   analysis: (params: { year: number }) => get<Record<string, unknown>>('/budget/execution', params),
   /** @deprecated 使用 alertSaveConfig */
   updateSetting: (data: Record<string, unknown>) => post('/budget/alert/config', data),
+
+  // ========== 预算分析图表（后端: api/budget/analysis）==========
+  /** 预算概览 */
+  analysisOverview: (year: number) => get<Record<string, unknown>>('/budget/analysis/overview', { year }),
+  /** 月度趋势 */
+  analysisMonthlyTrend: (year: number) => get<Record<string, unknown>[]>('/budget/analysis/monthly-trend', { year }),
+  /** 科目对比 */
+  analysisSubjectCompare: (year: number) => get<Record<string, unknown>[]>('/budget/analysis/subject-compare', { year }),
+  /** 费用TOP10 */
+  analysisExpenseTop10: (year: number, month?: number) => get<Record<string, unknown>[]>('/budget/analysis/expense-top10', { year, month }),
 };

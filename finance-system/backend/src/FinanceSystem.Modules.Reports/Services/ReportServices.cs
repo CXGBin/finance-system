@@ -66,12 +66,12 @@ public class BalanceSheetService : IBalanceSheetService
     {
         var items = new List<BalanceSheetItem>
         {
-            new() { LineNo = 1, ItemName = "货币资金", SubjectCodes = new() { "1001", "1002", "1012" } },
-            new() { LineNo = 2, ItemName = "应收账款", SubjectCodes = new() { "1122" } },
-            new() { LineNo = 3, ItemName = "预付账款", SubjectCodes = new() { "1123" } },
-            new() { LineNo = 4, ItemName = "存货", SubjectCodes = new() { "1401", "1403", "1411", "5001" } },
-            new() { LineNo = 5, ItemName = "固定资产", SubjectCodes = new() { "1601" } },
-            new() { LineNo = 6, ItemName = "无形资产", SubjectCodes = new() { "1701" } }
+            new() { LineNo = 1, ItemName = "货币资金", SubjectCodes = AccountingConstants.BalanceSheetCashCodes.ToList() },
+            new() { LineNo = 2, ItemName = "应收账款", SubjectCodes = AccountingConstants.BalanceSheetReceivableCodes.ToList() },
+            new() { LineNo = 3, ItemName = "预付账款", SubjectCodes = AccountingConstants.BalanceSheetPrepaymentCodes.ToList() },
+            new() { LineNo = 4, ItemName = "存货", SubjectCodes = AccountingConstants.BalanceSheetInventoryCodes.ToList() },
+            new() { LineNo = 5, ItemName = "固定资产", SubjectCodes = AccountingConstants.BalanceSheetFixedAssetCodes.ToList() },
+            new() { LineNo = 6, ItemName = "无形资产", SubjectCodes = AccountingConstants.BalanceSheetIntangibleAssetCodes.ToList() }
         };
 
         foreach (var item in items)
@@ -90,11 +90,11 @@ public class BalanceSheetService : IBalanceSheetService
     {
         var items = new List<BalanceSheetItem>
         {
-            new() { LineNo = 1, ItemName = "短期借款", SubjectCodes = new() { "2001" } },
-            new() { LineNo = 2, ItemName = "应付账款", SubjectCodes = new() { "2202" } },
-            new() { LineNo = 3, ItemName = "应付职工薪酬", SubjectCodes = new() { "2211" } },
-            new() { LineNo = 4, ItemName = "应交税费", SubjectCodes = new() { "2221" } },
-            new() { LineNo = 5, ItemName = "长期借款", SubjectCodes = new() { "2501" } }
+            new() { LineNo = 1, ItemName = "短期借款", SubjectCodes = AccountingConstants.BalanceSheetShortTermLoanCodes.ToList() },
+            new() { LineNo = 2, ItemName = "应付账款", SubjectCodes = AccountingConstants.BalanceSheetPayableCodes.ToList() },
+            new() { LineNo = 3, ItemName = "应付职工薪酬", SubjectCodes = AccountingConstants.BalanceSheetEmployeePayCodes.ToList() },
+            new() { LineNo = 4, ItemName = "应交税费", SubjectCodes = AccountingConstants.BalanceSheetTaxPayableCodes.ToList() },
+            new() { LineNo = 5, ItemName = "长期借款", SubjectCodes = AccountingConstants.BalanceSheetLongTermLoanCodes.ToList() }
         };
 
         foreach (var item in items)
@@ -113,10 +113,10 @@ public class BalanceSheetService : IBalanceSheetService
     {
         var items = new List<BalanceSheetItem>
         {
-            new() { LineNo = 1, ItemName = "实收资本", SubjectCodes = new() { "4001" } },
-            new() { LineNo = 2, ItemName = "资本公积", SubjectCodes = new() { "4002" } },
-            new() { LineNo = 3, ItemName = "盈余公积", SubjectCodes = new() { "4101" } },
-            new() { LineNo = 4, ItemName = "未分配利润", SubjectCodes = new() { "4103", "4104" } }
+            new() { LineNo = 1, ItemName = "实收资本", SubjectCodes = AccountingConstants.BalanceSheetPaidInCapitalCodes.ToList() },
+            new() { LineNo = 2, ItemName = "资本公积", SubjectCodes = AccountingConstants.BalanceSheetCapitalReserveCodes.ToList() },
+            new() { LineNo = 3, ItemName = "盈余公积", SubjectCodes = AccountingConstants.BalanceSheetSurplusReserveCodes.ToList() },
+            new() { LineNo = 4, ItemName = "未分配利润", SubjectCodes = AccountingConstants.BalanceSheetRetainedEarningsCodes.ToList() }
         };
 
         foreach (var item in items)
@@ -199,17 +199,17 @@ public class IncomeStatementService : IIncomeStatementService
                 : entryList.Where(d => ids.Contains(d.SubjectId)).Sum(d => d.CreditAmount);
         }
 
-        decimal revenue = CalcAmount(new() { "6001", "6051", "6101", "6111" }, false);
+        decimal revenue = CalcAmount(AccountingConstants.RevenueSubjectCodes.ToList(), false);
         decimal cost = CalcAmount(new() { "6401" }, true);
-        decimal taxSurcharge = CalcAmount(new() { "6402", "6403" }, true);
-        decimal sellingExpense = CalcAmount(new() { "6601" }, true);
-        decimal adminExpense = CalcAmount(new() { "6602" }, true);
-        decimal financeExpense = CalcAmount(new() { "6603" }, true);
+        decimal taxSurcharge = CalcAmount(AccountingConstants.CostSubjectCodes.Skip(1).ToList(), true);
+        decimal sellingExpense = CalcAmount(AccountingConstants.SellingExpenseCodes.ToList(), true);
+        decimal adminExpense = CalcAmount(AccountingConstants.AdminExpenseCodes.ToList(), true);
+        decimal financeExpense = CalcAmount(AccountingConstants.FinanceExpenseCodes.ToList(), true);
         decimal operatingProfit = revenue - cost - taxSurcharge - sellingExpense - adminExpense - financeExpense;
-        decimal nonOperatingIncome = CalcAmount(new() { "6301" }, false);
-        decimal nonOperatingExpense = CalcAmount(new() { "6711" }, true);
+        decimal nonOperatingIncome = CalcAmount(AccountingConstants.NonOperatingIncomeCodes.ToList(), false);
+        decimal nonOperatingExpense = CalcAmount(AccountingConstants.NonOperatingExpenseCodes.ToList(), true);
         decimal totalProfit = operatingProfit + nonOperatingIncome - nonOperatingExpense;
-        decimal incomeTax = CalcAmount(new() { "6801" }, true);
+        decimal incomeTax = CalcAmount(AccountingConstants.IncomeTaxCodes.ToList(), true);
         decimal netProfit = totalProfit - incomeTax;
 
         var items = new List<IncomeStatementItem>
@@ -280,12 +280,12 @@ public class CashFlowService : ICashFlowService
             .Select((e, v) => new { e.VoucherId, e.SubjectId, e.DebitAmount, e.CreditAmount, e.Summary })
             .ToListAsync();
 
-        // 经营活动：主营业务收入(6001)/成本(6401)/税金(6403)/管理费用(6602)/销售费用(6601)
-        var operatingSubjectCodes = new[] { "6001", "6051", "6401", "6402", "6403", "6601", "6602", "6603", "6101", "6111", "6701", "6711" };
-        // 投资活动：投资收益(6111)/长期股权投资(1511)/固定资产(1601)/无形资产(1701)
-        var investingSubjectCodes = new[] { "1511", "1601", "1602", "1604", "1701", "1702" };
-        // 筹资活动：短期借款(2001)/长期借款(2501)/应付利息(2231)/应付股利(2232)
-        var financingSubjectCodes = new[] { "2001", "2501", "2502", "2231", "2232", "4001" };
+        // 经营活动：收入/成本/税金/费用等损益类科目
+        var operatingSubjectCodes = AccountingConstants.OperatingSubjectCodes;
+        // 投资活动：长期股权投资/固定资产/无形资产等
+        var investingSubjectCodes = AccountingConstants.InvestingSubjectCodes;
+        // 筹资活动：借款/应付利息/应付股利/实收资本等
+        var financingSubjectCodes = AccountingConstants.FinancingSubjectCodes;
 
         // 简化实现：通过摘要关键字和对方科目推断现金流分类
         decimal operatingInflow = 0, operatingOutflow = 0;
@@ -758,7 +758,7 @@ public class CompareService : ICompareService
                 .ToListAsync();
 
             // 按科目编码过滤收入/成本/费用
-            var revenueIds = subjects.Where(s => new[] { "6001", "6051", "6101", "6111" }.Any(c => s.SubjectCode.StartsWith(c))).Select(s => s.Id).ToHashSet();
+            var revenueIds = subjects.Where(s => AccountingConstants.RevenueSubjectCodes.Any(c => s.SubjectCode.StartsWith(c))).Select(s => s.Id).ToHashSet();
             var costIds = subjects.Where(s => new[] { "6401", "6402", "6403", "6601", "6602", "6603", "6801" }.Any(c => s.SubjectCode.StartsWith(c))).Select(s => s.Id).ToHashSet();
 
             decimal revenue = entryList.Where(e => revenueIds.Contains(e.SubjectId)).Sum(e => e.CreditAmount);

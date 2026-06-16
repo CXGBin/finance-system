@@ -192,15 +192,17 @@ public static class SeedData
     }
 
     /// <summary>
-    /// 初始化默认管理员账号 admin/admin123
+    /// 初始化默认管理员账号 admin（随机强密码，首次登录强制修改）
     /// </summary>
     /// <returns>用户ID</returns>
     private static async Task<long> InitAdminUserAsync(ISqlSugarClient db, long roleId, long deptId)
     {
+        // 生成16位随机强密码（包含大小写字母、数字和特殊字符）
+        var randomPassword = GenerateRandomPassword(16);
         var user = new SysUser
         {
             Username = "admin",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(randomPassword),
             RealName = "系统管理员",
             Email = "admin@finance.com",
             Phone = "13800000000",
@@ -208,10 +210,18 @@ public static class SeedData
             PostId = 0,
             Status = 1,
             LoginFailCount = 0,
+            MustChangePassword = true,
             Remark = "系统默认超级管理员",
             UpdatedTime = DateTime.Now
         };
         await db.Insertable(user).ExecuteCommandAsync();
+
+        // 输出初始密码到控制台日志（部署后请及时修改）
+        Console.WriteLine($"========================================================");
+        Console.WriteLine($"[SEED] 初始管理员账号已创建: admin");
+        Console.WriteLine($"[SEED] 初始密码: {randomPassword}");
+        Console.WriteLine($"[SEED] 请妥善保管此密码，首次登录后将强制修改");
+        Console.WriteLine($"========================================================");
 
         // 关联用户和角色
         await db.Insertable(new SysUserRole { UserId = user.Id, RoleId = roleId }).ExecuteCommandAsync();
@@ -359,4 +369,45 @@ public static class SeedData
         }
     }
 
+    /// <summary>
+    /// 生成指定长度的随机强密码（包含大小写字母、数字和特殊字符）
+    /// </summary>
+    /// <param name="length">密码长度（最小8位）</param>
+    /// <returns>随机强密码</returns>
+    private static string GenerateRandomPassword(int length)
+    {
+        if (length < 8) length = 8;
+        const string upperChars = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+        const string lowerChars = "abcdefghjkmnpqrstuvwxyz";
+        const string digitChars = "23456789";
+        const string specialChars = "!@#$%^&*_+-=";
+        var allChars = upperChars + lowerChars + digitChars + specialChars;
+
+        // 使用加密安全的随机数生成器
+        using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+        var bytes = new byte[length];
+        rng.GetBytes(bytes);
+
+        // 确保至少包含每类字符各一个
+        var password = new char[length];
+        password[0] = upperChars[bytes[0] % upperChars.Length];
+        password[1] = lowerChars[bytes[1] % lowerChars.Length];
+        password[2] = digitChars[bytes[2] % digitChars.Length];
+        password[3] = specialChars[bytes[3] % specialChars.Length];
+
+        // 剩余位置从所有字符中随机选取
+        for (var i = 4; i < length; i++)
+        {
+            password[i] = allChars[bytes[i] % allChars.Length];
+        }
+
+        // 打乱顺序（Fisher-Yates洗牌）
+        for (var i = length - 1; i > 0; i--)
+        {
+            var j = bytes[i] % (i + 1);
+            (password[i], password[j]) = (password[j], password[i]);
+        }
+
+        return new string(password);
+    }
 }

@@ -4,6 +4,7 @@ using FinanceSystem.Core.Interfaces;
 using FinanceSystem.Core.Modules;
 using FinanceSystem.Infrastructure;
 using FinanceSystem.Infrastructure.Extensions;
+using FinanceSystem.Infrastructure.Services;
 using FinanceSystem.Modules.System;
 using FinanceSystem.Modules.Accounts;
 using FinanceSystem.Modules.Reports;
@@ -88,6 +89,22 @@ builder.Services.AddSqlSugarSetup(builder.Configuration);
 builder.Services.AddRepository();
 
 // ========== 模块化 DI 注册（基于模块开关） ==========
+
+// 注册Token黑名单和RefreshToken存储服务（Redis + 内存降级）
+builder.Services.AddSingleton<ITokenBlacklistService>(sp =>
+{
+    var service = new RedisTokenBlacklistService(
+        sp.GetRequiredService<IConfiguration>(),
+        sp.GetRequiredService<ILogger<RedisTokenBlacklistService>>());
+    return service;
+});
+builder.Services.AddSingleton<IRefreshTokenStoreService>(sp =>
+{
+    var service = new RedisTokenBlacklistService(
+        sp.GetRequiredService<IConfiguration>(),
+        sp.GetRequiredService<ILogger<RedisTokenBlacklistService>>());
+    return service;
+});
 
 // 1. 创建模块注册器并注册所有模块定义
 var registry = new ModuleRegistry();

@@ -33,6 +33,7 @@ BEGIN
         Remark      NVARCHAR(500)  NULL,                      -- 备注
         LoginFailCount INT         NOT NULL DEFAULT 0,         -- 登录失败次数
         LockoutEndTime DATETIME   NULL,                      -- 账户锁定截止时间
+        MustChangePassword BIT NOT NULL DEFAULT 0,        -- 是否需要强制修改密码
         CreatedTime DATETIME      NOT NULL DEFAULT GETDATE(), -- 创建时间
         UpdatedTime DATETIME      NULL,                      -- 更新时间
         CONSTRAINT PK_sys_user PRIMARY KEY (Id)

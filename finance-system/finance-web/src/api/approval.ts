@@ -37,4 +37,12 @@ export const approvalApi = {
   withdraw: (id: number) => post(`/approval/instance/${id}/withdraw`),
   /** 获取审批记录 */
   records: (instanceId: number) => get<{ nodeIndex: number; nodeName: string; approverName: string; action: number; comment: string; createTime: string }[]>(`/approval/instance/${instanceId}/records`),
+  /** 转办审批 */
+  transfer: (instanceId: number, targetUserId: number, comment: string) =>
+    post(`/approval/instance/${instanceId}/transfer`, { targetUserId, comment }),
+  /** 批量审批操作 */
+  batchAction: (ids: number[], actionType: string, comment: string) =>
+    post('/approval/instance/batch-action', { ids, actionType, comment }),
+  /** 获取审批统计数据 */
+  statistics: () => get<Record<string, unknown>>('/approval/instance/statistics'),
 };

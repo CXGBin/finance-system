@@ -38,4 +38,21 @@ export const taxApi = {
   reportList: (params: Record<string, unknown>) => get<TaxReport[]>('/tax/declaration/list', params),
   /** 税务日历（后端暂无独立日历接口，返回空） */
   calendar: (month: string) => get<TaxCalendarItem[]>('/tax/category/list', { month }),
+
+  // ========== 税务报表（后端: api/tax/report）==========
+  /** 税务汇总报表 */
+  reportSummary: (year: number) => get<Record<string, unknown>>('/tax/report/summary', { year }),
+  /** 按税种分类查询 */
+  reportByCategory: (year: number, month?: number) => get<Record<string, unknown>[]>('/tax/report/by-category', { year, month }),
+  /** 税负率分析 */
+  reportBurden: (year: number, quarter?: number) => get<Record<string, unknown>>('/tax/report/burden', { year, quarter }),
+
+  // ========== 附加税（后端: api/tax/declaration）==========
+  /** 自动计算附加税 */
+  declarationSurcharges: (data: { declarePeriod: string; vatDeclarationId: number }) =>
+    post<TaxDeclaration[]>('/tax/declaration/surcharges', data),
+
+  // ========== 税务日历（后端: api/tax/calendar）==========
+  /** 获取税务日历事项 */
+  calendarList: (year: number, month: number) => get<Record<string, unknown>[]>('/tax/calendar', { year, month }),
 };

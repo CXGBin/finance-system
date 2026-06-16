@@ -51,6 +51,11 @@ public class LoginResponse
     /// 用户基本信息
     /// </summary>
     public UserInfoDto UserInfo { get; set; } = new();
+
+    /// <summary>
+    /// 是否需要强制修改密码（首次登录）
+    /// </summary>
+    public bool MustChangePassword { get; set; } = false;
 }
 
 /// <summary>

@@ -44,8 +44,8 @@ function ProTable<T extends Record<string, unknown>>({
       const res = await fetchData({ ...pageParams, ...values });
       setData(res.data?.list || []);
       setTotal(res.data?.total || 0);
-    } catch (err: any) {
-      setError(err.message || '加载失败');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '加载失败');
     } finally {
       setLoading(false);
     }

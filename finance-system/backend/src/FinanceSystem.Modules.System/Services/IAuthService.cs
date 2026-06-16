@@ -20,15 +20,22 @@ public interface IAuthService
     /// <param name="ip">客户端IP</param>
     /// <returns>登录响应数据（含Token和用户信息）</returns>
     Task<LoginResponse> LoginAsync(LoginRequest request, string ip);
+    /// <summary>
     /// 用户登出（使Token失效）
+    /// </summary>
     /// <param name="userId">当前用户ID</param>
     /// <param name="accessToken">当前访问令牌</param>
     Task LogoutAsync(long userId, string accessToken);
+    /// <summary>
     /// 刷新Token
+    /// </summary>
     /// <param name="request">刷新Token请求</param>
     /// <returns>新的登录响应数据</returns>
     Task<LoginResponse> RefreshTokenAsync(RefreshTokenRequest request);
+    /// <summary>
     /// 修改密码
+    /// </summary>
+    /// <param name="userId">用户ID</param>
     /// <param name="request">修改密码请求</param>
     Task ChangePasswordAsync(long userId, ChangePasswordRequest request);
 }
