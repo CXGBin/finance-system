@@ -15,9 +15,8 @@ html, body, #root {
 
 /* ProLayout 内容区域 */
 .main-content {
-  padding: 16px;
+  padding: 0;
   background: #fff;
-  border-radius: 8px;
   min-height: 280px;
 }
 
@@ -112,11 +111,15 @@ html, body, #root {
   margin-top: 4px;
 }
 
-/* ProLayout覆盖：隐藏多余breadcrumb层级 */
+/* ProLayout覆盖：隐藏多余padding层级 */
 .ant-pro-page-container-children-content {
   padding: 0 !important;
 }
 
 .ant-pro-page-container-warp {
   padding-block: 0 !important;
+}
+
+.ant-pro-page-container-warp-page-main {
+  margin-block: 0 !important;
 }

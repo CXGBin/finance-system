@@ -32,7 +32,7 @@ const ApprovalDetail: React.FC = () => {
     setTransferComment('');
     // 加载可选审批人列表
     try {
-      const res = await approvalApi.list({ page: 1, pageSize: 100, type: 'approvers' } as any);
+      const res = await approvalApi.list({ pageIndex: 1, pageSize: 100, type: 'approvers' } as any);
       const users = ((res.data as any)?.list || []).map((u: any) => ({ label: u.approverName || u.name, value: u.id || u.userId }));
       setUserOptions(users);
     } catch {

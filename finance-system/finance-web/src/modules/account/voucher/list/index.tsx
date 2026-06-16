@@ -22,7 +22,7 @@ const VoucherList: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const res = await voucherApi.page({ page, pageSize, ...searchParams } as PageParams);
+      const res = await voucherApi.page({ pageIndex: page, pageSize, ...searchParams } as PageParams);
       setData(res.list || []);
       setTotal(res.total || 0);
     } finally { setLoading(false); }

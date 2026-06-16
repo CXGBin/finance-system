@@ -6,6 +6,31 @@ import {
   UserOutlined,
   LockOutlined,
   LogoutOutlined,
+  DashboardOutlined,
+  SettingOutlined,
+  SafetyOutlined,
+  AppstoreOutlined,
+  ApartmentOutlined,
+  IdcardOutlined,
+  BookOutlined,
+  UnorderedListOutlined,
+  ControlOutlined,
+  CalendarOutlined,
+  FileTextOutlined,
+  AccountBookOutlined,
+  FundOutlined,
+  DollarOutlined,
+  FileExcelOutlined,
+  FileSearchOutlined,
+  ScheduleOutlined,
+  TeamOutlined,
+  PieChartOutlined,
+  GoldOutlined,
+  AuditOutlined,
+  BankOutlined,
+  ShoppingCartOutlined,
+  ReconciliationOutlined,
+  CheckCircleOutlined,
 } from '@ant-design/icons';
 import TabsView from '@/components/TabsView';
 import { useAppStore } from '@/store/useAppStore';
@@ -20,43 +45,43 @@ const menuData: RouteObject[] = [
   {
     path: '/dashboard',
     name: '首页',
-    icon: 'DashboardOutlined',
+    icon: <DashboardOutlined />,
   },
   {
     path: '/system',
     name: '系统管理',
-    icon: 'SettingOutlined',
+    icon: <SettingOutlined />,
     routes: [
-      { path: '/system/user', name: '用户管理', icon: 'UserOutlined' },
-      { path: '/system/role', name: '角色管理', icon: 'SafetyOutlined' },
-      { path: '/system/menu', name: '菜单管理', icon: 'AppstoreOutlined' },
-      { path: '/system/dept', name: '部门管理', icon: 'ApartmentOutlined' },
-      { path: '/system/post', name: '岗位管理', icon: 'IdcardOutlined' },
-      { path: '/system/dict', name: '字典管理', icon: 'BookOutlined' },
-      { path: '/system/log', name: '操作日志', icon: 'UnorderedListOutlined' },
-      { path: '/system/module', name: '模块管理', icon: 'ControlOutlined' },
-      { path: '/system/config', name: '系统配置', icon: 'CalendarOutlined' },
-      { path: '/system/notice', name: '公告管理', icon: 'FileTextOutlined' },
+      { path: '/system/user', name: '用户管理', icon: <UserOutlined /> },
+      { path: '/system/role', name: '角色管理', icon: <SafetyOutlined /> },
+      { path: '/system/menu', name: '菜单管理', icon: <AppstoreOutlined /> },
+      { path: '/system/dept', name: '部门管理', icon: <ApartmentOutlined /> },
+      { path: '/system/post', name: '岗位管理', icon: <IdcardOutlined /> },
+      { path: '/system/dict', name: '字典管理', icon: <BookOutlined /> },
+      { path: '/system/log', name: '操作日志', icon: <UnorderedListOutlined /> },
+      { path: '/system/module', name: '模块管理', icon: <ControlOutlined /> },
+      { path: '/system/config', name: '系统配置', icon: <CalendarOutlined /> },
+      { path: '/system/notice', name: '公告管理', icon: <FileTextOutlined /> },
     ],
   },
   {
     path: '/account',
     name: '账务管理',
-    icon: 'AccountBookOutlined',
+    icon: <AccountBookOutlined />,
     routes: [
-      { path: '/account/subject', name: '科目管理', icon: 'FundOutlined' },
-      { path: '/account/balance', name: '期初余额', icon: 'DollarOutlined' },
-      { path: '/account/voucher', name: '凭证管理', icon: 'FileExcelOutlined', routes: [
+      { path: '/account/subject', name: '科目管理', icon: <FundOutlined /> },
+      { path: '/account/balance', name: '期初余额', icon: <DollarOutlined /> },
+      { path: '/account/voucher', name: '凭证管理', icon: <FileExcelOutlined />, routes: [
         { path: '/account/voucher/list', name: '凭证列表', redirect: '/account/voucher' },
         { path: '/account/voucher/add', name: '新增凭证' },
       ]},
-      { path: '/account/ledger', name: '账簿查询', icon: 'FileSearchOutlined', routes: [
+      { path: '/account/ledger', name: '账簿查询', icon: <FileSearchOutlined />, routes: [
         { path: '/account/ledger/general', name: '总账' },
         { path: '/account/ledger/detail', name: '明细账' },
         { path: '/account/ledger/journal', name: '日记账' },
       ]},
-      { path: '/account/period', name: '会计期间', icon: 'ScheduleOutlined' },
-      { path: '/account/auxiliary', name: '辅助核算', icon: 'TeamOutlined', routes: [
+      { path: '/account/period', name: '会计期间', icon: <ScheduleOutlined /> },
+      { path: '/account/auxiliary', name: '辅助核算', icon: <TeamOutlined />, routes: [
         { path: '/account/auxiliary/customer', name: '客户' },
         { path: '/account/auxiliary/supplier', name: '供应商' },
         { path: '/account/auxiliary/project', name: '项目' },
@@ -66,7 +91,7 @@ const menuData: RouteObject[] = [
   {
     path: '/report',
     name: '报表中心',
-    icon: 'PieChartOutlined',
+    icon: <PieChartOutlined />,
     routes: [
       { path: '/report/balance-sheet', name: '资产负债表' },
       { path: '/report/income-statement', name: '利润表' },
@@ -79,7 +104,7 @@ const menuData: RouteObject[] = [
   {
     path: '/budget',
     name: '预算管理',
-    icon: 'GoldOutlined',
+    icon: <GoldOutlined />,
     routes: [
       { path: '/budget/setting', name: '预算设置' },
       { path: '/budget/plan', name: '月度预算' },
@@ -92,7 +117,7 @@ const menuData: RouteObject[] = [
   {
     path: '/approval',
     name: '审批流程',
-    icon: 'AuditOutlined',
+    icon: <AuditOutlined />,
     routes: [
       { path: '/approval/pending', name: '待办审批' },
       { path: '/approval/done', name: '已办审批' },
@@ -103,7 +128,7 @@ const menuData: RouteObject[] = [
   {
     path: '/asset',
     name: '资产管理',
-    icon: 'BankOutlined',
+    icon: <BankOutlined />,
     routes: [
       { path: '/asset/category', name: '资产分类' },
       { path: '/asset/card', name: '资产卡片' },
@@ -117,7 +142,7 @@ const menuData: RouteObject[] = [
   {
     path: '/expense',
     name: '费用管理',
-    icon: 'ShoppingCartOutlined',
+    icon: <ShoppingCartOutlined />,
     routes: [
       { path: '/expense/type', name: '费用类型' },
       { path: '/expense/claim', name: '报销管理', routes: [
@@ -133,7 +158,7 @@ const menuData: RouteObject[] = [
   {
     path: '/tax',
     name: '税务管理',
-    icon: 'ReconciliationOutlined',
+    icon: <ReconciliationOutlined />,
     routes: [
       { path: '/tax/type', name: '税种管理' },
       { path: '/tax/declaration', name: '纳税申报' },

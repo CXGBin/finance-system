@@ -19,13 +19,15 @@ const DictList: React.FC = () => {
 
   const loadTypes = async () => {
     const res = await dictApi.typeList();
-    setTypes(res.data || []);
+    const d = res.data;
+    setTypes(Array.isArray(d) ? d : ((d as any)?.list || []));
   };
 
   const loadItems = async (dictTypeCode: string) => {
     setSelectedType(dictTypeCode as any);
     const res = await dictApi.itemList(dictTypeCode);
-    setItems(res.data || []);
+    const d = res.data;
+    setItems(Array.isArray(d) ? d : ((d as any)?.list || []));
   };
 
   const handleAddType = () => {
@@ -58,7 +60,7 @@ const DictList: React.FC = () => {
   const handleAddItem = () => {
     setEditingItem(null);
     itemForm.resetFields();
-    itemForm.setFieldsValue({ dictId: selectedType });
+    itemForm.setFieldsValue({ dictType: selectedType });
     setItemModalOpen(true);
   };
 

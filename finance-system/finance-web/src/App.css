@@ -1,3 +1,8 @@
+/* 全局字体大小 - 13px略微紧凑模式 */
+html, body, #root {
+  font-size: 13px;
+}
+
 /* 金额右对齐 */
 .amount-right {
   text-align: right;

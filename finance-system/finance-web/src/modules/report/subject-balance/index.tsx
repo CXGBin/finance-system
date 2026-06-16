@@ -35,6 +35,7 @@ const SubjectBalance: React.FC = () => {
         <span>年</span>
         <Select value={params.month} onChange={(v) => setParams({ ...params, month: v })} style={{ width: 80 }} options={Array.from({ length: 12 }, (_, i) => ({ label: String(i + 1), value: i + 1 }))} />
         <span>月</span>
+        <Button type="primary" onClick={loadData} loading={loading}>查询</Button>
       </Space>
       <Table columns={columns} dataSource={data} rowKey="subjectCode" loading={loading} pagination={false} />
     </Card>

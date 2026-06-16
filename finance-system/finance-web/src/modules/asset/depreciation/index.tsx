@@ -14,7 +14,7 @@ const AssetDepreciation: React.FC = () => {
 
   const loadData = async () => {
     setLoading(true);
-    try { const res = await assetApi.depreciationList({ page: 1, pageSize: 999 }); const d = res.data; setData(Array.isArray(d) ? d : ((d as { list?: typeof data })?.list || [])); } finally { setLoading(false); }
+    try { const res = await assetApi.depreciationList({ pageIndex: 1, pageSize: 999 }); const d = res.data; setData(Array.isArray(d) ? d : ((d as { list?: typeof data })?.list || [])); } finally { setLoading(false); }
   };
 
   const handleRun = async () => {

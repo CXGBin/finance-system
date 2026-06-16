@@ -1,31 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, InputNumber, Button, message, Space } from 'antd';
-import { balanceApi, subjectApi } from '@/api/account';
-import { Select } from 'antd';
-import type { BalanceItem, Subject } from '@/types/account.d';
-import dayjs from 'dayjs';
+import { Card, Table, InputNumber, Button, message, Select, Space } from 'antd';
+import { balanceApi, subjectApi, periodApi } from '@/api/account';
+import type { BalanceItem, Subject, AccountingPeriod } from '@/types/account.d';
 
 /** 期初余额管理 */
 const BalanceList: React.FC = () => {
-  const [yearPeriod, setYearPeriod] = useState(dayjs().format('YYYY-01'));
+  const [selectedPeriodId, setSelectedPeriodId] = useState<number | undefined>();
+  const [periods, setPeriods] = useState<AccountingPeriod[]>([]);
   const [data, setData] = useState<BalanceItem[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    loadPeriods();
     loadSubjects();
-    loadData();
-  }, [yearPeriod]);
+  }, []);
+
+  useEffect(() => {
+    if (selectedPeriodId) loadData();
+  }, [selectedPeriodId]);
+
+  const loadPeriods = async () => {
+    const year = new Date().getFullYear();
+    try {
+      const res = await periodApi.list(year);
+      const list = res.data || [];
+      setPeriods(list);
+      if (list.length > 0) setSelectedPeriodId(list[0].id);
+    } catch {}
+  };
 
   const loadSubjects = async () => {
-    const res = await subjectApi.list();
-    setSubjects(res.data || []);
+    try {
+      const res = await subjectApi.list();
+      setSubjects(res.data || []);
+    } catch {}
   };
 
   const loadData = async () => {
+    if (!selectedPeriodId) return;
     setLoading(true);
     try {
-      const res = await balanceApi.list(yearPeriod);
+      const res = await balanceApi.list(selectedPeriodId);
       setData(res.data || []);
     } finally { setLoading(false); }
   };
@@ -65,7 +81,14 @@ const BalanceList: React.FC = () => {
     <Card title="期初余额" extra={<Button type="primary" onClick={handleSave} loading={loading}>保存</Button>}>
       <Space style={{ marginBottom: 16 }}>
         <span>会计期间：</span>
-        <Select value={yearPeriod} onChange={setYearPeriod} style={{ width: 120 }} options={Array.from({ length: 12 }, (_, i) => ({ label: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}`, value: `${dayjs().year()}-${String(i + 1).padStart(2, '0')}` }))} />
+        <Select
+          value={selectedPeriodId}
+          onChange={setSelectedPeriodId}
+          style={{ width: 200 }}
+          placeholder="选择会计期间"
+          options={periods.map(p => ({ label: `${p.periodYear}-${String(p.periodMonth).padStart(2, '0')}`, value: p.id }))}
+        />
+        <Button onClick={loadData}>查询</Button>
       </Space>
       <Table columns={columns} dataSource={data} rowKey="id" loading={loading} pagination={false} />
     </Card>

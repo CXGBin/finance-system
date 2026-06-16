@@ -25,20 +25,20 @@ const PeriodList: React.FC = () => {
   };
 
   const handleClose = async (record: AccountingPeriod) => {
-    await periodApi.close(`${record.periodYear}-${String(record.periodMonth).padStart(2, '0')}`);
+    await periodApi.close(record.id);
     message.success('结账成功');
     loadData();
   };
 
   const handleReopen = async (record: AccountingPeriod) => {
-    await periodApi.reopen(`${record.periodYear}-${String(record.periodMonth).padStart(2, '0')}`);
+    await periodApi.unclose(record.id);
     message.success('反结账成功');
     loadData();
   };
 
   const handleCarryForward = async (record: AccountingPeriod) => {
-    await periodApi.carryForward(`${record.periodYear}-${String(record.periodMonth).padStart(2, '0')}`);
-    message.success('期末结转成功');
+    await periodApi.profitTransfer(record.id);
+    message.success('损益结转成功');
     loadData();
   };
 
@@ -65,7 +65,7 @@ const PeriodList: React.FC = () => {
     { title: '结束日期', dataIndex: 'endDate', key: 'endDate' },
     {
       title: '状态', dataIndex: 'isClosed', key: 'isClosed',
-      render: (val: number) => val === 1 ? <Tag color="success">已结账</Tag> : <Tag color="processing">未结账</Tag>,
+      render: (val: boolean) => val ? <Tag color="success">已结账</Tag> : <Tag color="processing">未结账</Tag>,
     },
     { title: '结账时间', dataIndex: 'closedTime', key: 'closedTime' },
     {

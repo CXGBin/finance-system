@@ -41,12 +41,14 @@ const BalanceSheet: React.FC = () => {
   ];
 
   return (
-    <Card title="资产负债表" extra={<Space><Button onClick={handleExport}>导出Excel</Button><Button type="primary" onClick={loadData} loading={loading}>查询</Button></Space>}>
+    <Card title="
       <Space style={{ marginBottom: 16 }}>
         <Select value={params.year} onChange={(v) => setParams({ ...params, year: v })} style={{ width: 100 }} options={Array.from({ length: 5 }, (_, i) => ({ label: String(dayjs().year() - 2 + i), value: dayjs().year() - 2 + i }))} />
         <span>年</span>
         <Select value={params.month} onChange={(v) => setParams({ ...params, month: v })} style={{ width: 80 }} options={Array.from({ length: 12 }, (_, i) => ({ label: String(i + 1), value: i + 1 }))} />
         <span>月</span>
+        <Button type="primary" onClick={loadData} loading={loading}>查询</Button>
+        <Button onClick={handleExport}>导出Excel</Button>
       </Space>
       <Table columns={columns} dataSource={data} rowKey="lineNo" loading={loading} pagination={false} />
     </Card>
