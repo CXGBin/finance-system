@@ -14,3 +14,14 @@ dist/
 .vscode/
 *.swp
 *.swo
+
+## Test Results
+TestResults/
+test-results/
+test-results.txt
+*.log
+detailed-test.log
+
+## Temp
+*.tmp
+*.bak
