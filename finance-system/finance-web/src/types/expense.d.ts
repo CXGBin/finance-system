@@ -41,9 +41,12 @@ export interface ExpenseAllocate {
   id: number;
   allocateNo: string; // 后端 AllocateNo
   description?: string;
-  amount?: number;
-  status?: number;
-  createTime?: string;
+  totalAmount: number; // 后端 TotalAmount
+  deptId?: number; // 后端 DeptId
+  allocateAmount: number; // 后端 AllocateAmount
+  periodYear?: number; // 后端 PeriodYear
+  periodMonth?: number; // 后端 PeriodMonth
+  createdTime?: string;
 }
 
 /** 费用统计 */

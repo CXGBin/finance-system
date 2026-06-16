@@ -66,10 +66,10 @@ const ApprovalDetail: React.FC = () => {
       {data && (
         <>
           <Descriptions bordered size="small" column={3} style={{ marginBottom: 16 }}>
-            <Descriptions.Item label="审批单号">{data.approvalNo}</Descriptions.Item>
+            <Descriptions.Item label="业务ID">{data.businessId}</Descriptions.Item>
             <Descriptions.Item label="标题">{data.title}</Descriptions.Item>
             <Descriptions.Item label="状态"><Tag>{data.status === 0 ? '审批中' : data.status === 1 ? '已通过' : '已驳回'}</Tag></Descriptions.Item>
-            <Descriptions.Item label="发起人">{data.initiatorName}</Descriptions.Item>
+            <Descriptions.Item label="发起人ID">{data.initiatorId}</Descriptions.Item>
             <Descriptions.Item label="发起时间">{data.createdTime}</Descriptions.Item>
           </Descriptions>
           <h4>审批记录</h4>

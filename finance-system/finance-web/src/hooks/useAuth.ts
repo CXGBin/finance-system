@@ -10,8 +10,8 @@ export function useAuth() {
   const setModules = useModuleStore((s) => s.setModules);
 
   const login = useCallback(
-    async (username: string, password: string, remember?: boolean) => {
-      const res = await loginApi({ username, password, remember });
+    async (username: string, password: string, rememberMe?: boolean) => {
+      const res = await loginApi({ username, password, rememberMe });
       const { accessToken, refreshToken, userInfo: info } = res.data;
       setAuth(accessToken, refreshToken, info);
       if (info.permissions) setPermissions(info.permissions);

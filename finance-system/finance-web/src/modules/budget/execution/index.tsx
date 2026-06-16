@@ -17,10 +17,10 @@ const BudgetExecution: React.FC = () => {
 
   const columns = [
     { title: '科目名称', dataIndex: 'subjectName', key: 'subjectName' },
-    { title: '年度预算', dataIndex: 'yearBudget', key: 'yearBudget', align: 'right' },
+    { title: '年度预算', dataIndex: 'annualBudget', key: 'annualBudget', align: 'right' },
     { title: '已执行', dataIndex: 'executedAmount', key: 'executedAmount', align: 'right' },
     { title: '执行率(%)', dataIndex: 'executionRate', key: 'executionRate', align: 'right' },
-    { title: '剩余', dataIndex: 'remainBudget', key: 'remainBudget', align: 'right' },
+    { title: '剩余', dataIndex: 'remainingBudget', key: 'remainingBudget', align: 'right' },
   ];
 
   return (

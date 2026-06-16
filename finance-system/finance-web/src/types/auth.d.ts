@@ -2,7 +2,7 @@
 export interface LoginParams {
   username: string;
   password: string;
-  remember?: boolean;
+  rememberMe?: boolean;
 }
 
 /** 登录响应 - 与后端 LoginResponse 对齐 */

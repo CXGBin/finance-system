@@ -13,10 +13,10 @@ const LoginPage: React.FC = () => {
   const location = useLocation();
   const from = (location.state as any)?.from?.pathname || '/dashboard';
 
-  const handleLogin = async (values: { username: string; password: string; remember?: boolean }) => {
+  const handleLogin = async (values: { username: string; password: string; rememberMe?: boolean }) => {
     setLoading(true);
     try {
-      await login(values.username, values.password, values.remember);
+      await login(values.username, values.password, values.rememberMe);
       message.success('登录成功');
       navigate(from, { replace: true });
     } catch (err: unknown) {
@@ -47,7 +47,7 @@ const LoginPage: React.FC = () => {
         <Form
           name="login"
           onFinish={handleLogin}
-          initialValues={{ remember: true }}
+          initialValues={{ rememberMe: true }}
           size="large"
         >
           <Form.Item name="username" rules={[{ required: true, message: '请输入用户名' }]}>
@@ -58,7 +58,7 @@ const LoginPage: React.FC = () => {
           </Form.Item>
           <Form.Item>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Form.Item name="remember" valuePropName="checked" noStyle>
+              <Form.Item name="rememberMe" valuePropName="checked" noStyle>
                 <Checkbox>记住我</Checkbox>
               </Form.Item>
             </div>

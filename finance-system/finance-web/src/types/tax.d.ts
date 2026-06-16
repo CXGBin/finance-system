@@ -4,8 +4,8 @@ export interface TaxType {
   taxCode: string; // 后端 TaxCode
   taxName: string; // 后端 TaxName
   taxRate: number; // 后端 TaxRate
-  calculationMethod?: string; // 后端 CalculationMethod
-  declareCycle?: string; // 后端 DeclareCycle
+  calculationMethod?: number; // 后端 CalculationMethod (int)
+  declareCycle?: number; // 后端 DeclareCycle (int)
   subjectId?: number;
   isEnabled: number; // 后端 IsEnabled
   remark?: string;
@@ -27,16 +27,16 @@ export interface TaxDeclaration {
 /** 发票 - 与后端 TaxInvoice 对齐 */
 export interface Invoice {
   id: number;
-  invoiceType: string; // 后端 InvoiceType
+  invoiceType: number; // 后端 InvoiceType (int)
   invoiceNo: string; // 后端 InvoiceNo
   invoiceDate: string; // 后端 InvoiceDate
   counterpartyName?: string; // 后端 CounterpartyName
   taxAmount: number; // 后端 TaxAmount
   amountWithoutTax: number; // 后端 AmountWithoutTax
   totalAmount: number; // 后端 TotalAmount
-  direction: string; // 后端 Direction
+  direction: number; // 后端 Direction (int)
   voucherId?: number;
-  isVerified?: boolean; // 后端 IsVerified
+  isVerified: number; // 后端 IsVerified (int: 0未核验 1已核验)
 }
 
 /** 税务报表 */

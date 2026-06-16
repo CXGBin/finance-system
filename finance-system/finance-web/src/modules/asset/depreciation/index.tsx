@@ -27,8 +27,8 @@ const AssetDepreciation: React.FC = () => {
   };
 
   const columns = [
-    { title: '资产编号', dataIndex: 'assetCode', key: 'assetCode' },
-    { title: '资产名称', dataIndex: 'assetName', key: 'assetName' },
+    { title: '资产ID', dataIndex: 'assetCardId', key: 'assetCardId' },
+    { title: '月份', dataIndex: 'month', key: 'month' },
     { title: '折旧额', dataIndex: 'depreciationAmount', key: 'depreciationAmount', align: 'right' },
     { title: '累计折旧', dataIndex: 'accumulatedDepreciation', key: 'accumulatedDepreciation', align: 'right' },
     { title: '净值', dataIndex: 'netValue', key: 'netValue', align: 'right' },

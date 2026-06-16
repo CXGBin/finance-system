@@ -8,7 +8,7 @@ import type { AssetChange } from '@/types/asset.d';
 const AssetChange: React.FC = () => {
   const columns = [
     { title: '资产编号', dataIndex: 'assetCode', key: 'assetCode', search: true },
-    { title: '资产名称', dataIndex: 'assetName', key: 'assetName' },
+    { title: '资产ID', dataIndex: 'assetCardId', key: 'assetCardId' },
     { title: '变动类型', dataIndex: 'changeType', key: 'changeType', render: (val: number) => ['未知', '调拨', '处置', '报废'][val] || '未知' },
     { title: '变动原因', dataIndex: 'reason', key: 'reason', ellipsis: true },
     { title: '处置收入', dataIndex: 'disposalIncome', key: 'disposalIncome', align: 'right' },

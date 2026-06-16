@@ -12,11 +12,13 @@ export interface BudgetItem {
 /** 预算执行记录 - 与后端 BudgetExecutionItem 对齐 */
 export interface BudgetExecution {
   budgetSubjectId: number; // 后端 BudgetSubjectId
-  subjectName?: string;
-  annualBudget: number;
-  totalActual: number;
-  executionRate: number;
-  remainAmount: number;
+  subjectCode?: string; // 后端 SubjectCode
+  subjectName?: string; // 后端 SubjectName
+  deptName?: string; // 后端 DeptName
+  annualBudget: number; // 后端 AnnualBudget
+  executedAmount: number; // 后端 ExecutedAmount
+  executionRate: number; // 后端 ExecutionRate
+  remainingBudget: number; // 后端 RemainingBudget
 }
 
 /** 预算月度数据 - 与后端 BudgetMonthly 对齐 */
@@ -37,7 +39,7 @@ export interface BudgetMonthlySaveRequest {
 export interface BudgetAdjust {
   id: number;
   budgetSubjectId?: number;
-  adjustType: string; // 后端 AdjustType
+  adjustType: number; // 后端 AdjustType (int: 1增加 2减少)
   beforeAmount: number; // 后端 BeforeAmount
   afterAmount: number; // 后端 AfterAmount
   reason: string;
@@ -53,5 +55,5 @@ export interface BudgetAlert {
   budgetYearId: number; // 后端 BudgetYearId
   alertThreshold: number; // 后端 AlertThreshold
   isEnabled: number; // 后端 IsEnabled
-  alertMethod?: string; // 后端 AlertMethod
+  alertMethod?: number; // 后端 AlertMethod (int)
 }

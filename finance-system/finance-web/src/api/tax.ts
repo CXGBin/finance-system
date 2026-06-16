@@ -17,7 +17,7 @@ export const taxApi = {
   /** 获取申报列表 */
   declarationList: (params: PageParams) => get<PagedResult<TaxDeclaration>>('/tax/declaration/list', params),
   /** 计算应纳税额 */
-  declarationCalculate: (data: { taxTypeId: number; period: string }) => post<number>('/tax/declaration/calculate', data),
+  declarationCalculate: (data: { taxCategoryId: number; declarePeriod: string; taxBase?: number }) => post<number>('/tax/declaration/calculate', data),
   /** 申报 */
   declarationDeclare: (id: number) => post(`/tax/declaration/${id}/declare`),
   /** 缴款 */

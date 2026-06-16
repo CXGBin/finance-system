@@ -9,9 +9,9 @@ import type { ApprovalInstance } from '@/types/approval.d';
 const PendingApproval: React.FC = () => {
   const navigate = useNavigate();
   const columns = [
-    { title: '审批单号', dataIndex: 'approvalNo', key: 'approvalNo', search: true },
+    { title: '业务ID', dataIndex: 'businessId', key: 'businessId', search: true },
     { title: '标题', dataIndex: 'title', key: 'title' },
-    { title: '发起人', dataIndex: 'initiatorName', key: 'initiatorName' },
+    { title: '发起人ID', dataIndex: 'initiatorId', key: 'initiatorId' },
     { title: '发起时间', dataIndex: 'createdTime', key: 'createdTime' },
     {
       title: '操作', key: 'action', render: (_: unknown, record: ApprovalInstance) => (

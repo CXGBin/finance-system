@@ -9,9 +9,9 @@ const BudgetPlan: React.FC = () => {
   const columns = [
     { title: '科目编码', dataIndex: 'subjectCode', key: 'subjectCode', search: true },
     { title: '科目名称', dataIndex: 'subjectName', key: 'subjectName' },
-    { title: '年度预算', dataIndex: 'yearBudget', key: 'yearBudget', align: 'right' },
-    { title: '已用预算', dataIndex: 'usedBudget', key: 'usedBudget', align: 'right' },
-    { title: '剩余预算', dataIndex: 'remainBudget', key: 'remainBudget', align: 'right' },
+    { title: '年度预算', dataIndex: 'annualBudget', key: 'annualBudget', align: 'right' },
+    { title: '已执行', dataIndex: 'executedAmount', key: 'executedAmount', align: 'right' },
+    { title: '剩余预算', dataIndex: 'remainingBudget', key: 'remainingBudget', align: 'right' },
   ];
 
   return (

@@ -12,7 +12,7 @@ const MyApproval: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('initiated');
 
   const commonColumns = [
-    { title: '审批单号', dataIndex: 'approvalNo', key: 'approvalNo', search: true },
+    { title: '业务ID', dataIndex: 'businessId', key: 'businessId', search: true },
     { title: '标题', dataIndex: 'title', key: 'title' },
     {
       title: '状态', dataIndex: 'status', key: 'status',

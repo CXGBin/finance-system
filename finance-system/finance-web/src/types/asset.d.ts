@@ -37,30 +37,34 @@ export interface AssetCard {
 /** 折旧记录 - 与后端 AssetDepreciation 对齐 */
 export interface DepreciationRecord {
   id: number;
-  assetId: number;
-  assetName?: string;
-  period: string;
-  originalValue: number;
-  netBookValue: number;
-  depreciationAmount: number;
-  cumulativeDepreciation: number;
+  assetCardId: number; // 后端 AssetCardId
+  periodId: number; // 后端 PeriodId
+  month: number; // 后端 Month
+  depreciationAmount: number; // 后端 DepreciationAmount
+  accumulatedDepreciation: number; // 后端 AccumulatedDepreciation
+  netValue: number; // 后端 NetValue
 }
 
-/** 资产变动 */
+/** 资产变动 - 与后端 AssetChange 对齐 */
 export interface AssetChange {
   id: number;
-  assetId: number;
-  assetName?: string;
-  changeType: string;
-  changeDate: string;
-  description: string;
-  operator: string;
+  assetCardId: number; // 后端 AssetCardId
+  changeType: number; // 后端 ChangeType (int)
+  reason: string; // 后端 Reason
+  fromDeptId?: number; // 后端 FromDeptId
+  toDeptId?: number; // 后端 ToDeptId
+  disposalIncome?: number; // 后端 DisposalIncome
+  operatorId: number; // 后端 OperatorId
+  createdTime?: string;
 }
 
 /** 资产盘点 - 与后端 AssetInventory 对齐 */
 export interface AssetInventory {
   id: number;
-  name: string;
-  status: number; // 后端 Status (int)
-  createTime?: string;
+  inventoryNo: string; // 后端 InventoryNo
+  inventoryDate: string; // 后端 InventoryDate
+  operatorId: number; // 后端 OperatorId
+  itemsJson?: string; // 后端 ItemsJson
+  status: number; // 后端 Status (0未完成 1已完成)
+  createdTime?: string;
 }

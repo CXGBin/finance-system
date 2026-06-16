@@ -11,7 +11,7 @@ const AssetInventory: React.FC = () => {
     { title: '资产名称', dataIndex: 'assetName', key: 'assetName' },
     { title: '存放地点', dataIndex: 'location', key: 'location' },
     { title: '盘点结果', dataIndex: 'result', key: 'result' },
-    { title: '盘点人', dataIndex: 'operatorName', key: 'operatorName' },
+    { title: '盘点人ID', dataIndex: 'operatorId', key: 'operatorId' },
     { title: '盘点时间', dataIndex: 'inventoryTime', key: 'inventoryTime' },
   ];
   return <Card title="资产盘点"><ProTable columns={columns} fetchData={(params) => assetApi.inventoryList(params as any)} /></Card>;

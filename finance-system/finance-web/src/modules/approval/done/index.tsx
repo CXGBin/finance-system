@@ -9,9 +9,9 @@ import type { ApprovalInstance } from '@/types/approval.d';
 const DoneApproval: React.FC = () => {
   const navigate = useNavigate();
   const columns = [
-    { title: '审批单号', dataIndex: 'approvalNo', key: 'approvalNo', search: true },
+    { title: '业务ID', dataIndex: 'businessId', key: 'businessId', search: true },
     { title: '标题', dataIndex: 'title', key: 'title' },
-    { title: '发起人', dataIndex: 'initiatorName', key: 'initiatorName' },
+    { title: '发起人ID', dataIndex: 'initiatorId', key: 'initiatorId' },
     {
       title: '结果', dataIndex: 'result', key: 'result',
       render: (val: number) => val === 1 ? <Tag color="success">通过</Tag> : <Tag color="error">驳回</Tag>,
