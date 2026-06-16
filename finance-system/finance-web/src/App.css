@@ -1,5 +1,7 @@
 /* 全局字体大小 - 13px略微紧凑模式 */
-html, body, #root {
+html,
+body,
+#root {
   font-size: 13px;
 }
 
@@ -38,4 +40,13 @@ html, body, #root {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.ant-pro-page-container-children-container {
+  padding-block-end: 0px !important;
+  padding-inline: 0px !important;
+}
+
+.ant-pro-page-container-children-container-no-header {
+  padding-block-start: 0px !important;
 }

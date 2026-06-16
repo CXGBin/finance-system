@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "FinanceSystem.Api": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:2842;http://localhost:2843"
+    }
+  }
+}
