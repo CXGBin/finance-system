@@ -16,12 +16,13 @@ export interface ExpenseClaim {
   typeId?: number;
   typeName?: string;
   totalAmount: number;
-  status: 'draft' | 'submitted' | 'approving' | 'approved' | 'rejected' | 'paid';
-  applicant: string;
+  status: number; // 0草稿 1待审批 2已审批 3已驳回 4已付款
+  applicant?: string;
   applicantId: number;
-  createTime: string;
+  createdTime: string;
   items: ExpenseClaimItem[];
   attachments?: string[];
+  remark?: string;
 }
 
 /** 报销明细 */

@@ -625,7 +625,9 @@ public class ReportExportService : IReportExportService
         if (!Directory.Exists(exportDir)) Directory.CreateDirectory(exportDir);
 
         var period = query.Period ?? "";
-        var csv = query.ReportType switch
+        // 兼容下划线和连字符两种格式
+        var normalizedType = query.ReportType.Replace("_", "-");
+        var csv = normalizedType switch
         {
             "balance-sheet" => await ExportBalanceSheet(period),
             "income-statement" => await ExportIncomeStatement(period),
