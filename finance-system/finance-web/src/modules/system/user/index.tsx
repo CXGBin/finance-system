@@ -135,7 +135,7 @@ const UserList: React.FC = () => {
         headerTitle="用户管理"
         rowKey="id"
         columns={columns}
-        search={{ labelWidth: 'auto' }}
+        search={{ labelWidth: 'auto', defaultCollapsed: true }}
         request={createProTableRequest((params) => userApi.list(params as any))}
         toolBarRender={() => [
           <Button key="add" type="primary" onClick={handleAdd}>新增用户</Button>,

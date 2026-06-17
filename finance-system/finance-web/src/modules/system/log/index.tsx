@@ -89,7 +89,7 @@ const LogList: React.FC = () => {
         headerTitle="操作日志"
         rowKey="id"
         columns={columns}
-        search={{ labelWidth: 'auto' }}
+        search={{ labelWidth: 'auto', defaultCollapsed: true }}
         request={createProTableRequest((params) => logApi.list(params as any))}
         pagination={{ defaultPageSize: 10, showSizeChanger: true }}
       />

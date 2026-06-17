@@ -14,7 +14,7 @@ const ExpenseAllocate: React.FC = () => {
     { title: '分摊金额', dataIndex: 'allocateAmount', align: 'right', sorter: true },
   ];
   const request = createProTableRequest((params) => expenseApi.allocateList(params));
-  return <Card title="费用分摊"><ProTable columns={columns} request={request} search={{ labelWidth: 'auto' }} rowKey="id" /></Card>;
+  return <Card title="费用分摊"><ProTable columns={columns} request={request} search={{ labelWidth: 'auto', defaultCollapsed: true }} rowKey="id" /></Card>;
 };
 
 export default ExpenseAllocate;

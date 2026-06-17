@@ -130,7 +130,7 @@ const RoleList: React.FC = () => {
         headerTitle="角色管理"
         rowKey="id"
         columns={columns}
-        search={{ labelWidth: 'auto' }}
+        search={{ labelWidth: 'auto', defaultCollapsed: true }}
         request={createProTableRequest((params) => roleApi.list(params as any))}
         toolBarRender={() => [
           <Button key="add" type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新增角色</Button>,

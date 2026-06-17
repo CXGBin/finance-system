@@ -37,7 +37,7 @@ const ApprovalTemplate: React.FC = () => {
         actionRef={actionRef}
         columns={columns}
         request={request}
-        search={{ labelWidth: 'auto' }}
+        search={{ labelWidth: 'auto', defaultCollapsed: true }}
         rowKey="id"
         toolBarRender={() => [<a key="add" onClick={() => { form.resetFields(); setModalOpen(true); }}>新增模板</a>]}
       />

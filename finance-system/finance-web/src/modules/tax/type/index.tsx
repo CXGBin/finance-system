@@ -36,7 +36,7 @@ const TaxType: React.FC = () => {
   return (
     <>
       <ProTable<TaxCategory> actionRef={actionRef} headerTitle="税种管理" rowKey="id" columns={columns}
-        search={{ labelWidth: 'auto' }}
+        search={{ labelWidth: 'auto', defaultCollapsed: true }}
         request={createProTableRequest((params) => taxApi.typeList(params as any))}
         toolBarRender={() => [<Button key="add" type="primary" icon={<PlusOutlined />} onClick={() => { setEditingRecord(null); form.resetFields(); form.setFieldsValue({ calculationMethod: 1, declareCycle: 1, taxRate: 0 }); setModalOpen(true); }}>新增税种</Button>]}
         pagination={{ defaultPageSize: 10, showSizeChanger: true }}

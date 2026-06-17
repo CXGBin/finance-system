@@ -68,7 +68,7 @@ const BudgetSubjectTable: React.FC<{ yearId: number }> = ({ yearId }) => {
   return (
     <>
       <ProTable<BudgetItem> actionRef={actionRef} headerTitle="预算科目" rowKey="id" columns={columns}
-        search={{ labelWidth: 'auto' }}
+        search={{ labelWidth: 'auto', defaultCollapsed: true }}
         request={createProTableRequest((params) => budgetApi.subjectList({ yearId, ...params }))}
         toolBarRender={() => [<Button key="add" type="primary" icon={<PlusOutlined />} onClick={() => { setEditingRecord(null); form.resetFields(); form.setFieldsValue({ annualAmount: 0 }); setModalOpen(true); }}>新增科目</Button>]}
         pagination={{ defaultPageSize: 10, showSizeChanger: true }}

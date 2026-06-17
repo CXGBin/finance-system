@@ -56,7 +56,7 @@ export default function ExpenseLoanPage() {
         actionRef={actionRef}
         columns={columns}
         request={request}
-        search={{ labelWidth: 'auto' }}
+        search={{ labelWidth: 'auto', defaultCollapsed: true }}
         rowKey="id"
         scroll={{ x: 1200 }}
         toolBarRender={() => [<a key="add" onClick={() => setModalVisible(true)}>申请借款</a>]}

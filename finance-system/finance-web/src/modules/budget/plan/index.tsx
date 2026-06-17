@@ -14,7 +14,7 @@ const BudgetPlan: React.FC = () => {
     { title: '剩余预算', dataIndex: 'remainingBudget', align: 'right', sorter: true },
   ];
   const request = createProTableRequest((params) => budgetApi.planList(params));
-  return <Card title="预算编制"><ProTable columns={columns} request={request} search={{ labelWidth: 'auto' }} rowKey="id" /></Card>;
+  return <Card title="预算编制"><ProTable columns={columns} request={request} search={{ labelWidth: 'auto', defaultCollapsed: true }} rowKey="id" /></Card>;
 };
 
 export default BudgetPlan;

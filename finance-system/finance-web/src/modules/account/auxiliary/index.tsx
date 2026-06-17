@@ -126,7 +126,7 @@ const AuxiliaryList: React.FC = () => {
           headerTitle=""
           rowKey="id"
           columns={getColumns()}
-          search={{ labelWidth: 'auto' }}
+          search={{ labelWidth: 'auto', defaultCollapsed: true }}
           dataSource={data}
           loading={loading}
           pagination={false}

@@ -45,7 +45,7 @@ const AssetCard: React.FC = () => {
         actionRef={actionRef}
         columns={columns}
         request={request}
-        search={{ labelWidth: 'auto' }}
+        search={{ labelWidth: 'auto', defaultCollapsed: true }}
         rowKey="id"
         toolBarRender={() => [<a key="add" onClick={handleAdd}>新增资产</a>]}
       />

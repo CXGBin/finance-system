@@ -51,7 +51,7 @@ const PostList: React.FC = () => {
     <>
       <ProTable<Post>
         actionRef={actionRef} headerTitle="岗位管理" rowKey="id" columns={columns}
-        search={{ labelWidth: 'auto' }}
+        search={{ labelWidth: 'auto', defaultCollapsed: true }}
         request={createProTableRequest((params) => postApi.list(params as any))}
         toolBarRender={() => [<Button key="add" type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新增岗位</Button>]}
         pagination={{ defaultPageSize: 10, showSizeChanger: true }}

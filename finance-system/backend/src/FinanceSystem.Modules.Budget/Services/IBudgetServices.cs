@@ -30,7 +30,7 @@ public interface IBudgetYearService
 public interface IBudgetSubjectService
 {
     /// <summary>获取预算科目列表</summary>
-    Task<PageResult<BudgetSubject>> GetListAsync(long yearId, int pageIndex = 1, int pageSize = 20);
+    Task<PageResult<BudgetSubject>> GetListAsync(long yearId, int pageIndex = 1, int pageSize = 20, string? sortField = null, string? sortOrder = null);
     /// <summary>新增预算科目</summary>
     Task<long> CreateAsync(BudgetSubjectRequest request);
     /// <summary>修改预算科目</summary>

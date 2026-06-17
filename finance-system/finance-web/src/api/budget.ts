@@ -13,7 +13,7 @@ export const budgetApi = {
 
   // ========== 预算科目（后端: api/budget/setting/subject）==========
   /** 获取预算科目列表 */
-  subjectList: (params: { yearId: number; pageIndex?: number; pageSize?: number }) =>
+  subjectList: (params: { yearId: number; pageIndex?: number; pageSize?: number; sortField?: string; sortOrder?: string } & Record<string, unknown>) =>
     get<PagedResult<BudgetItem>>('/budget/setting/subject/list', params),
   /** 新增预算科目 */
   subjectAdd: (data: Omit<BudgetItem, 'id'>) => post('/budget/setting/subject', data),

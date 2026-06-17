@@ -14,7 +14,7 @@ const PaymentList: React.FC = () => {
     { title: '状态', dataIndex: 'status', valueType: 'select', valueEnum: { 0: { text: '待付款' }, 1: { text: '已付款' } }, search: true },
   ];
   const request = createProTableRequest((params) => expenseApi.paymentList(params));
-  return <Card title="付款记录"><ProTable columns={columns} request={request} search={{ labelWidth: 'auto' }} rowKey="id" /></Card>;
+  return <Card title="付款记录"><ProTable columns={columns} request={request} search={{ labelWidth: 'auto', defaultCollapsed: true }} rowKey="id" /></Card>;
 };
 
 export default PaymentList;

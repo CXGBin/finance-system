@@ -68,9 +68,9 @@ public class BudgetSubjectController : ControllerBase
     /// 获取预算科目列表
     /// </summary>
     [HttpGet("list")]
-    public async Task<ApiResult<PageResult<BudgetSubject>>> GetList([FromQuery] long yearId, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 20)
+    public async Task<ApiResult<PageResult<BudgetSubject>>> GetList([FromQuery] long yearId, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 20, [FromQuery] string? sortField = null, [FromQuery] string? sortOrder = null)
     {
-        return ApiResult<PageResult<BudgetSubject>>.Success(await _subjectService.GetListAsync(yearId, pageIndex, pageSize));
+        return ApiResult<PageResult<BudgetSubject>>.Success(await _subjectService.GetListAsync(yearId, pageIndex, pageSize, sortField, sortOrder));
     }
 
     /// <summary>

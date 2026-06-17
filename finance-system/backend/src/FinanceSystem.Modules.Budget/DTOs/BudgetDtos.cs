@@ -1,3 +1,5 @@
+using FinanceSystem.Core.Common;
+
 namespace FinanceSystem.Modules.Budget.DTOs;
 
 /// <summary>
@@ -6,7 +8,7 @@ namespace FinanceSystem.Modules.Budget.DTOs;
 /// <summary>
 /// BudgetYearQuery
 /// </summary>
-public class BudgetYearQuery
+public class BudgetYearQuery : PageRequest
 {
     /// <summary>
     /// 年份筛选

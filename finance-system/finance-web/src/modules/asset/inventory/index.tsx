@@ -14,7 +14,7 @@ const AssetInventory: React.FC = () => {
     { title: '盘点时间', dataIndex: 'inventoryTime', sorter: true },
   ];
   const request = createProTableRequest((params) => assetApi.inventoryList(params));
-  return <Card title="资产盘点"><ProTable columns={columns} request={request} search={{ labelWidth: 'auto' }} rowKey="id" /></Card>;
+  return <Card title="资产盘点"><ProTable columns={columns} request={request} search={{ labelWidth: 'auto', defaultCollapsed: true }} rowKey="id" /></Card>;
 };
 
 export default AssetInventory;

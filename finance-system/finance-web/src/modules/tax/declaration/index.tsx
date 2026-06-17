@@ -25,7 +25,7 @@ const TaxDeclaration: React.FC = () => {
     },
   ];
   const request = createProTableRequest((params) => taxApi.declarationList(params));
-  return <Card title="纳税申报"><ProTable actionRef={actionRef} columns={columns} request={request} search={{ labelWidth: 'auto' }} rowKey="id" /></Card>;
+  return <Card title="纳税申报"><ProTable actionRef={actionRef} columns={columns} request={request} search={{ labelWidth: 'auto', defaultCollapsed: true }} rowKey="id" /></Card>;
 };
 
 export default TaxDeclaration;

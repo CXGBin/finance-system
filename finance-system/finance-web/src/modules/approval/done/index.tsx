@@ -20,7 +20,7 @@ const DoneApproval: React.FC = () => {
     },
   ];
   const request = createProTableRequest((params) => approvalApi.done(params));
-  return <ProTable columns={columns} request={request} search={{ labelWidth: 'auto' }} rowKey="id" />;
+  return <ProTable columns={columns} request={request} search={{ labelWidth: 'auto', defaultCollapsed: true }} rowKey="id" />;
 };
 
 export default DoneApproval;

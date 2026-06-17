@@ -32,7 +32,7 @@ public class BudgetYearService : IBudgetYearService
         return await _db.Queryable<BudgetYear>()
             .WhereIF(query.Year.HasValue, y => y.Year == query.Year)
             .WhereIF(query.Status.HasValue, y => y.Status == query.Status)
-            .OrderBy(y => y.Year, OrderByType.Desc)
+            .ApplySort(query.SortField, query.SortOrder)
             .ToListAsync();
     }
 
@@ -90,12 +90,12 @@ public class BudgetSubjectService : IBudgetSubjectService
     /// <summary>
     /// 获取盘点列表
     /// </summary>
-    public async Task<PageResult<BudgetSubject>> GetListAsync(long yearId, int pageIndex = 1, int pageSize = 20)
+    public async Task<PageResult<BudgetSubject>> GetListAsync(long yearId, int pageIndex = 1, int pageSize = 20, string? sortField = null, string? sortOrder = null)
     {
         RefAsync<int> total = 0;
         var list = await _db.Queryable<BudgetSubject>()
             .Where(s => s.BudgetYearId == yearId)
-            .OrderBy(s => s.SubjectId)
+            .ApplySort(sortField, sortOrder)
             .ToPageListAsync(pageIndex, pageSize, total);
         return new PageResult<BudgetSubject>(total, list);
     }

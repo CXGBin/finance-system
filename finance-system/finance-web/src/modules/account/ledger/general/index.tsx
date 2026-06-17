@@ -41,7 +41,7 @@ const GeneralLedger: React.FC = () => {
         headerTitle=""
         rowKey={(record) => `${record.voucherNo}-${record.subjectId}-${record.summary}`}
         columns={columns}
-        search={{ labelWidth: 'auto' }}
+        search={{ labelWidth: 'auto', defaultCollapsed: true }}
         request={async (params) => {
           setLoadingData(true);
           try {

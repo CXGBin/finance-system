@@ -122,7 +122,7 @@ const VoucherList: React.FC = () => {
       headerTitle="凭证管理"
       rowKey="id"
       columns={columns}
-      search={{ labelWidth: 'auto' }}
+      search={{ labelWidth: 'auto', defaultCollapsed: true }}
       request={createProTableRequest((params) => voucherApi.page(params as any))}
       toolBarRender={() => [
         <Button key="add" type="primary" icon={<PlusOutlined />} onClick={() => navigate('/account/voucher/add')}>新增凭证</Button>,

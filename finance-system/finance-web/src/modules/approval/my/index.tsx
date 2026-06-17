@@ -44,7 +44,7 @@ const MyApproval: React.FC = () => {
             },
           ]}
           request={requestInitiated}
-          search={{ labelWidth: 'auto' }}
+          search={{ labelWidth: 'auto', defaultCollapsed: true }}
           rowKey="id"
         />
       ),
@@ -63,7 +63,7 @@ const MyApproval: React.FC = () => {
             },
           ]}
           request={requestApproved}
-          search={{ labelWidth: 'auto' }}
+          search={{ labelWidth: 'auto', defaultCollapsed: true }}
           rowKey="id"
         />
       ),

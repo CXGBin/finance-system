@@ -25,7 +25,7 @@ const JournalLedger: React.FC = () => {
         headerTitle=""
         rowKey={(record) => `${record.voucherNo}-${record.subjectId}`}
         columns={columns}
-        search={{ labelWidth: 'auto' }}
+        search={{ labelWidth: 'auto', defaultCollapsed: true }}
         request={async (params) => {
           const res = await ledgerApi.journal({
             startPeriod: (params.startPeriod as string) || '',

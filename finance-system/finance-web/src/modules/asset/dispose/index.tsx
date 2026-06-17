@@ -45,7 +45,7 @@ const AssetDispose: React.FC = () => {
       <Card title="资产处置">
         <ProTable<AssetCard>
           actionRef={actionRef} headerTitle="" rowKey="id" columns={columns}
-          search={{ labelWidth: 'auto' }}
+          search={{ labelWidth: 'auto', defaultCollapsed: true }}
           request={createProTableRequest((params) => assetApi.cardList({ ...params, status: 1 }))}
           pagination={{ defaultPageSize: 10, showSizeChanger: true }}
         />

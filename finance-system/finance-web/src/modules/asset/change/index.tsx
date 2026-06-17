@@ -15,7 +15,7 @@ const AssetChange: React.FC = () => {
     { title: '操作时间', dataIndex: 'createdTime', sorter: true, search: false },
   ];
   const request = createProTableRequest((params) => assetApi.changeList(params));
-  return <Card title="资产变动"><ProTable columns={columns} request={request} search={{ labelWidth: 'auto' }} rowKey="id" /></Card>;
+  return <Card title="资产变动"><ProTable columns={columns} request={request} search={{ labelWidth: 'auto', defaultCollapsed: true }} rowKey="id" /></Card>;
 };
 
 export default AssetChange;

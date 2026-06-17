@@ -51,7 +51,7 @@ const NoticeList: React.FC = () => {
     <>
       <ProTable<SysNotice>
         actionRef={actionRef} headerTitle="系统公告" rowKey="id" columns={columns}
-        search={{ labelWidth: 'auto' }}
+        search={{ labelWidth: 'auto', defaultCollapsed: true }}
         request={async (params) => {
           const data = await noticeApi.list(params.noticeType as number | undefined);
           return { data: data.data ?? [], success: true, total: (data.data ?? []).length };

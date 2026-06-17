@@ -37,7 +37,7 @@ const ExpenseClaimList: React.FC = () => {
         actionRef={actionRef}
         columns={columns}
         request={request}
-        search={{ labelWidth: 'auto' }}
+        search={{ labelWidth: 'auto', defaultCollapsed: true }}
         rowKey="id"
         toolBarRender={() => [<Button key="add" type="primary" onClick={() => navigate('/expense/claim/add')}>新增报销</Button>]}
       />

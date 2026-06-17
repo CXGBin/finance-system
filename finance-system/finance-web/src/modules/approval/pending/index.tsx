@@ -29,7 +29,7 @@ const PendingApproval: React.FC = () => {
     },
   ];
   const request = createProTableRequest((params) => approvalApi.pending(params));
-  return <ProTable actionRef={actionRef} columns={columns} request={request} search={{ labelWidth: 'auto' }} rowKey="id" />;
+  return <ProTable actionRef={actionRef} columns={columns} request={request} search={{ labelWidth: 'auto', defaultCollapsed: true }} rowKey="id" />;
 };
 
 export default PendingApproval;

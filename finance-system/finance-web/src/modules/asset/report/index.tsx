@@ -27,7 +27,7 @@ const AssetReport: React.FC = () => {
     <Card title="资产台账">
       <ProTable<AssetCard>
         actionRef={actionRef} headerTitle="" rowKey="id" columns={columns}
-        search={{ labelWidth: 'auto' }}
+        search={{ labelWidth: 'auto', defaultCollapsed: true }}
         request={createProTableRequest((params) => assetApi.reportLedger(params as any))}
         pagination={{ defaultPageSize: 10, showSizeChanger: true }}
       />
