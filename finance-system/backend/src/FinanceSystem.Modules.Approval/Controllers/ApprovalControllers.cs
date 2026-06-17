@@ -145,10 +145,10 @@ public class ApprovalInstanceController : ControllerBase
     /// 我的已办（我已经审批过的）
     /// </summary>
     [HttpGet("my-done")]
-    public async Task<ApiResult<List<ApprovalInstance>>> MyDone([FromQuery] string? moduleType = null)
+    public async Task<ApiResult<PageResult<ApprovalInstance>>> MyDone([FromQuery] ApprovalInstanceQuery query)
     {
         var userId = HttpContext.GetCurrentUserId();
-        return ApiResult<List<ApprovalInstance>>.Success(await _instanceService.GetMyDoneAsync(userId, moduleType));
+        return ApiResult<PageResult<ApprovalInstance>>.Success(await _instanceService.GetMyDoneAsync(userId, query));
     }
 
     /// <summary>

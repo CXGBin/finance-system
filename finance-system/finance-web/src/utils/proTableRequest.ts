@@ -38,20 +38,20 @@ export function createProTableRequest<T>(
 
     try {
       const res = await fetchData(requestParams);
+      const list = res.data?.list ?? [];
       return {
-        data: res.data?.list ?? [],
+        data: list,
         success: true,
         total: res.data?.total ?? 0,
       };
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : '数据加载失败';
       console.error('[ProTable request error]', msg);
-      message.error(msg);
+      message.error(`数据加载失败: ${msg}`);
       return {
         data: [],
         success: false,
         total: 0,
-        errorMessage: msg,
       };
     }
   };

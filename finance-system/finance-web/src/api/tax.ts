@@ -1,15 +1,15 @@
 import { get, post, put, del } from './request';
-import type { TaxType, TaxDeclaration, Invoice, TaxReport, TaxCalendarItem } from '@/types/tax.d';
+import type { TaxCategory, TaxDeclaration, Invoice, TaxReport, TaxCalendarItem } from '@/types/tax.d';
 import type { PageParams, PagedResult } from '@/types/api.d';
 
 export const taxApi = {
   // ========== 税种管理（后端: api/tax/category）==========
   /** 获取税种列表 */
-  typeList: (params: PageParams & Record<string, unknown> = {}) => get<PagedResult<TaxType>>('/tax/category/list', params),
+  typeList: (params: PageParams & Record<string, unknown> = {}) => get<PagedResult<TaxCategory>>('/tax/category/list', params),
   /** 新增税种 */
-  typeAdd: (data: Partial<TaxType>) => post('/tax/category', data),
+  typeAdd: (data: Partial<TaxCategory>) => post('/tax/category', data),
   /** 修改税种 */
-  typeUpdate: (data: Partial<TaxType>) => put(`/tax/category/${data.id}`, data),
+  typeUpdate: (data: Partial<TaxCategory>) => put(`/tax/category/${data.id}`, data),
   /** 删除税种 */
   typeRemove: (id: number) => del(`/tax/category/${id}`),
 

@@ -43,9 +43,9 @@ export const budgetApi = {
 
   // ========== 预算预警（后端: api/budget/alert）==========
   /** 获取预警配置 */
-  alertConfig: (budgetYearId: number) => get<{ budgetYearId: number; thresholdRate: number; alertEnabled: boolean }>('/budget/alert/config', { budgetYearId }),
+  alertConfig: (budgetYearId: number) => get<{ budgetYearId: number; alertThreshold: number; isEnabled: boolean }>('/budget/alert/config', { budgetYearId }),
   /** 保存预警配置 */
-  alertSaveConfig: (data: { budgetYearId: number; thresholdRate: number; alertEnabled: boolean }) => post('/budget/alert/config', data),
+  alertSaveConfig: (data: { budgetYearId: number; alertThreshold: number; isEnabled: boolean }) => post('/budget/alert/config', data),
   /** 检查超预警科目 */
   alertCheck: (params: { budgetYearId: number; pageIndex?: number; pageSize?: number } & Record<string, unknown>) =>
     get<PagedResult<BudgetAlert>>('/budget/alert/check', params),

@@ -18,8 +18,8 @@ const MyApproval: React.FC = () => {
     { title: '提交时间', dataIndex: 'createdTime', sorter: true },
   ];
 
-  const requestInitiated = createProTableRequest((params) => approvalApi.list({ ...params, type: 'mine-initiated' }));
-  const requestApproved = createProTableRequest((params) => approvalApi.list({ ...params, type: 'mine-approved' }));
+  const requestInitiated = createProTableRequest((params) => approvalApi.myInitiated(params));
+  const requestApproved = createProTableRequest((params) => approvalApi.myDone(params));
 
   const tabItems = [
     {

@@ -48,7 +48,7 @@ public interface IApprovalInstanceService
     /// <summary>我的待办</summary>
     Task<List<ApprovalInstance>> GetMyPendingAsync(long userId, string? moduleType = null);
     /// <summary>我的已办</summary>
-    Task<List<ApprovalInstance>> GetMyDoneAsync(long userId, string? moduleType = null);
+    Task<PageResult<ApprovalInstance>> GetMyDoneAsync(long userId, ApprovalInstanceQuery query);
     /// <summary>我的申请</summary>
     Task<PageResult<ApprovalInstance>> GetMyInitiatedAsync(long userId, ApprovalInstanceQuery query);
     /// <summary>审批统计</summary>
@@ -332,7 +332,7 @@ public class ApprovalInstanceService : IApprovalInstanceService
     /// <inheritdoc/>
     /// <summary>
     /// <inheritdoc/>
-    public async Task<List<ApprovalInstance>> GetMyDoneAsync(long userId, string? moduleType = null)
+    public async Task<PageResult<ApprovalInstance>> GetMyDoneAsync(long userId, ApprovalInstanceQuery query)
     {
         var instanceIds = await _db.Queryable<ApprovalRecord>()
             .Where(r => r.ApproverId == userId)
@@ -340,15 +340,13 @@ public class ApprovalInstanceService : IApprovalInstanceService
             .Distinct()
             .ToListAsync();
 
-        var query = _db.Queryable<ApprovalInstance>()
-            .Where(i => instanceIds.Contains(i.Id) && i.Status != 0);
-
-        if (!string.IsNullOrEmpty(moduleType))
-            query = query.Where(i => i.ModuleType == moduleType);
-
-        return await query
-            .OrderBy(i => i.CreatedTime, OrderByType.Desc)
-            .ToListAsync();
+        RefAsync<int> total = 0;
+        var list = await _db.Queryable<ApprovalInstance>()
+            .Where(i => instanceIds.Contains(i.Id) && i.Status != 0)
+            .WhereIF(!string.IsNullOrEmpty(query.ModuleType), i => i.ModuleType == query.ModuleType)
+            .ApplySort(query.SortField, query.SortOrder)
+            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+        return new PageResult<ApprovalInstance>(total, list);
     }
 
     /// <inheritdoc/>

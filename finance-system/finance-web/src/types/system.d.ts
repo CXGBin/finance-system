@@ -130,3 +130,12 @@ export interface SysConfig {
   remark?: string;
   createdTime?: string;
 }
+export interface SysNotice {
+  id: number;
+  title: string;
+  content: string;
+  noticeType: number;
+  status: number;
+  createdBy: number;
+  createdTime: string;
+}

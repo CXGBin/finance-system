@@ -1,5 +1,5 @@
 /** 税种 - 与后端 TaxCategory 对齐 */
-export interface TaxType {
+export interface TaxCategory {
   id: number;
   taxCode: string; // 后端 TaxCode
   taxName: string; // 后端 TaxName

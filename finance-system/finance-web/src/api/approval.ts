@@ -25,7 +25,7 @@ export const approvalApi = {
   /** 我的待办（我需要审批的） */
   myPending: (moduleType?: string) => get<ApprovalInstance[]>('/approval/instance/my-pending', { moduleType }),
   /** 我的已办（我已经审批过的） */
-  myDone: (moduleType?: string) => get<ApprovalInstance[]>('/approval/instance/my-done', { moduleType }),
+  myDone: (params: PageParams & { moduleType?: string }) => get<PagedResult<ApprovalInstance>>('/approval/instance/my-done', params),
   /** 我的申请（我发起的） */
   myInitiated: (params: PageParams & { moduleType?: string }) => get<PagedResult<ApprovalInstance>>('/approval/instance/my-initiated', params),
   /** 获取审批详情 */

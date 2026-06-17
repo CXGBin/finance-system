@@ -1,5 +1,5 @@
 import { get, post, put, del } from './request';
-import type { User, SysRole, Menu, Dept, Post, DictType, DictItem, OperLog, SysModule, SysConfig } from '@/types/system.d';
+import type { User, SysRole, Menu, Dept, Post, DictType, DictItem, OperLog, SysModule, SysConfig, SysNotice } from '@/types/system.d';
 import type { PageParams, PagedResult } from '@/types/api.d';
 
 // 用户管理
@@ -126,17 +126,6 @@ export const configApi = {
   /** 兼容旧调用（别名） */
   update: (data: { configKey: string; configValue: string }) => put(`/system/config/${data.configKey}`, data),
 };
-
-/** 系统公告 */
-export interface SysNotice {
-  id: number;
-  title: string;
-  content: string;
-  noticeType: number;
-  status: number;
-  createdBy: number;
-  createdTime: string;
-}
 
 /** 系统公告API */
 export const noticeApi = {
