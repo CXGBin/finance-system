@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, InputNumber, Button, message, Select, Space, Statistic, Row, Col } from 'antd';
+import { Card, Table, InputNumber, Button, message, Select, Space, Statistic, Row, Col, Spin, Alert, Empty } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 import { balanceApi, subjectApi, periodApi } from '@/api/account';
 import type { BalanceItem, AccountingPeriod } from '@/types/account.d';
@@ -10,6 +10,7 @@ const BalanceList: React.FC = () => {
   const [periods, setPeriods] = useState<AccountingPeriod[]>([]);
   const [data, setData] = useState<BalanceItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => { loadPeriods(); }, []);
@@ -17,21 +18,26 @@ const BalanceList: React.FC = () => {
   useEffect(() => { if (selectedPeriodId) loadData(); }, [selectedPeriodId]);
 
   const loadPeriods = async () => {
-    const year = new Date().getFullYear();
     try {
+      const year = new Date().getFullYear();
       const res = await periodApi.list(year);
       const list = res.data || [];
       setPeriods(list);
       if (list.length > 0) setSelectedPeriodId(list[0].id);
-    } catch { /* ignore */ }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '加载会计期间失败');
+    }
   };
 
   const loadData = async () => {
     if (!selectedPeriodId) return;
     setLoading(true);
+    setError(null);
     try {
       const res = await balanceApi.list(selectedPeriodId);
       setData(res.data || []);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '加载余额数据失败');
     } finally { setLoading(false); }
   };
 
@@ -83,7 +89,13 @@ const BalanceList: React.FC = () => {
         <Col span={8}><Statistic title="期初贷方合计" value={creditTotal} precision={2} /></Col>
         <Col span={8}><Statistic title="差额" value={debitTotal - creditTotal} precision={2} valueStyle={{ color: Math.abs(debitTotal - creditTotal) < 0.01 ? '#3f8600' : '#cf1322' }} /></Col>
       </Row>
-      <Table columns={columns} dataSource={data} rowKey="id" loading={loading} pagination={false} size="middle" />
+      <Spin spinning={loading}>
+        {error ? (
+          <Alert type="error" message={error} showIcon action={<Button size="small" onClick={() => selectedPeriodId && loadData()}>重试</Button>} />
+        ) : (
+          <Table columns={columns} dataSource={data} rowKey="id" pagination={false} size="middle" locale={{ emptyText: <Empty description="暂无余额数据" /> }} />
+        )}
+      </Spin>
     </Card>
   );
 };

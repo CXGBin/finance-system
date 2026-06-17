@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Select, Space, Button, Table, Tag, message } from 'antd';
+import { Card, Select, Space, Button, Table, Spin, Alert, Empty } from 'antd';
 import { FileExcelOutlined, ReloadOutlined } from '@ant-design/icons';
 import { reportCompareApi } from '@/api/report';
 import dayjs from 'dayjs';
@@ -11,10 +11,12 @@ const CompareReport: React.FC = () => {
   const [displayMode, setDisplayMode] = useState('parallel');
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadData = async () => {
     setLoading(true);
-    try { const res = await reportCompareApi.compare(type, periods, displayMode); setData(res.data ?? []); } finally { setLoading(false); }
+    setError(null);
+    try { const res = await reportCompareApi.compare(type, periods, displayMode); setData(res.data ?? []); } catch (err: unknown) { setError(err instanceof Error ? err.message : '加载对比数据失败'); } finally { setLoading(false); }
   };
 
   React.useEffect(() => { loadData(); }, [type, periods, displayMode]);
@@ -43,7 +45,13 @@ const CompareReport: React.FC = () => {
         <Button icon={<FileExcelOutlined />} onClick={() => message.info('导出功能开发中')}>导出</Button>
       </Space>
     }>
-      <Table columns={columns} dataSource={data} rowKey={(r) => `${r.lineNo}-${r.itemName}`} loading={loading} pagination={false} size="middle" bordered />
+      <Spin spinning={loading}>
+        {error ? (
+          <Alert type="error" message={error} showIcon action={<Button size="small" onClick={loadData}>重试</Button>} />
+        ) : (
+          <Table columns={columns} dataSource={data} rowKey={(r) => `${r.lineNo}-${r.itemName}`} pagination={false} size="middle" bordered />
+        )}
+      </Spin>
     </Card>
   );
 };

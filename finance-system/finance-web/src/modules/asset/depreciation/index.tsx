@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Table, Select, Button, message, Row, Col, Statistic } from 'antd';
+import { Card, Table, Select, Button, message, Row, Col, Statistic, Spin, Alert, Empty } from 'antd';
 import { CalculatorOutlined, SearchOutlined } from '@ant-design/icons';
 import { assetApi } from '@/api/asset';
 import type { DepreciationRecord } from '@/types/asset.d';
@@ -9,15 +9,19 @@ import dayjs from 'dayjs';
 const AssetDepreciation: React.FC = () => {
   const [data, setData] = useState<DepreciationRecord[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const [year, setYear] = useState(dayjs().year());
   const [month, setMonth] = useState(dayjs().month() + 1);
 
   const loadData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await assetApi.depreciationCalculate(year, month);
       setData(res.data ?? []);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '加载折旧数据失败');
     } finally { setLoading(false); }
   };
 
@@ -62,7 +66,13 @@ const AssetDepreciation: React.FC = () => {
         <Col span={8}><Statistic title="累计折旧合计" value={accTotal} precision={2} /></Col>
         <Col span={8}><Statistic title="净值合计" value={netTotal} precision={2} /></Col>
       </Row>
-      <Table columns={columns} dataSource={data} rowKey={(r) => `${r.assetCardId}-${r.month}`} loading={loading} pagination={false} />
+      <Spin spinning={loading}>
+        {error ? (
+          <Alert type="error" message={error} showIcon action={<Button size="small" onClick={loadData}>重试</Button>} />
+        ) : (
+          <Table columns={columns} dataSource={data} rowKey={(r) => `${r.assetCardId}-${r.month}`} pagination={false} locale={{ emptyText: <Empty description="暂无折旧数据" /> }} />
+        )}
+      </Spin>
     </Card>
   );
 };

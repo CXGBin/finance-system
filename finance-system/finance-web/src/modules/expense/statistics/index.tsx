@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Select, DatePicker, Button, Row, Col, Statistic, Table, Space } from 'antd';
+import { Card, Select, DatePicker, Button, Row, Col, Statistic, Table, Space, Spin, Alert, Empty } from 'antd';
 import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
 import { expenseApi } from '@/api/expense';
 import dayjs from 'dayjs';
@@ -8,13 +8,17 @@ import dayjs from 'dayjs';
 const ExpenseStatistics: React.FC = () => {
   const [year, setYear] = useState(dayjs().year());
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<any[]>([]);
 
   const loadData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await expenseApi.statistics({ year });
       setData(res.data?.list ?? res.data ?? []);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '加载费用统计数据失败');
     } finally { setLoading(false); }
   };
 
@@ -44,7 +48,13 @@ const ExpenseStatistics: React.FC = () => {
         <Col span={8}><Statistic title="报销单数" value={totalClaim} suffix="单" /></Col>
         <Col span={8}><Statistic title="人均费用" value={totalClaim > 0 ? totalExpense / totalClaim : 0} precision={2} prefix="¥" /></Col>
       </Row>
-      <Table columns={columns} dataSource={data} rowKey={(r) => r.typeName} loading={loading} pagination={false} />
+      <Spin spinning={loading}>
+        {error ? (
+          <Alert type="error" message={error} showIcon action={<Button size="small" onClick={loadData}>重试</Button>} />
+        ) : (
+          <Table columns={columns} dataSource={data} rowKey={(r) => r.typeName} pagination={false} locale={{ emptyText: <Empty description="暂无统计数据" /> }} />
+        )}
+      </Spin>
     </Card>
   );
 };

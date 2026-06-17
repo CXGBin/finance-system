@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Input, DatePicker, Select, Table, Button, Space, InputNumber, message } from 'antd';
+import { Card, Form, Input, DatePicker, Select, Table, Button, Space, InputNumber, message, Spin, Alert } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { voucherApi, subjectApi } from '@/api/account';
 import type { Subject, VoucherEntry } from '@/types/account.d';
@@ -10,14 +10,22 @@ const VoucherAdd: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [subjectsLoading, setSubjectsLoading] = useState(false);
+  const [subjectsError, setSubjectsError] = useState<string | null>(null);
   const [entries, setEntries] = useState<VoucherEntry[]>([{ id: Date.now(), subjectId: 0, summary: '', debitAmount: 0, creditAmount: 0 } as VoucherEntry]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => { loadSubjects(); }, []);
 
   const loadSubjects = async () => {
-    const res = await subjectApi.list();
-    setSubjects(res.data || []);
+    setSubjectsLoading(true);
+    setSubjectsError(null);
+    try {
+      const res = await subjectApi.list();
+      setSubjects(res.data || []);
+    } catch (err: unknown) {
+      setSubjectsError(err instanceof Error ? err.message : '加载科目列表失败');
+    } finally { setSubjectsLoading(false); }
   };
 
   const addEntry = () => {
@@ -60,9 +68,12 @@ const VoucherAdd: React.FC = () => {
 
   const entryColumns = [
     { title: '科目', dataIndex: 'subjectId', render: (val: number, record: VoucherEntry) => (
-      <Select style={{ width: 200 }} value={val} onChange={(v) => updateEntry(record.id, 'subjectId', v)}
-        showSearch optionFilterProp="label" options={subjects.map(s => ({ label: `${s.subjectCode} ${s.subjectName}`, value: s.id }))} />
-    )},
+      <Spin spinning={subjectsLoading} size="small">
+        {subjectsError ? <Alert type="error" message={subjectsError} banner /> : (
+          <Select style={{ width: 200 }} value={val} onChange={(v) => updateEntry(record.id, 'subjectId', v)}
+            showSearch optionFilterProp="label" options={subjects.map(s => ({ label: `${s.subjectCode} ${s.subjectName}`, value: s.id }))} />
+        )}
+      </Spin>), }
     { title: '摘要', dataIndex: 'summary', render: (val: string, record: VoucherEntry) => (
       <Input value={val} onChange={(e) => updateEntry(record.id, 'summary', e.target.value)} style={{ width: 150 }} />
     )},

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Select, Space, Button, Statistic, Row, Col, Table } from 'antd';
+import { Card, Select, Space, Button, Statistic, Row, Col, Table, Spin, Alert, Empty } from 'antd';
 import { ReloadOutlined, FileExcelOutlined } from '@ant-design/icons';
 import { taxApi } from '@/api/tax';
 import dayjs from 'dayjs';
@@ -8,9 +8,13 @@ import dayjs from 'dayjs';
 const TaxReport: React.FC = () => {
   const [year, setYear] = useState(dayjs().year());
   const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadData = async () => {
-    try { const res = await taxApi.declarationList({ pageIndex: 1, pageSize: 999 }); setData(res.data?.list ?? []); } catch { /* error */ }
+    setLoading(true);
+    setError(null);
+    try { const res = await taxApi.declarationList({ pageIndex: 1, pageSize: 999 }); setData(res.data?.list ?? []); } catch (err: unknown) { setError(err instanceof Error ? err.message : '加载纳税统计数据失败'); } finally { setLoading(false); }
   };
 
   React.useEffect(() => { loadData(); }, []);
@@ -30,7 +34,13 @@ const TaxReport: React.FC = () => {
         <Button icon={<ReloadOutlined />} onClick={loadData}>刷新</Button>
       </Space>
     }>
-      <Table columns={columns} dataSource={data} rowKey="id" pagination={false} />
+      <Spin spinning={loading}>
+        {error ? (
+          <Alert type="error" message={error} showIcon action={<Button size="small" onClick={loadData}>重试</Button>} />
+        ) : (
+          <Table columns={columns} dataSource={data} rowKey="id" pagination={false} locale={{ emptyText: <Empty description="暂无纳税数据" /> }} />
+        )}
+      </Spin>
     </Card>
   );
 };

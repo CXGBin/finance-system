@@ -2,6 +2,7 @@
  * ProTable 通用 request 函数
  * 封装分页+搜索+排序的统一请求逻辑，供 @ant-design/pro-components 的 ProTable 使用
  */
+import { message } from 'antd';
 import type { ProTableParams } from '@ant-design/pro-components';
 import type { PageParams, SearchParams, PagedResult } from '@/types/api.d';
 
@@ -42,11 +43,15 @@ export function createProTableRequest<T>(
         success: true,
         total: res.data?.total ?? 0,
       };
-    } catch {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : '数据加载失败';
+      console.error('[ProTable request error]', msg);
+      message.error(msg);
       return {
         data: [],
         success: false,
         total: 0,
+        errorMessage: msg,
       };
     }
   };

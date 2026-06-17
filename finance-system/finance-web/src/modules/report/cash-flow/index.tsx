@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Select, Space, Button, Table, message } from 'antd';
+import { Card, Select, Space, Button, Table, Spin, Alert, Empty } from 'antd';
 import { FileExcelOutlined, ReloadOutlined } from '@ant-design/icons';
 import { reportApi, reportExportApi } from '@/api/report';
 import dayjs from 'dayjs';
@@ -9,10 +9,12 @@ const CashFlow: React.FC = () => {
   const [period, setPeriod] = useState(dayjs().format('YYYY-MM'));
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadData = async () => {
     setLoading(true);
-    try { const res = await reportApi.cashFlow(period); setData(res.data?.items ?? res.data ?? []); } finally { setLoading(false); }
+    setError(null);
+    try { const res = await reportApi.cashFlow(period); setData(res.data?.items ?? res.data ?? []); } catch (err: unknown) { setError(err instanceof Error ? err.message : '加载数据失败'); } finally { setLoading(false); }
   };
 
   React.useEffect(() => { loadData(); }, [period]);
@@ -39,7 +41,13 @@ const CashFlow: React.FC = () => {
         <Button icon={<FileExcelOutlined />} onClick={handleExport}>导出</Button>
       </Space>
     }>
-      <Table columns={columns} dataSource={data} rowKey={(r) => `${r.lineNo}-${r.itemName}`} loading={loading} pagination={false} size="middle" bordered />
+      <Spin spinning={loading}>
+        {error ? (
+          <Alert type="error" message={error} showIcon action={<Button size="small" onClick={loadData}>重试</Button>} />
+        ) : (
+          <Table columns={columns} dataSource={data} rowKey={(r) => `${r.lineNo}-${r.itemName}`} pagination={false} size="middle" bordered />
+        )}
+      </Spin>
     </Card>
   );
 };

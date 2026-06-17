@@ -1,6 +1,6 @@
 // dashboard/index.tsx
 import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Statistic, Typography, Spin, Skeleton } from 'antd';
+import { Row, Col, Card, Statistic, Typography, Skeleton, Alert } from 'antd';
 import {
   AccountBookOutlined,
   FileExcelOutlined,
@@ -20,6 +20,7 @@ const { Title } = Typography;
 const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState({
     voucherCount: 0,
     pendingApproval: 0,
@@ -55,8 +56,8 @@ const DashboardPage: React.FC = () => {
         todoCount: approvalData?.total || 0,
       });
       if (noticeData) setNotices(noticeData.slice(0, 5));
-    } catch {
-      // 数据加载失败时显示默认值
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '数据加载失败');
     } finally {
       setLoading(false);
     }
@@ -65,6 +66,7 @@ const DashboardPage: React.FC = () => {
   return (
     <div>
       <Title level={4}>工作台</Title>
+      {error && <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} />}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col span={6}>
           <Card>

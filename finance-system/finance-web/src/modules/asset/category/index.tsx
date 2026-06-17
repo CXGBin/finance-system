@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Modal, Form, Input, InputNumber, Select, message, Popconfirm, Tree, Space } from 'antd';
+import { Card, Modal, Form, Input, InputNumber, Select, message, Popconfirm, Tree, Space, Spin, Alert, Empty } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { AssetCategory } from '@/types/asset.d';
 import { assetApi } from '@/api/asset';
@@ -7,13 +7,23 @@ import { assetApi } from '@/api/asset';
 /** 资产分类管理 */
 const AssetCategoryPage: React.FC = () => {
   const [treeData, setTreeData] = useState<AssetCategory[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<AssetCategory | null>(null);
   const [form] = Form.useForm();
 
   const loadTree = async () => {
-    const data = await assetApi.categoryTree();
-    setTreeData(data.data ?? []);
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await assetApi.categoryTree();
+      setTreeData(data.data ?? []);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '加载分类数据失败');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { loadTree(); }, []);
@@ -71,11 +81,15 @@ const AssetCategoryPage: React.FC = () => {
   return (
     <>
       <Card title="资产分类" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => handleAdd()}>新增分类</Button>}>
-        {treeData.length > 0 ? (
-          <Tree showLine defaultExpandAll treeData={buildTreeNodes(treeData)} blockNode />
-        ) : (
-          <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>暂无分类数据</div>
-        )}
+        <Spin spinning={loading}>
+          {error ? (
+            <Alert type="error" message={error} showIcon action={<Button size="small" onClick={loadTree}>重试</Button>} />
+          ) : treeData.length > 0 ? (
+            <Tree showLine defaultExpandAll treeData={buildTreeNodes(treeData)} blockNode />
+          ) : !loading ? (
+            <Empty description="暂无分类数据" />
+          ) : null}
+        </Spin>
       </Card>
       <Modal title={editingRecord ? '编辑分类' : '新增分类'} open={modalOpen} onOk={handleSave} onCancel={() => setModalOpen(false)} width={500}>
         <Form form={form} layout="vertical">

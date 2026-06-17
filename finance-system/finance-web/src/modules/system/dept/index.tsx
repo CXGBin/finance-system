@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Form, Input, InputNumber, Space, Button, message, Popconfirm, Tree, Card } from 'antd';
+import { Modal, Form, Input, InputNumber, Space, Button, message, Popconfirm, Tree, Card, Spin, Alert, Empty } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { Dept } from '@/types/system.d';
 import { deptApi } from '@/api/system';
@@ -7,13 +7,23 @@ import { deptApi } from '@/api/system';
 /** 部门管理页面 */
 const DeptList: React.FC = () => {
   const [treeData, setTreeData] = useState<Dept[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<Dept | null>(null);
   const [form] = Form.useForm();
 
   const loadTree = async () => {
-    const data = await deptApi.tree();
-    setTreeData(data.data ?? []);
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await deptApi.tree();
+      setTreeData(data.data ?? []);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '加载部门数据失败');
+    } finally {
+      setLoading(false);
+    }
   };
 
   React.useEffect(() => { loadTree(); }, []);
@@ -73,11 +83,15 @@ const DeptList: React.FC = () => {
   return (
     <>
       <Card title="部门管理" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => handleAdd()}>新增部门</Button>}>
-        {treeData.length > 0 ? (
-          <Tree showLine defaultExpandAll treeData={buildTreeNodes(treeData)} />
-        ) : (
-          <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>暂无部门数据</div>
-        )}
+        <Spin spinning={loading}>
+          {error ? (
+            <Alert type="error" message={error} showIcon action={<Button size="small" onClick={loadTree}>重试</Button>} />
+          ) : treeData.length > 0 ? (
+            <Tree showLine defaultExpandAll treeData={buildTreeNodes(treeData)} />
+          ) : !loading ? (
+            <Empty description="暂无部门数据" />
+          ) : null}
+        </Spin>
       </Card>
       <Modal title={editingRecord ? '编辑部门' : '新增部门'} open={modalOpen} onOk={handleSave} onCancel={() => setModalOpen(false)} width={500}>
         <Form form={form} layout="vertical">

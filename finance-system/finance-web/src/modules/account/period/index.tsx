@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Tag, Button, Space, InputNumber, Select, message, Popconfirm, Modal, Statistic, Row, Col } from 'antd';
+import { Card, Table, Tag, Button, Space, InputNumber, Select, message, Popconfirm, Modal, Statistic, Row, Col, Spin, Alert } from 'antd';
 import { PlusOutlined, CheckCircleOutlined, CloseCircleOutlined, SyncOutlined, CarryForwardOutlined } from '@ant-design/icons';
 import { periodApi } from '@/api/account';
 import type { AccountingPeriod } from '@/types/account.d';
@@ -9,14 +9,18 @@ const PeriodList: React.FC = () => {
   const [year, setYear] = useState(new Date().getFullYear());
   const [periods, setPeriods] = useState<AccountingPeriod[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [initModalOpen, setInitModalOpen] = useState(false);
   const [initYear, setInitYear] = useState(year + 1);
 
   const loadPeriods = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await periodApi.list(year);
       setPeriods(res.data || []);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '加载会计期间数据失败');
     } finally { setLoading(false); }
   };
 
@@ -106,7 +110,13 @@ const PeriodList: React.FC = () => {
           <Col span={8}><Statistic title="已结账" value={closedCount} valueStyle={{ color: '#3f8600' }} /></Col>
           <Col span={8}><Statistic title="未结账" value={periods.length - closedCount} valueStyle={{ color: '#cf1322' }} /></Col>
         </Row>
-        <Table columns={columns} dataSource={periods} rowKey="id" loading={loading} pagination={false} />
+        <Spin spinning={loading}>
+          {error ? (
+            <Alert type="error" message={error} showIcon action={<Button size="small" onClick={loadPeriods}>重试</Button>} />
+          ) : (
+            <Table columns={columns} dataSource={periods} rowKey="id" pagination={false} />
+          )}
+        </Spin>
       </Card>
       <Modal title="初始化年度" open={initModalOpen} onOk={handleInitYear} onCancel={() => setInitModalOpen(false)}>
         <p>将创建选定年度的12个会计期间</p>

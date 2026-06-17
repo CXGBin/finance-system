@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Form, Input, InputNumber, Select, Space, Button, message, Popconfirm, Tree, Card, Tag } from 'antd';
+import { Modal, Form, Input, InputNumber, Select, Space, Button, message, Popconfirm, Tree, Card, Tag, Spin, Alert, Empty } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { Menu } from '@/types/system.d';
 import { menuApi } from '@/api/system';
@@ -7,13 +7,23 @@ import { menuApi } from '@/api/system';
 /** 菜单管理页面 */
 const MenuList: React.FC = () => {
   const [treeData, setTreeData] = useState<Menu[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<Menu | null>(null);
   const [form] = Form.useForm();
 
   const loadTree = async () => {
-    const data = await menuApi.tree();
-    setTreeData(data.data ?? []);
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await menuApi.tree();
+      setTreeData(data.data ?? []);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '加载菜单数据失败');
+    } finally {
+      setLoading(false);
+    }
   };
 
   React.useEffect(() => { loadTree(); }, []);
@@ -81,11 +91,15 @@ const MenuList: React.FC = () => {
   return (
     <>
       <Card title="菜单管理" extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => handleAdd()}>新增菜单</Button>}>
-        {treeData.length > 0 ? (
-          <Tree showLine defaultExpandAll treeData={buildTreeNodes(treeData)} blockNode />
-        ) : (
-          <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>暂无菜单数据</div>
-        )}
+        <Spin spinning={loading}>
+          {error ? (
+            <Alert type="error" message={error} showIcon action={<Button size="small" onClick={loadTree}>重试</Button>} />
+          ) : treeData.length > 0 ? (
+            <Tree showLine defaultExpandAll treeData={buildTreeNodes(treeData)} blockNode />
+          ) : !loading ? (
+            <Empty description="暂无菜单数据" />
+          ) : null}
+        </Spin>
       </Card>
       <Modal title={editingRecord ? '编辑菜单' : '新增菜单'} open={modalOpen} onOk={handleSave} onCancel={() => setModalOpen(false)} width={600}>
         <Form form={form} layout="vertical">

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Descriptions, Table, Tag, Button, Space, message, Modal } from 'antd';
+import { Card, Descriptions, Table, Tag, Button, Space, message, Modal, Spin, Alert, Empty } from 'antd';
 import { useParams, useNavigate } from 'react-router-dom';
 import { voucherApi, voucherBatchApi } from '@/api/account';
 import type { Voucher } from '@/types/account.d';
@@ -10,6 +10,7 @@ const VoucherDetail: React.FC = () => {
   const navigate = useNavigate();
   const [voucher, setVoucher] = useState<Voucher | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [printVisible, setPrintVisible] = useState(false);
   const [printData, setPrintData] = useState<Record<string, unknown> | null>(null);
 
@@ -19,9 +20,12 @@ const VoucherDetail: React.FC = () => {
 
   const loadDetail = async (vid: number) => {
     setLoading(true);
+    setError(null);
     try {
       const res = await voucherApi.detail(vid);
       setVoucher(res.data || null);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '加载凭证详情失败');
     } finally { setLoading(false); }
   };
 
@@ -58,31 +62,37 @@ const VoucherDetail: React.FC = () => {
   ];
 
   return (
-    <Card title="凭证详情" loading={loading} extra={
+    <Card title="凭证详情" extra={
       <Space>
         {voucher?.status === 1 && <Button type="primary" onClick={handleAudit}>审核</Button>}
         <Button onClick={handlePrint}>打印</Button>
         <Button onClick={() => navigate(-1)}>返回</Button>
       </Space>
     }>
-      {voucher && (
-        <>
-          <Descriptions bordered size="small" column={4} style={{ marginBottom: 16 }}>
-            <Descriptions.Item label="凭证字号">{voucher.voucherNo}</Descriptions.Item>
-            <Descriptions.Item label="凭证日期">{voucher.voucherDate}</Descriptions.Item>
-            <Descriptions.Item label="状态"><Tag color={statusMap[voucher.status]?.color}>{statusMap[voucher.status]?.text}</Tag></Descriptions.Item>
-            <Descriptions.Item label="制单人">{voucher.createBy}</Descriptions.Item>
-          </Descriptions>
-          <Table columns={entryColumns} dataSource={voucher.entries || []} rowKey="id" pagination={false}
-            footer={() => (
-              <Space style={{ float: 'right' }}>
-                <span>借方合计: {voucher.totalDebit?.toFixed(2)}</span>
-                <span>贷方合计: {voucher.totalCredit?.toFixed(2)}</span>
-              </Space>
-            )}
-          />
-        </>
-      )}
+      <Spin spinning={loading}>
+        {error ? (
+          <Alert type="error" message={error} showIcon action={<Button size="small" onClick={() => id && loadDetail(Number(id))}>重试</Button>} />
+        ) : voucher ? (
+          <>
+            <Descriptions bordered size="small" column={4} style={{ marginBottom: 16 }}>
+              <Descriptions.Item label="凭证字号">{voucher.voucherNo}</Descriptions.Item>
+              <Descriptions.Item label="凭证日期">{voucher.voucherDate}</Descriptions.Item>
+              <Descriptions.Item label="状态"><Tag color={statusMap[voucher.status]?.color}>{statusMap[voucher.status]?.text}</Tag></Descriptions.Item>
+              <Descriptions.Item label="制单人">{voucher.createBy}</Descriptions.Item>
+            </Descriptions>
+            <Table columns={entryColumns} dataSource={voucher.entries || []} rowKey="id" pagination={false}
+              footer={() => (
+                <Space style={{ float: 'right' }}>
+                  <span>借方合计: {voucher.totalDebit?.toFixed(2)}</span>
+                  <span>贷方合计: {voucher.totalCredit?.toFixed(2)}</span>
+                </Space>
+              )}
+            />
+          </>
+        ) : !loading ? (
+          <Empty description="暂无凭证数据" />
+        ) : null}
+      </Spin>
       <Modal
         title="凭证打印预览"
         open={printVisible}

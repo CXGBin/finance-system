@@ -1,6 +1,6 @@
 // expense/claim/add/index.tsx
 import React, { useState } from 'react';
-import { Card, Form, Input, DatePicker, Select, Table, Button, Space, Upload, Typography, message } from 'antd';
+import { Card, Form, Input, DatePicker, Select, Table, Button, Space, Upload, Typography, message, Spin, Alert } from 'antd';
 import { PlusOutlined, MinusCircleOutlined, UploadOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { expenseApi } from '@/api/expense';
@@ -25,13 +25,20 @@ const ExpenseClaimAdd: React.FC = () => {
     { key: '1', expenseDate: '', expenseTypeName: '', expenseTypeId: 0, description: '', amount: 0 },
   ]);
   const [expenseTypes, setExpenseTypes] = useState<any[]>([]);
+  const [typesLoading, setTypesLoading] = useState(false);
+  const [typesError, setTypesError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const totalAmount = items.reduce((s, i) => s + (Number(i.amount) || 0), 0);
 
   /** 加载费用类型列表 */
   React.useEffect(() => {
-    expenseApi.typeList().then(res => setExpenseTypes(res.data || []));
+    setTypesLoading(true);
+    setTypesError(null);
+    expenseApi.typeList()
+      .then(res => setExpenseTypes(res.data || []))
+      .catch((err: unknown) => setTypesError(err instanceof Error ? err.message : '加载费用类型失败'))
+      .finally(() => setTypesLoading(false));
   }, []);
 
   const addItem = () => setItems((prev) => [...prev, { key: String(Date.now()), expenseDate: '', expenseTypeName: '', expenseTypeId: 0, description: '', amount: 0 }]);
@@ -113,6 +120,7 @@ const ExpenseClaimAdd: React.FC = () => {
       <Title level={5}>提交报销</Title>
       <Card size="small">
         <Form form={form} layout="vertical" style={{ maxWidth: 600, marginBottom: 16 }}>
+          {typesError && <Alert type="error" message={typesError} banner />}
           <Form.Item name="title" label="报销标题" rules={[{ required: true, message: '请输入报销标题' }]}>
             <Input />
           </Form.Item>

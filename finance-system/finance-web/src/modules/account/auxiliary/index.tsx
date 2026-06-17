@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Card, Tabs, Modal, Form, Input, InputNumber, Button, Space, message, Popconfirm } from 'antd';
+import { Card, Tabs, Modal, Form, Input, InputNumber, Button, Space, message, Popconfirm, Alert } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { ProTable, type ProColumns, type ActionType } from '@ant-design/pro-components';
 import type { LedgerRecord } from '@/types/account.d';
@@ -10,15 +10,19 @@ const AuxiliaryList: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('customer');
   const [data, setData] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<Record<string, unknown> | null>(null);
   const [form] = Form.useForm();
 
   const loadData = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await auxiliaryApi.list(activeTab);
       setData(res.data ?? []);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '加载辅助核算数据失败');
     } finally { setLoading(false); }
   };
 
@@ -116,6 +120,7 @@ const AuxiliaryList: React.FC = () => {
   return (
     <>
       <Card title="辅助核算">
+        {error && <Alert type="error" message={error} showIcon action={<Button size="small" onClick={loadData}>重试</Button>} style={{ marginBottom: 16 }} />}
         <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
         <ProTable<Record<string, unknown>>
           headerTitle=""
