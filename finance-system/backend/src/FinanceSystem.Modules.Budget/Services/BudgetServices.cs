@@ -333,6 +333,18 @@ public class BudgetAdjustService : IBudgetAdjustService
     public BudgetAdjustService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
+    public async Task<PageResult<BudgetAdjustment>> GetPageAsync(int pageIndex, int pageSize, long? subjectId = null, int? adjustType = null)
+    {
+        RefAsync<int> total = 0;
+        var query = _db.Queryable<BudgetAdjustment>();
+        if (subjectId.HasValue) query = query.Where(a => a.BudgetSubjectId == subjectId.Value);
+        if (adjustType.HasValue) query = query.Where(a => a.AdjustType == adjustType.Value);
+        var list = await query.OrderBy(a => a.Id, OrderByType.Desc)
+            .ToPageListAsync(pageIndex, pageSize, total);
+        return new PageResult<BudgetAdjustment>(total, list);
+    }
+
+    /// <inheritdoc/>
     /// <summary>
     /// <summary>
     /// 创建预算调整

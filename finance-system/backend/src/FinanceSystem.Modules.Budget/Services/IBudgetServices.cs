@@ -75,6 +75,8 @@ public interface IBudgetExecutionService
 /// </summary>
 public interface IBudgetAdjustService
 {
+    /// <summary>分页查询预算调整列表</summary>
+    Task<PageResult<BudgetAdjustment>> GetPageAsync(int pageIndex, int pageSize, long? subjectId = null, int? adjustType = null);
     /// <summary>发起预算调整</summary>
     Task<long> CreateAdjustAsync(BudgetAdjustRequest request, long currentUserId);
     /// <summary>审批预算调整</summary>

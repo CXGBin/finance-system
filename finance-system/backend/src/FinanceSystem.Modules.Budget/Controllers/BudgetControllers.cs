@@ -186,6 +186,20 @@ public class BudgetAdjustmentController : ControllerBase
     public BudgetAdjustmentController(IBudgetAdjustService adjustService) => _adjustService = adjustService;
 
     /// <summary>
+    /// 分页查询预算调整列表
+    /// </summary>
+    [HttpGet("list")]
+    public async Task<ApiResult<PageResult<BudgetAdjustment>>> GetPage(
+        [FromQuery] int pageIndex = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] long? subjectId = null,
+        [FromQuery] int? adjustType = null)
+    {
+        return ApiResult<PageResult<BudgetAdjustment>>.Success(
+            await _adjustService.GetPageAsync(pageIndex, pageSize, subjectId, adjustType));
+    }
+
+    /// <summary>
     /// 发起预算调整
     /// </summary>
     [HttpPost("")]
