@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.Accounts.Entities;
 using FinanceSystem.Modules.Expense.DTOs;
 using FinanceSystem.Modules.Expense.Entities;
@@ -419,7 +420,8 @@ public class ExpenseLoanService : IExpenseLoanService
         var keyword = query.Keyword ?? "";
         q = q.WhereIF(!string.IsNullOrEmpty(keyword), l => l.LoanNo.Contains(keyword) || (l.Reason ?? "").Contains(keyword));
         var total = await q.CountAsync();
-        var list = await q.OrderByDescending(l => l.Id).ToPageListAsync(query.PageIndex, query.PageSize);
+        var list = await q.ApplySort(query.SortField, query.SortOrder)
+            .OrderByDescending(l => l.Id).ToPageListAsync(query.PageIndex, query.PageSize);
         return new PageResult<ExpenseLoan>(total, list);
     }
 

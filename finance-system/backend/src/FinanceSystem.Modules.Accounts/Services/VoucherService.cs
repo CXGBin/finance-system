@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.Accounts.DTOs;
 using FinanceSystem.Modules.Accounts.Entities;
 using SqlSugar;
@@ -57,7 +58,7 @@ public class VoucherService : IVoucherService
         var list = await queryable
             .OrderBy(v => v.VoucherDate, OrderByType.Desc)
             .OrderBy(v => v.VoucherNo)
-            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+            .ApplySort(query.SortField, query.SortOrder).ToPageListAsync(query.PageIndex, query.PageSize, total);
 
         return new PageResult<Voucher>(total, list);
     }

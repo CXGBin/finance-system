@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.Budget.DTOs;
 using FinanceSystem.Modules.Budget.Entities;
 using SqlSugar;

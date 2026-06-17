@@ -1,5 +1,6 @@
 using System;
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.Accounts.DTOs;
 using FinanceSystem.Modules.Accounts.Entities;
 using SqlSugar;
@@ -671,7 +672,8 @@ public class AuxiliaryService : IAuxiliaryService
     {
         RefAsync<int> total = 0;
         var queryable = filter(_db.Queryable<T>());
-        var list = await queryable.ToPageListAsync(query.PageIndex, query.PageSize, total);
+        var list = await queryable.ApplySort(query.SortField, query.SortOrder)
+            .ToPageListAsync(query.PageIndex, query.PageSize, total);
         return new PageResult<T>(total, list);
     }
 

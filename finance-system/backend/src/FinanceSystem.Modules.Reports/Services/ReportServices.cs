@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using Microsoft.Extensions.Configuration;
 using FinanceSystem.Modules.Accounts.Entities;
 using FinanceSystem.Modules.Reports.DTOs;

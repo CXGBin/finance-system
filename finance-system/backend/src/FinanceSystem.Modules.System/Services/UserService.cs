@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.System.DTOs;
 using FinanceSystem.Modules.System.Entities;
 using SqlSugar;
@@ -46,7 +47,7 @@ public class UserService : IUserService
         RefAsync<int> total = 0;
         var list = await queryable
             .OrderBy(u => u.CreatedTime, OrderByType.Desc)
-            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+            .ApplySort(query.SortField, query.SortOrder).ToPageListAsync(query.PageIndex, query.PageSize, total);
 
         return new PageResult<SysUser>(total, list);
     }

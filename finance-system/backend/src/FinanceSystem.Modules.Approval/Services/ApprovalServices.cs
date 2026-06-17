@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.Approval.DTOs;
 using FinanceSystem.Modules.Approval.Entities;
 using SqlSugar;
@@ -171,7 +172,7 @@ public class ApprovalInstanceService : IApprovalInstanceService
             .WhereIF(!string.IsNullOrEmpty(query.ModuleType), i => i.ModuleType == query.ModuleType)
             .WhereIF(query.Status.HasValue, i => i.Status == query.Status)
             .OrderBy(i => i.CreatedTime, OrderByType.Desc)
-            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+            .ApplySort(query.SortField, query.SortOrder).ToPageListAsync(query.PageIndex, query.PageSize, total);
         return new PageResult<ApprovalInstance>(total, list);
     }
 
@@ -359,7 +360,7 @@ public class ApprovalInstanceService : IApprovalInstanceService
             .WhereIF(!string.IsNullOrEmpty(query.ModuleType), i => i.ModuleType == query.ModuleType)
             .WhereIF(query.Status.HasValue, i => i.Status == query.Status)
             .OrderBy(i => i.CreatedTime, OrderByType.Desc)
-            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+            .ApplySort(query.SortField, query.SortOrder).ToPageListAsync(query.PageIndex, query.PageSize, total);
         return new PageResult<ApprovalInstance>(total, list);
     }
 

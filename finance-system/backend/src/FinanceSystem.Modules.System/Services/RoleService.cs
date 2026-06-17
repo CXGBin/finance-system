@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.System.DTOs;
 using FinanceSystem.Modules.System.Entities;
 using SqlSugar;
@@ -29,7 +30,7 @@ public class RoleService : IRoleService
             .WhereIF(!string.IsNullOrEmpty(query.RoleCode), r => r.RoleCode.Contains(query.RoleCode!))
             .WhereIF(query.Status.HasValue, r => r.Status == query.Status)
             .OrderBy(r => r.SortOrder)
-            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+            .ApplySort(query.SortField, query.SortOrder).ToPageListAsync(query.PageIndex, query.PageSize, total);
 
         return new PageResult<SysRole>(total, list);
     }

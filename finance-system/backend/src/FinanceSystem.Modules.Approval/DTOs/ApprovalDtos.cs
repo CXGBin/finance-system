@@ -111,6 +111,16 @@ public class ApprovalInstanceQuery
     public int? Status { get; set; }
 
     /// <summary>
+    /// 排序字段
+    /// </summary>
+    public string? SortField { get; set; }
+
+    /// <summary>
+    /// 排序方向
+    /// </summary>
+    public string? SortOrder { get; set; }
+
+    /// <summary>
     /// 页码
     /// </summary>
     public int PageIndex { get; set; } = 1;

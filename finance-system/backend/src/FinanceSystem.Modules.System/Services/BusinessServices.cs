@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.System.DTOs;
 using FinanceSystem.Modules.System.Entities;
 using SqlSugar;
@@ -317,7 +318,7 @@ public class DictService : IDictService
             .WhereIF(!string.IsNullOrEmpty(query.DictType), d => d.DictType.Contains(query.DictType!))
             .WhereIF(query.Status.HasValue, d => d.Status == query.Status)
             .OrderBy(d => d.CreatedTime, OrderByType.Desc)
-            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+            .ApplySort(query.SortField, query.SortOrder).ToPageListAsync(query.PageIndex, query.PageSize, total);
         return new PageResult<SysDictType>(total, list);
     }
 
@@ -423,7 +424,7 @@ public class LogService : ILogService
             .WhereIF(query.StartTime.HasValue, l => l.CreatedTime >= query.StartTime)
             .WhereIF(query.EndTime.HasValue, l => l.CreatedTime <= query.EndTime)
             .OrderBy(l => l.CreatedTime, OrderByType.Desc)
-            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+            .ApplySort(query.SortField, query.SortOrder).ToPageListAsync(query.PageIndex, query.PageSize, total);
         return new PageResult<SysLog>(total, list);
     }
 

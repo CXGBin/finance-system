@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.Accounts.Entities;
 using FinanceSystem.Modules.Asset.DTOs;
 using FinanceSystem.Modules.Asset.Entities;
@@ -150,7 +151,7 @@ public class AssetCardService : IAssetCardService
             .WhereIF(query.DeptId.HasValue, a => a.DeptId == query.DeptId)
             .WhereIF(query.Status.HasValue, a => a.Status == query.Status)
             .OrderBy(a => a.AssetCode)
-            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+            .ApplySort(query.SortField, query.SortOrder).ToPageListAsync(query.PageIndex, query.PageSize, total);
         return new PageResult<AssetCard>(total, list);
     }
 
@@ -635,7 +636,7 @@ public class AssetInventoryService : IAssetInventoryService
         RefAsync<int> total = 0;
         var list = await _db.Queryable<AssetInventory>()
             .OrderBy(i => i.InventoryDate, OrderByType.Desc)
-            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+            .ApplySort(query.SortField, query.SortOrder).ToPageListAsync(query.PageIndex, query.PageSize, total);
         return new PageResult<AssetInventory>(total, list);
     }
 

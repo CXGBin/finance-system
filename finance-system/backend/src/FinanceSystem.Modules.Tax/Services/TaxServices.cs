@@ -1,4 +1,5 @@
 using FinanceSystem.Core.Common;
+using FinanceSystem.Core.Extensions;
 using FinanceSystem.Modules.Accounts.Entities;
 using FinanceSystem.Modules.Tax.DTOs;
 using FinanceSystem.Modules.Tax.Entities;
@@ -105,7 +106,7 @@ public class TaxDeclarationService : ITaxDeclarationService
             .WhereIF(!string.IsNullOrEmpty(query.DeclarePeriod), d => d.DeclarePeriod == query.DeclarePeriod)
             .WhereIF(query.Status.HasValue, d => d.Status == query.Status)
             .OrderBy(d => d.CreatedTime, OrderByType.Desc)
-            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+            .ApplySort(query.SortField, query.SortOrder).ToPageListAsync(query.PageIndex, query.PageSize, total);
         return new PageResult<TaxDeclaration>(total, list);
     }
 
@@ -260,7 +261,7 @@ public class TaxInvoiceService : ITaxInvoiceService
             .WhereIF(!string.IsNullOrEmpty(query.InvoiceNo), i => i.InvoiceNo.Contains(query.InvoiceNo!))
             .WhereIF(query.IsVerified.HasValue, i => i.IsVerified == query.IsVerified)
             .OrderBy(i => i.InvoiceDate, OrderByType.Desc)
-            .ToPageListAsync(query.PageIndex, query.PageSize, total);
+            .ApplySort(query.SortField, query.SortOrder).ToPageListAsync(query.PageIndex, query.PageSize, total);
         return new PageResult<TaxInvoice>(total, list);
     }
 

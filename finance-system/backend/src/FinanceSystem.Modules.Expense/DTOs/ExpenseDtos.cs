@@ -133,4 +133,12 @@ public class ExpenseLoanQuery
     public int PageSize { get; set; } = 20;
     public int? Status { get; set; }
     public string? Keyword { get; set; }
+    /// <summary>
+    /// 排序字段
+    /// </summary>
+    public string? SortField { get; set; }
+    /// <summary>
+    /// 排序方向
+    /// </summary>
+    public string? SortOrder { get; set; }
 }
