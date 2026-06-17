@@ -120,9 +120,9 @@ public class CustomReportController : ControllerBase
     /// 获取模板列表
     /// </summary>
     [HttpGet("template/list")]
-    public async Task<ApiResult<PageResult<object>>> GetTemplates([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 20)
+    public async Task<ApiResult<PageResult<object>>> GetTemplates([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 20, [FromQuery] string? sortField = null, [FromQuery] string? sortOrder = null)
     {
-        return ApiResult<PageResult<object>>.Success(await _service.GetTemplatesAsync(pageIndex, pageSize));
+        return ApiResult<PageResult<object>>.Success(await _service.GetTemplatesAsync(pageIndex, pageSize, sortField, sortOrder));
     }
 
     /// <summary>

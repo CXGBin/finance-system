@@ -165,9 +165,9 @@ public class BudgetExecutionController : ControllerBase
     /// 查询预算执行情况
     /// </summary>
     [HttpGet("")]
-    public async Task<ApiResult<List<BudgetExecutionItem>>> GetExecution([FromQuery] BudgetExecutionQuery query)
+    public async Task<ApiResult<PageResult<BudgetExecutionItem>>> GetExecution([FromQuery] BudgetExecutionQuery query, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 20, [FromQuery] string? sortField = null, [FromQuery] string? sortOrder = null)
     {
-        return ApiResult<List<BudgetExecutionItem>>.Success(await _executionService.GetExecutionAsync(query));
+        return ApiResult<PageResult<BudgetExecutionItem>>.Success(await _executionService.GetExecutionAsync(query, pageIndex, pageSize, sortField, sortOrder));
     }
 }
 
@@ -256,9 +256,9 @@ public class BudgetAlertController : ControllerBase
     /// 检查超预警科目
     /// </summary>
     [HttpGet("check")]
-    public async Task<ApiResult<List<BudgetExecutionItem>>> CheckAlerts([FromQuery] long budgetYearId)
+    public async Task<ApiResult<PageResult<BudgetExecutionItem>>> CheckAlerts([FromQuery] long budgetYearId, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 20)
     {
-        return ApiResult<List<BudgetExecutionItem>>.Success(await _alertService.CheckAlertsAsync(budgetYearId));
+        return ApiResult<PageResult<BudgetExecutionItem>>.Success(await _alertService.CheckAlertsAsync(budgetYearId, pageIndex, pageSize));
     }
 }
 

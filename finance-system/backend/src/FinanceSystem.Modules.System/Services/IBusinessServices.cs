@@ -1,3 +1,4 @@
+using FinanceSystem.Core.Common;
 using FinanceSystem.Modules.System.DTOs;
 using FinanceSystem.Modules.System.Entities;
 
@@ -94,7 +95,7 @@ public interface IPostService
     /// <param name="deptId">部门ID筛选（可选）</param>
     /// <param name="postName">岗位名称模糊搜索（可选）</param>
     /// <returns>岗位分页数据</returns>
-    Task<Core.Common.PageResult<SysPost>> GetPageAsync(int pageIndex, int pageSize, long? deptId = null, string? postName = null);
+    Task<Core.Common.PageResult<SysPost>> GetPageAsync(int pageIndex, int pageSize, long? deptId = null, string? postName = null, string? sortField = null, string? sortOrder = null);
 
     /// <summary>
     /// 新增岗位
@@ -265,7 +266,7 @@ public interface IConfigService
 public interface INoticeService
 {
     /// <summary>获取公告列表</summary>
-    Task<List<SysNotice>> GetListAsync(int? noticeType = null);
+    Task<PageResult<SysNotice>> GetListAsync(int? noticeType = null, int pageIndex = 1, int pageSize = 20, string? sortField = null, string? sortOrder = null);
     /// <summary>新增公告</summary>
     Task<long> CreateAsync(NoticeCreateRequest request, long currentUserId);
     /// <summary>修改公告</summary>

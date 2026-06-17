@@ -153,10 +153,12 @@ public class PostController : ControllerBase
         [FromQuery] int pageIndex = 1,
         [FromQuery] int pageSize = 20,
         [FromQuery] long? deptId = null,
-        [FromQuery] string? postName = null)
+        [FromQuery] string? postName = null,
+        [FromQuery] string? sortField = null,
+        [FromQuery] string? sortOrder = null)
     {
         return ApiResult<Core.Common.PageResult<SysPost>>.Success(
-            await _postService.GetPageAsync(pageIndex, pageSize, deptId, postName));
+            await _postService.GetPageAsync(pageIndex, pageSize, deptId, postName, sortField, sortOrder));
     }
 
     /// <summary>

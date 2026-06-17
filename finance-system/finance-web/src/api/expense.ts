@@ -5,7 +5,7 @@ import type { PageParams, PagedResult } from '@/types/api.d';
 export const expenseApi = {
   // ========== 费用类型（后端: api/expense/type）==========
   /** 获取费用类型列表 */
-  typeList: () => get<ExpenseType[]>('/expense/type/list'),
+  typeList: (params: PageParams & Record<string, unknown> = {}) => get<PagedResult<ExpenseType>>('/expense/type/list', params),
   /** 新增费用类型 */
   typeAdd: (data: Partial<ExpenseType>) => post('/expense/type', data),
   /** 修改费用类型 */

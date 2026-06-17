@@ -466,11 +466,11 @@ public class CustomReportService : ICustomReportService
     /// <inheritdoc/>
     /// <summary>
     /// <inheritdoc/>
-    public async Task<PageResult<object>> GetTemplatesAsync(int pageIndex = 1, int pageSize = 20)
+    public async Task<PageResult<object>> GetTemplatesAsync(int pageIndex = 1, int pageSize = 20, string? sortField = null, string? sortOrder = null)
     {
         RefAsync<int> total = 0;
         var list = await _db.Queryable<ReportTemplate>()
-            .OrderBy(t => t.CreatedTime, OrderByType.Desc)
+            .ApplySort(sortField, sortOrder)
             .ToPageListAsync(pageIndex, pageSize, total);
         return new PageResult<object>(total, list.Cast<object>().ToList());
     }

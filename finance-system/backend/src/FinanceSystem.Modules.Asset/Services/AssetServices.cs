@@ -670,8 +670,7 @@ public class AssetReportService : IAssetReportService
             .WhereIF(!string.IsNullOrEmpty(query.AssetName), c => c.AssetName.Contains(query.AssetName!))
             .WhereIF(query.CategoryId.HasValue, c => c.CategoryId == query.CategoryId)
             .WhereIF(query.Status.HasValue, c => c.Status == query.Status);
-        var list = await q.Select(c => new { c.Id, c.AssetCode, c.AssetName, c.CategoryId, c.OriginalValue, c.AccumulatedDepreciation, c.NetValue, c.Status, c.Location })
-            .OrderBy(c => c.AssetCode)
+        var list = await q.ApplySort(query.SortField, query.SortOrder).Select(c => new { c.Id, c.AssetCode, c.AssetName, c.CategoryId, c.OriginalValue, c.AccumulatedDepreciation, c.NetValue, c.Status, c.Location })
             .ToPageListAsync(query.PageIndex, query.PageSize, total);
         return new PageResult<object>(total, list.Cast<object>().ToList());
     }

@@ -32,8 +32,8 @@ export const budgetApi = {
 
   // ========== 预算执行跟踪（后端: api/budget/execution）==========
   /** 查询预算执行情况 */
-  execution: (params: { budgetYearId: number; subjectId?: number; deptId?: number; month?: number }) =>
-    get<BudgetExecution[]>('/budget/execution', params),
+  execution: (params: { budgetYearId: number; subjectId?: number; deptId?: number; month?: number; pageIndex?: number; pageSize?: number; sortField?: string; sortOrder?: string } & Record<string, unknown>) =>
+    get<PagedResult<BudgetExecution>>('/budget/execution', params),
 
   // ========== 预算调整（后端: api/budget/adjustment）==========
   /** 发起预算调整 */
@@ -47,7 +47,8 @@ export const budgetApi = {
   /** 保存预警配置 */
   alertSaveConfig: (data: { budgetYearId: number; thresholdRate: number; alertEnabled: boolean }) => post('/budget/alert/config', data),
   /** 检查超预警科目 */
-  alertCheck: (budgetYearId: number) => get<BudgetAlert[]>('/budget/alert/check', { budgetYearId }),
+  alertCheck: (params: { budgetYearId: number; pageIndex?: number; pageSize?: number } & Record<string, unknown>) =>
+    get<PagedResult<BudgetAlert>>('/budget/alert/check', params),
 
   // ========== 兼容旧调用（别名）==========
   /** @deprecated 使用 years */

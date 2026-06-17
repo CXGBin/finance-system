@@ -3,6 +3,7 @@ import { Card, Select, Tag, Space, Row, Col, Statistic } from 'antd';
 import { ProTable, type ProColumns, type ActionType } from '@ant-design/pro-components';
 import { budgetApi } from '@/api/budget';
 import type { BudgetExecution } from '@/types/budget.d';
+import { createProTableRequest } from '@/utils/proTableRequest';
 import dayjs from 'dayjs';
 
 /** 预算执行跟踪 */
@@ -43,13 +44,8 @@ const BudgetExecution: React.FC = () => {
       </Space>
       <ProTable<BudgetExecution> actionRef={actionRef} headerTitle="" rowKey="id" columns={columns}
         search={false}
-        request={async () => {
-          if (!yearId) return { data: [], success: true, total: 0 };
-          const res = await budgetApi.execution({ budgetYearId: yearId });
-          const list = res.data ?? [];
-          return { data: list, success: true, total: list.length };
-        }}
-        pagination={false}
+        request={createProTableRequest((params) => budgetApi.execution({ budgetYearId: yearId!, ...params }))}
+        pagination={{ defaultPageSize: 10, showSizeChanger: true }}
       />
     </Card>
   );

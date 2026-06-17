@@ -25,9 +25,9 @@ public class NoticeController : ControllerBase
     /// 获取公告列表
     /// </summary>
     [HttpGet("list")]
-    public async Task<ApiResult<List<SysNotice>>> GetList([FromQuery] int? noticeType = null)
+    public async Task<ApiResult<PageResult<SysNotice>>> GetList([FromQuery] int? noticeType = null, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 20, [FromQuery] string? sortField = null, [FromQuery] string? sortOrder = null)
     {
-        return ApiResult<List<SysNotice>>.Success(await _noticeService.GetListAsync(noticeType));
+        return ApiResult<PageResult<SysNotice>>.Success(await _noticeService.GetListAsync(noticeType, pageIndex, pageSize, sortField, sortOrder));
     }
 
     /// <summary>

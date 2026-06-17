@@ -241,13 +241,13 @@ public class PostService : IPostService
     public PostService(ISqlSugarClient db) => _db = db;
 
     /// <inheritdoc/>
-    public async Task<PageResult<SysPost>> GetPageAsync(int pageIndex, int pageSize, long? deptId = null, string? postName = null)
+    public async Task<PageResult<SysPost>> GetPageAsync(int pageIndex, int pageSize, long? deptId = null, string? postName = null, string? sortField = null, string? sortOrder = null)
     {
         RefAsync<int> total = 0;
         var list = await _db.Queryable<SysPost>()
             .WhereIF(deptId.HasValue, p => p.DeptId == deptId)
             .WhereIF(!string.IsNullOrEmpty(postName), p => p.PostName.Contains(postName!))
-            .OrderBy(p => p.SortOrder)
+            .ApplySort(sortField, sortOrder)
             .ToPageListAsync(pageIndex, pageSize, total);
         return new PageResult<SysPost>(total, list);
     }
@@ -317,8 +317,8 @@ public class DictService : IDictService
             .WhereIF(!string.IsNullOrEmpty(query.DictName), d => d.DictName.Contains(query.DictName!))
             .WhereIF(!string.IsNullOrEmpty(query.DictType), d => d.DictType.Contains(query.DictType!))
             .WhereIF(query.Status.HasValue, d => d.Status == query.Status)
-            .OrderBy(d => d.CreatedTime, OrderByType.Desc)
-            .ApplySort(query.SortField, query.SortOrder).ToPageListAsync(query.PageIndex, query.PageSize, total);
+            .ApplySort(query.SortField, query.SortOrder)
+            .ToPageListAsync(query.PageIndex, query.PageSize, total);
         return new PageResult<SysDictType>(total, list);
     }
 
@@ -548,13 +548,15 @@ public class NoticeService : INoticeService
     private readonly ISqlSugarClient _db;
     public NoticeService(ISqlSugarClient db) => _db = db;
 
-    public async Task<List<SysNotice>> GetListAsync(int? noticeType = null)
+    public async Task<PageResult<SysNotice>> GetListAsync(int? noticeType = null, int pageIndex = 1, int pageSize = 20, string? sortField = null, string? sortOrder = null)
     {
-        return await _db.Queryable<SysNotice>()
+        RefAsync<int> total = 0;
+        var list = await _db.Queryable<SysNotice>()
             .WhereIF(noticeType.HasValue, n => n.NoticeType == noticeType)
             .Where(n => n.Status == 1)
-            .OrderByDescending(n => n.CreatedTime)
-            .ToListAsync();
+            .ApplySort(sortField, sortOrder)
+            .ToPageListAsync(pageIndex, pageSize, total);
+        return new PageResult<SysNotice>(total, list);
     }
 
     public async Task<long> CreateAsync(NoticeCreateRequest request, long currentUserId)

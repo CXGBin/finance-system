@@ -253,7 +253,7 @@ public class BudgetExecutionService : IBudgetExecutionService
     /// <inheritdoc/>
     /// <summary>
     /// <inheritdoc/>
-    public async Task<List<BudgetExecutionItem>> GetExecutionAsync(BudgetExecutionQuery query)
+    public async Task<PageResult<BudgetExecutionItem>> GetExecutionAsync(BudgetExecutionQuery query, int pageIndex = 1, int pageSize = 20, string? sortField = null, string? sortOrder = null)
     {
         var subjects = await _db.Queryable<BudgetSubject>()
             .Where(s => s.BudgetYearId == query.BudgetYearId)
@@ -261,7 +261,7 @@ public class BudgetExecutionService : IBudgetExecutionService
             .WhereIF(query.SubjectId.HasValue, s => s.SubjectId == query.SubjectId)
             .ToListAsync();
 
-        if (!subjects.Any()) return new List<BudgetExecutionItem>();
+        if (!subjects.Any()) return new PageResult<BudgetExecutionItem>(0, new());
 
         var accountSubjects = await _db.Queryable<FinanceSystem.Modules.Accounts.Entities.AccountSubject>()
             .Where(s => subjects.Select(x => x.SubjectId).Contains(s.Id))
@@ -312,7 +312,20 @@ public class BudgetExecutionService : IBudgetExecutionService
             });
         }
 
-        return result;
+        // 内存排序
+        if (!string.IsNullOrEmpty(sortField))
+        {
+            var prop = typeof(BudgetExecutionItem).GetProperty(sortField);
+            if (prop != null)
+            {
+                var desc = string.Equals(sortOrder, "descend", StringComparison.OrdinalIgnoreCase) || string.Equals(sortOrder, "desc", StringComparison.OrdinalIgnoreCase);
+                result = desc ? result.OrderByDescending(x => prop.GetValue(x)).ToList() : result.OrderBy(x => prop.GetValue(x)).ToList();
+            }
+        }
+        // 内存分页
+        var total = result.Count;
+        var pagedList = result.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
+        return new PageResult<BudgetExecutionItem>(total, pagedList);
     }
 }
 
@@ -451,15 +464,17 @@ public class BudgetAlertService : IBudgetAlertService
     /// <inheritdoc/>
     /// <summary>
     /// <inheritdoc/>
-    public async Task<List<BudgetExecutionItem>> CheckAlertsAsync(long budgetYearId)
+    public async Task<PageResult<BudgetExecutionItem>> CheckAlertsAsync(long budgetYearId, int pageIndex = 1, int pageSize = 20)
     {
         var config = await GetConfigAsync(budgetYearId);
-        if (config == null || config.IsEnabled != 1) return new List<BudgetExecutionItem>();
+        if (config == null || config.IsEnabled != 1) return new PageResult<BudgetExecutionItem>(0, new());
 
         var executionService = new BudgetExecutionService(_db);
         var all = await executionService.GetExecutionAsync(new BudgetExecutionQuery { BudgetYearId = budgetYearId });
-
-        return all.Where(e => e.ExecutionRate >= config.AlertThreshold).ToList();
+        var filtered = all.List.Where(e => e.ExecutionRate >= config.AlertThreshold).ToList();
+        var total = filtered.Count;
+        var pagedList = filtered.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
+        return new PageResult<BudgetExecutionItem>(total, pagedList);
     }
 }
 

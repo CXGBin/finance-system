@@ -8,7 +8,7 @@ using SqlSugar;
 namespace FinanceSystem.Modules.Tax.Services;
 
 /// <summary>税种服务接口</summary>
-public interface ITaxCategoryService { Task<List<TaxCategory>> GetListAsync(); Task<long> CreateAsync(TaxCategoryRequest request); Task UpdateAsync(long id, TaxCategoryRequest request); Task DeleteAsync(long id); }
+public interface ITaxCategoryService { Task<PageResult<TaxCategory>> GetListAsync(int pageIndex = 1, int pageSize = 20, string? sortField = null, string? sortOrder = null); Task<long> CreateAsync(TaxCategoryRequest request); Task UpdateAsync(long id, TaxCategoryRequest request); Task DeleteAsync(long id); }
 /// <summary>纳税申报服务接口</summary>
 public interface ITaxDeclarationService { Task<PageResult<TaxDeclaration>> GetListAsync(TaxDeclarationQuery query); Task<long> CalculateAsync(TaxCalculateRequest request, long currentUserId); Task DeclareAsync(long id, long currentUserId); Task ConfirmPayAsync(long id); Task<List<TaxDeclaration>> CalculateSurchargesAsync(string declarePeriod, long vatDeclarationId, long currentUserId); }
 /// <summary>发票服务接口</summary>
@@ -46,8 +46,15 @@ public class TaxCategoryService : ITaxCategoryService
     /// <summary>
     /// 获取盘点列表
     /// </summary>
-    public async Task<List<TaxCategory>> GetListAsync()
-        => await _db.Queryable<TaxCategory>().Where(c => c.IsEnabled == 1).OrderBy(c => c.TaxCode).ToListAsync();
+    public async Task<PageResult<TaxCategory>> GetListAsync(int pageIndex = 1, int pageSize = 20, string? sortField = null, string? sortOrder = null)
+    {
+        RefAsync<int> total = 0;
+        var list = await _db.Queryable<TaxCategory>()
+            .Where(c => c.IsEnabled == 1)
+            .ApplySort(sortField, sortOrder)
+            .ToPageListAsync(pageIndex, pageSize, total);
+        return new PageResult<TaxCategory>(total, list);
+    }
 
     /// <summary>
     /// <summary>

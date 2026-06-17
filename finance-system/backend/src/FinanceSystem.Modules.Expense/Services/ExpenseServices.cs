@@ -8,7 +8,7 @@ using SqlSugar;
 namespace FinanceSystem.Modules.Expense.Services;
 
 /// <summary>费用类型服务接口</summary>
-public interface IExpenseTypeService { Task<List<ExpenseType>> GetListAsync(); Task<long> CreateAsync(ExpenseTypeRequest request); Task UpdateAsync(long id, ExpenseTypeRequest request); Task DeleteAsync(long id); }
+public interface IExpenseTypeService { Task<PageResult<ExpenseType>> GetListAsync(int pageIndex = 1, int pageSize = 20, string? sortField = null, string? sortOrder = null); Task<long> CreateAsync(ExpenseTypeRequest request); Task UpdateAsync(long id, ExpenseTypeRequest request); Task DeleteAsync(long id); }
 /// <summary>费用报销服务接口</summary>
 public interface IExpenseClaimService { Task<PageResult<ExpenseClaim>> GetListAsync(ExpenseClaimQuery query); Task<ExpenseClaim?> GetByIdAsync(long id); Task<long> CreateAsync(ExpenseClaimRequest request, long currentUserId); Task UpdateAsync(long id, ExpenseClaimRequest request); Task SubmitAsync(long id, long currentUserId); Task ApproveAsync(long id); Task RejectAsync(long id); Task ConfirmPaymentAsync(long id, long currentUserId); }
 /// <summary>费用统计服务接口</summary>
@@ -28,8 +28,15 @@ public class ExpenseTypeService : IExpenseTypeService
     /// <summary>
     /// 获取盘点列表
     /// </summary>
-    public async Task<List<ExpenseType>> GetListAsync()
-        => await _db.Queryable<ExpenseType>().Where(t => t.IsEnabled == 1).OrderBy(t => t.SortOrder).ToListAsync();
+    public async Task<PageResult<ExpenseType>> GetListAsync(int pageIndex = 1, int pageSize = 20, string? sortField = null, string? sortOrder = null)
+    {
+        RefAsync<int> total = 0;
+        var list = await _db.Queryable<ExpenseType>()
+            .Where(t => t.IsEnabled == 1)
+            .ApplySort(sortField, sortOrder)
+            .ToPageListAsync(pageIndex, pageSize, total);
+        return new PageResult<ExpenseType>(total, list);
+    }
 
     /// <summary>
     /// <summary>
@@ -86,7 +93,7 @@ public class ExpenseClaimService : IExpenseClaimService
             .WhereIF(query.Status.HasValue, c => c.Status == query.Status)
             .WhereIF(query.ClaimantId.HasValue, c => c.ClaimantId == query.ClaimantId)
             .WhereIF(query.DeptId.HasValue, c => c.DeptId == query.DeptId)
-            .OrderBy(c => c.CreatedTime, OrderByType.Desc)
+            .ApplySort(query.SortField, query.SortOrder)
             .ToPageListAsync(query.PageIndex, query.PageSize, total);
         return new PageResult<ExpenseClaim>(total, list);
     }
@@ -381,7 +388,7 @@ public class ExpenseAllocateService : IExpenseAllocateService
     {
         RefAsync<int> total = 0;
         var list = await _db.Queryable<ExpenseAllocate>()
-            .OrderBy(a => a.CreatedTime, OrderByType.Desc)
+            .ApplySort(query.SortField, query.SortOrder)
             .ToPageListAsync(query.PageIndex, query.PageSize, total);
         return new PageResult<ExpenseAllocate>(total, list);
     }
@@ -421,7 +428,7 @@ public class ExpenseLoanService : IExpenseLoanService
         q = q.WhereIF(!string.IsNullOrEmpty(keyword), l => l.LoanNo.Contains(keyword) || (l.Reason ?? "").Contains(keyword));
         var total = await q.CountAsync();
         var list = await q.ApplySort(query.SortField, query.SortOrder)
-            .OrderByDescending(l => l.Id).ToPageListAsync(query.PageIndex, query.PageSize);
+            .ToPageListAsync(query.PageIndex, query.PageSize);
         return new PageResult<ExpenseLoan>(total, list);
     }
 

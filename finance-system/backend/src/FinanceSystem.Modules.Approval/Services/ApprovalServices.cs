@@ -16,7 +16,7 @@ namespace FinanceSystem.Modules.Approval.Services;
 public interface IApprovalFlowService
 {
     /// <summary>获取流程列表</summary>
-    Task<List<ApprovalFlow>> GetListAsync(string? moduleType = null);
+    Task<PageResult<ApprovalFlow>> GetListAsync(string? moduleType = null, int pageIndex = 1, int pageSize = 20, string? sortField = null, string? sortOrder = null);
     /// <summary>创建流程</summary>
     Task<long> CreateAsync(ApprovalFlowRequest request);
     /// <summary>修改流程</summary>
@@ -80,12 +80,14 @@ public class ApprovalFlowService : IApprovalFlowService
     /// <summary>
     /// 获取盘点列表
     /// </summary>
-    public async Task<List<ApprovalFlow>> GetListAsync(string? moduleType = null)
+    public async Task<PageResult<ApprovalFlow>> GetListAsync(string? moduleType = null, int pageIndex = 1, int pageSize = 20, string? sortField = null, string? sortOrder = null)
     {
-        return await _db.Queryable<ApprovalFlow>()
+        RefAsync<int> total = 0;
+        var list = await _db.Queryable<ApprovalFlow>()
             .WhereIF(!string.IsNullOrEmpty(moduleType), f => f.ModuleType == moduleType)
-            .OrderBy(f => f.CreatedTime, OrderByType.Desc)
-            .ToListAsync();
+            .ApplySort(sortField, sortOrder)
+            .ToPageListAsync(pageIndex, pageSize, total);
+        return new PageResult<ApprovalFlow>(total, list);
     }
 
     /// <inheritdoc/>

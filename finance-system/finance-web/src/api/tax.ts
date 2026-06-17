@@ -5,7 +5,7 @@ import type { PageParams, PagedResult } from '@/types/api.d';
 export const taxApi = {
   // ========== 税种管理（后端: api/tax/category）==========
   /** 获取税种列表 */
-  typeList: () => get<TaxType[]>('/tax/category/list'),
+  typeList: (params: PageParams & Record<string, unknown> = {}) => get<PagedResult<TaxType>>('/tax/category/list', params),
   /** 新增税种 */
   typeAdd: (data: Partial<TaxType>) => post('/tax/category', data),
   /** 修改税种 */

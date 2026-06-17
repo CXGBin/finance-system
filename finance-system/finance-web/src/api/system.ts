@@ -141,7 +141,7 @@ export interface SysNotice {
 /** 系统公告API */
 export const noticeApi = {
   /** 获取公告列表 */
-  list: (noticeType?: number) => get<SysNotice[]>(`/system/notice/list`, { noticeType }),
+  list: (noticeType?: number, params?: PageParams & Record<string, unknown>) => get<PagedResult<SysNotice>>(`/system/notice/list`, { noticeType, ...params }),
   /** 新增公告 */
   create: (data: Omit<SysNotice, 'id' | 'createdTime'>) => post<number>('/system/notice', data),
   /** 修改公告 */

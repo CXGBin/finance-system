@@ -3,6 +3,7 @@ import { Modal, Form, Input, Select, Switch, message, Popconfirm, Space, Button,
 import { ProTable, type ProColumns, type ActionType } from '@ant-design/pro-components';
 import { PlusOutlined } from '@ant-design/icons';
 import { noticeApi, type SysNotice } from '@/api/system';
+import { createProTableRequest } from '@/utils/proTableRequest';
 
 /** 系统公告管理页面 */
 const NoticeList: React.FC = () => {
@@ -52,10 +53,7 @@ const NoticeList: React.FC = () => {
       <ProTable<SysNotice>
         actionRef={actionRef} headerTitle="系统公告" rowKey="id" columns={columns}
         search={{ labelWidth: 'auto', defaultCollapsed: true }}
-        request={async (params) => {
-          const data = await noticeApi.list(params.noticeType as number | undefined);
-          return { data: data.data ?? [], success: true, total: (data.data ?? []).length };
-        }}
+        request={createProTableRequest((params) => noticeApi.list(params.noticeType as number | undefined, params))}
         toolBarRender={() => [<Button key="add" type="primary" icon={<PlusOutlined />} onClick={handleAdd}>发布公告</Button>]}
         pagination={{ defaultPageSize: 10, showSizeChanger: true }}
       />

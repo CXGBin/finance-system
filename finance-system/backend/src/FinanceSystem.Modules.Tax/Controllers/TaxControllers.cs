@@ -21,7 +21,7 @@ public class TaxCategoryController : ControllerBase
     /// 获取税种列表
     /// </summary>
     [HttpGet("list")]
-    public async Task<ApiResult<List<TaxCategory>>> GetList() => ApiResult<List<TaxCategory>>.Success(await _service.GetListAsync());
+    public async Task<ApiResult<PageResult<TaxCategory>>> GetList([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 20, [FromQuery] string? sortField = null, [FromQuery] string? sortOrder = null) => ApiResult<PageResult<TaxCategory>>.Success(await _service.GetListAsync(pageIndex, pageSize, sortField, sortOrder));
 
     /// <summary>
     /// 新增税种

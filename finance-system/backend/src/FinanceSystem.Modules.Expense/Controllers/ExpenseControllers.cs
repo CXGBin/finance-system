@@ -21,7 +21,7 @@ public class ExpenseTypeController : ControllerBase
     /// 获取费用类型列表
     /// </summary>
     [HttpGet("list")]
-    public async Task<ApiResult<List<ExpenseType>>> GetList() => ApiResult<List<ExpenseType>>.Success(await _service.GetListAsync());
+    public async Task<ApiResult<PageResult<ExpenseType>>> GetList([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 20, [FromQuery] string? sortField = null, [FromQuery] string? sortOrder = null) => ApiResult<PageResult<ExpenseType>>.Success(await _service.GetListAsync(pageIndex, pageSize, sortField, sortOrder));
 
     /// <summary>
     /// 新增费用类型

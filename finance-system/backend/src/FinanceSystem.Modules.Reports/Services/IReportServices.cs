@@ -72,7 +72,7 @@ public interface ICustomReportService
     /// <summary>
     /// 获取模板列表
     /// </summary>
-    Task<PageResult<object>> GetTemplatesAsync(int pageIndex = 1, int pageSize = 20);
+    Task<PageResult<object>> GetTemplatesAsync(int pageIndex = 1, int pageSize = 20, string? sortField = null, string? sortOrder = null);
 
     /// <summary>
     /// 创建模板

@@ -25,9 +25,9 @@ public class ApprovalFlowController : ControllerBase
     /// 获取流程列表
     /// </summary>
     [HttpGet("list")]
-    public async Task<ApiResult<List<ApprovalFlow>>> GetList([FromQuery] string? moduleType = null)
+    public async Task<ApiResult<PageResult<ApprovalFlow>>> GetList([FromQuery] string? moduleType = null, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 20, [FromQuery] string? sortField = null, [FromQuery] string? sortOrder = null)
     {
-        return ApiResult<List<ApprovalFlow>>.Success(await _flowService.GetListAsync(moduleType));
+        return ApiResult<PageResult<ApprovalFlow>>.Success(await _flowService.GetListAsync(moduleType, pageIndex, pageSize, sortField, sortOrder));
     }
 
     /// <summary>

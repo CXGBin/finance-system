@@ -64,7 +64,7 @@ public interface IBudgetMonthlyService
 public interface IBudgetExecutionService
 {
     /// <summary>查询预算执行情况</summary>
-    Task<List<BudgetExecutionItem>> GetExecutionAsync(BudgetExecutionQuery query);
+    Task<PageResult<BudgetExecutionItem>> GetExecutionAsync(BudgetExecutionQuery query, int pageIndex = 1, int pageSize = 20, string? sortField = null, string? sortOrder = null);
 }
 
 /// <summary>
@@ -96,7 +96,7 @@ public interface IBudgetAlertService
     /// <summary>保存预警配置</summary>
     Task SaveConfigAsync(BudgetAlertConfigRequest request);
     /// <summary>检查并返回超预警列表</summary>
-    Task<List<BudgetExecutionItem>> CheckAlertsAsync(long budgetYearId);
+    Task<PageResult<BudgetExecutionItem>> CheckAlertsAsync(long budgetYearId, int pageIndex = 1, int pageSize = 20);
 }
 
 /// <summary>

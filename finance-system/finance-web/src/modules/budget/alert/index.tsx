@@ -14,7 +14,7 @@ const BudgetAlert: React.FC = () => {
     { title: '预警方式', dataIndex: 'alertMethod', valueType: 'select', valueEnum: { 1: { text: '站内消息' }, 2: { text: '邮件' } }, search: true },
     { title: '状态', dataIndex: 'isEnabled', valueType: 'select', valueEnum: { 0: { text: '禁用' }, 1: { text: '启用' } }, search: true },
   ];
-  const request = createProTableRequest((params) => budgetApi.alertList(params));
+  const request = createProTableRequest((params) => budgetApi.alertCheck({ ...params } as any));
   return <Card title="预算预警"><ProTable columns={columns} request={request} search={{ labelWidth: 'auto', defaultCollapsed: true }} rowKey="id" /></Card>;
 };
 
