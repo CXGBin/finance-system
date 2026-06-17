@@ -1,24 +1,20 @@
-import React, { useState } from 'react';
-import { Card, Table, Button, message } from 'antd';
+import React from 'react';
+import { Card } from 'antd';
+import { ProTable, type ProColumns } from '@ant-design/pro-components';
+import { createProTableRequest } from '@/utils/proTableRequest';
 import { budgetApi } from '@/api/budget';
-import ProTable from '@/components/ProTable';
-import type { BudgetItem } from '@/types/budget.d';
 
 /** 预算编制页面 */
 const BudgetPlan: React.FC = () => {
-  const columns = [
-    { title: '科目编码', dataIndex: 'subjectCode', key: 'subjectCode', search: true },
-    { title: '科目名称', dataIndex: 'subjectName', key: 'subjectName' },
-    { title: '年度预算', dataIndex: 'annualBudget', key: 'annualBudget', align: 'right' },
-    { title: '已执行', dataIndex: 'executedAmount', key: 'executedAmount', align: 'right' },
-    { title: '剩余预算', dataIndex: 'remainingBudget', key: 'remainingBudget', align: 'right' },
+  const columns: ProColumns<Record<string, unknown>>[] = [
+    { title: '科目编码', dataIndex: 'subjectCode', search: true, sorter: true },
+    { title: '科目名称', dataIndex: 'subjectName', search: true },
+    { title: '年度预算', dataIndex: 'annualBudget', align: 'right', sorter: true },
+    { title: '已执行', dataIndex: 'executedAmount', align: 'right', sorter: true },
+    { title: '剩余预算', dataIndex: 'remainingBudget', align: 'right', sorter: true },
   ];
-
-  return (
-    <Card title="预算编制">
-      <ProTable columns={columns} fetchData={(params) => budgetApi.planList(params as any)} />
-    </Card>
-  );
+  const request = createProTableRequest((params) => budgetApi.planList(params));
+  return <Card title="预算编制"><ProTable columns={columns} request={request} search={{ labelWidth: 'auto' }} rowKey="id" /></Card>;
 };
 
 export default BudgetPlan;

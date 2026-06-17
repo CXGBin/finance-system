@@ -1,18 +1,20 @@
 import React from 'react';
 import { Card } from 'antd';
-import ProTable from '@/components/ProTable';
+import { ProTable, type ProColumns } from '@ant-design/pro-components';
+import { createProTableRequest } from '@/utils/proTableRequest';
 import { expenseApi } from '@/api/expense';
-import type { PaymentRecord } from '@/types/expense.d';
 
 /** 付款记录 */
 const PaymentList: React.FC = () => {
-  const columns = [
-    { title: '报销单号', dataIndex: 'claimNo', key: 'claimNo', search: true },
-    { title: '报销人', dataIndex: 'claimantName', key: 'claimantName' },
-    { title: '付款金额', dataIndex: 'paymentAmount', key: 'paymentAmount', align: 'right' },
-    { title: '付款日期', dataIndex: 'paymentDate', key: 'paymentDate' },
+  const columns: ProColumns<Record<string, unknown>>[] = [
+    { title: '报销单号', dataIndex: 'claimNo', search: true, sorter: true },
+    { title: '报销人', dataIndex: 'claimantName', search: true },
+    { title: '付款金额', dataIndex: 'paymentAmount', align: 'right', sorter: true },
+    { title: '付款日期', dataIndex: 'paymentDate', sorter: true },
+    { title: '状态', dataIndex: 'status', valueType: 'select', valueEnum: { 0: { text: '待付款' }, 1: { text: '已付款' } }, search: true },
   ];
-  return <Card title="付款记录"><ProTable columns={columns} fetchData={(params) => expenseApi.paymentList(params as any)} /></Card>;
+  const request = createProTableRequest((params) => expenseApi.paymentList(params));
+  return <Card title="付款记录"><ProTable columns={columns} request={request} search={{ labelWidth: 'auto' }} rowKey="id" /></Card>;
 };
 
 export default PaymentList;

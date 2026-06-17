@@ -1,25 +1,26 @@
 import React from 'react';
 import { Tag } from 'antd';
-import ProTable from '@/components/ProTable';
+import { ProTable, type ProColumns } from '@ant-design/pro-components';
+import { createProTableRequest } from '@/utils/proTableRequest';
 import { approvalApi } from '@/api/approval';
 import { useNavigate } from 'react-router-dom';
-import type { ApprovalInstance } from '@/types/approval.d';
 
 /** 已办审批页面 */
 const DoneApproval: React.FC = () => {
   const navigate = useNavigate();
-  const columns = [
-    { title: '业务ID', dataIndex: 'businessId', key: 'businessId', search: true },
-    { title: '标题', dataIndex: 'title', key: 'title' },
-    { title: '发起人ID', dataIndex: 'initiatorId', key: 'initiatorId' },
+  const columns: ProColumns<Record<string, unknown>>[] = [
+    { title: '业务ID', dataIndex: 'businessId', search: true, sorter: true },
+    { title: '标题', dataIndex: 'title', search: true },
+    { title: '发起人ID', dataIndex: 'initiatorId', search: true },
+    { title: '结果', dataIndex: 'result', valueType: 'select', valueEnum: { 1: { text: '通过' }, 2: { text: '驳回' } }, search: true },
+    { title: '处理时间', dataIndex: 'handleTime', sorter: true },
     {
-      title: '结果', dataIndex: 'result', key: 'result',
-      render: (val: number) => val === 1 ? <Tag color="success">通过</Tag> : <Tag color="error">驳回</Tag>,
+      title: '操作', key: 'action', search: false,
+      render: (_, record) => <a onClick={() => navigate(`/approval/${(record as any).id}`)}>查看</a>,
     },
-    { title: '处理时间', dataIndex: 'handleTime', key: 'handleTime' },
-    { title: '操作', key: 'action', render: (_: unknown, record: ApprovalInstance) => <a onClick={() => navigate(`/approval/${record.id}`)}>查看</a> },
   ];
-  return <ProTable columns={columns} fetchData={(params) => approvalApi.done(params as any)} />;
+  const request = createProTableRequest((params) => approvalApi.done(params));
+  return <ProTable columns={columns} request={request} search={{ labelWidth: 'auto' }} rowKey="id" />;
 };
 
 export default DoneApproval;

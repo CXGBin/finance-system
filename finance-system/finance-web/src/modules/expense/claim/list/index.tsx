@@ -1,41 +1,46 @@
 import React, { useRef } from 'react';
 import { Tag, Space, Button } from 'antd';
-import ProTable, { type ProTableRef } from '@/components/ProTable';
+import { ProTable, type ProColumns, type ActionType } from '@ant-design/pro-components';
+import { createProTableRequest } from '@/utils/proTableRequest';
 import { expenseApi } from '@/api/expense';
 import { useNavigate } from 'react-router-dom';
-import type { ExpenseClaim } from '@/types/expense.d';
 
 /** 报销单列表 */
 const ExpenseClaimList: React.FC = () => {
   const navigate = useNavigate();
-  const actionRef = useRef<ProTableRef>(null);
-  const columns = [
-    { title: '报销单号', dataIndex: 'claimNo', key: 'claimNo', search: true },
-    { title: '标题', dataIndex: 'title', key: 'title' },
-    { title: '报销金额', dataIndex: 'totalAmount', key: 'totalAmount', align: 'right' },
+  const actionRef = useRef<ActionType>();
+  const columns: ProColumns<Record<string, unknown>>[] = [
+    { title: '报销单号', dataIndex: 'claimNo', search: true, sorter: true },
+    { title: '标题', dataIndex: 'title', search: true },
+    { title: '报销金额', dataIndex: 'totalAmount', align: 'right', sorter: true },
+    { title: '状态', dataIndex: 'status', valueType: 'select', valueEnum: { 0: { text: '草稿' }, 1: { text: '审批中' }, 2: { text: '已通过' }, 3: { text: '已驳回' }, 4: { text: '已付款' } }, search: true },
+    { title: '提交时间', dataIndex: 'createdTime', sorter: true },
     {
-      title: '状态', dataIndex: 'status', key: 'status',
-      render: (val: number) => {
-        const map: Record<number, { color: string; text: string }> = { 0: { color: 'default', text: '草稿' }, 1: { color: 'processing', text: '审批中' }, 2: { color: 'success', text: '已通过' }, 3: { color: 'error', text: '已驳回' }, 4: { color: 'blue', text: '已付款' } };
-        const info = map[val] || { color: 'default', text: '未知' };
-        return <Tag color={info.color}>{info.text}</Tag>;
+      title: '操作', key: 'action', search: false,
+      render: (_, record) => {
+        const r = record as any;
+        return (
+          <Space>
+            <a onClick={() => navigate(`/expense/claim/${r.id}`)}>查看</a>
+            {r.status === 0 && <a onClick={() => navigate('/expense/claim/add', { state: r })}>编辑</a>}
+            {r.status === 0 && <a onClick={() => { expenseApi.claimSubmit(r.id); setTimeout(() => actionRef.current?.reload(), 500); }}>提交</a>}
+            {r.status === 2 && <a onClick={() => { expenseApi.paymentConfirm(r.id); setTimeout(() => actionRef.current?.reload(), 500); }}>确认付款</a>}
+          </Space>
+        );
       },
     },
-    { title: '提交时间', dataIndex: 'createdTime', key: 'createdTime' },
-    {
-      title: '操作', key: 'action', render: (_: unknown, record: ExpenseClaim) => (
-        <Space>
-          <a onClick={() => navigate(`/expense/claim/${record.id}`)}>查看</a>
-          {record.status === 0 && <a onClick={() => navigate('/expense/claim/add', { state: record })}>编辑</a>}
-          {record.status === 0 && <a onClick={() => expenseApi.claimSubmit(record.id).then(() => actionRef.current?.refresh())}>提交</a>}
-          {record.status === 2 && <a onClick={() => expenseApi.paymentConfirm(record.id).then(() => actionRef.current?.refresh())}>确认付款</a>}
-        </Space>
-      ),
-    },
   ];
+  const request = createProTableRequest((params) => expenseApi.claimList(params));
   return (
     <div>
-      <ProTable ref={actionRef} columns={columns} fetchData={(params) => expenseApi.claimList(params as any)} toolbarActions={<Button type="primary" onClick={() => navigate('/expense/claim/add')}>新增报销</Button>} />
+      <ProTable
+        actionRef={actionRef}
+        columns={columns}
+        request={request}
+        search={{ labelWidth: 'auto' }}
+        rowKey="id"
+        toolBarRender={() => [<Button key="add" type="primary" onClick={() => navigate('/expense/claim/add')}>新增报销</Button>]}
+      />
     </div>
   );
 };

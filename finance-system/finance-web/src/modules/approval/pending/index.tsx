@@ -1,30 +1,35 @@
 import React, { useRef } from 'react';
-import { Tag, Space, Button } from 'antd';
-import ProTable, { type ProTableRef } from '@/components/ProTable';
+import { Space } from 'antd';
+import { ProTable, type ProColumns, type ActionType } from '@ant-design/pro-components';
+import { createProTableRequest } from '@/utils/proTableRequest';
 import { approvalApi } from '@/api/approval';
 import { useNavigate } from 'react-router-dom';
-import type { ApprovalInstance } from '@/types/approval.d';
 
 /** 待办审批页面 */
 const PendingApproval: React.FC = () => {
   const navigate = useNavigate();
-  const actionRef = useRef<ProTableRef>(null);
-  const columns = [
-    { title: '业务ID', dataIndex: 'businessId', key: 'businessId', search: true },
-    { title: '标题', dataIndex: 'title', key: 'title' },
-    { title: '发起人ID', dataIndex: 'initiatorId', key: 'initiatorId' },
-    { title: '发起时间', dataIndex: 'createdTime', key: 'createdTime' },
+  const actionRef = useRef<ActionType>();
+  const columns: ProColumns<Record<string, unknown>>[] = [
+    { title: '业务ID', dataIndex: 'businessId', search: true, sorter: true },
+    { title: '标题', dataIndex: 'title', search: true },
+    { title: '发起人ID', dataIndex: 'initiatorId', search: true },
+    { title: '发起时间', dataIndex: 'createdTime', sorter: true },
     {
-      title: '操作', key: 'action', render: (_: unknown, record: ApprovalInstance) => (
-        <Space>
-          <a onClick={() => navigate(`/approval/${record.id}`)}>详情</a>
-          <a onClick={() => approvalApi.approve(record.id, '同意').then(() => actionRef.current?.refresh())}>通过</a>
-          <a style={{ color: '#ff4d4f' }} onClick={() => approvalApi.reject(record.id, '驳回').then(() => actionRef.current?.refresh())}>驳回</a>
-        </Space>
-      ),
+      title: '操作', key: 'action', search: false,
+      render: (_, record) => {
+        const r = record as any;
+        return (
+          <Space>
+            <a onClick={() => navigate(`/approval/${r.id}`)}>详情</a>
+            <a onClick={() => { approvalApi.approve(r.id, '同意'); setTimeout(() => actionRef.current?.reload(), 500); }}>通过</a>
+            <a style={{ color: '#ff4d4f' }} onClick={() => { approvalApi.reject(r.id, '驳回'); setTimeout(() => actionRef.current?.reload(), 500); }}>驳回</a>
+          </Space>
+        );
+      },
     },
   ];
-  return <ProTable ref={actionRef} columns={columns} fetchData={(params) => approvalApi.pending(params as any)} />;
+  const request = createProTableRequest((params) => approvalApi.pending(params));
+  return <ProTable actionRef={actionRef} columns={columns} request={request} search={{ labelWidth: 'auto' }} rowKey="id" />;
 };
 
 export default PendingApproval;

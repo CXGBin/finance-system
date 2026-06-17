@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
-import { Modal, Form, Input, message } from 'antd';
-import ProTable from '@/components/ProTable';
+import React, { useState, useRef } from 'react';
+import { Modal, Form, Input } from 'antd';
+import { ProTable, type ProColumns, type ActionType } from '@ant-design/pro-components';
+import { createProTableRequest } from '@/utils/proTableRequest';
 import { approvalApi } from '@/api/approval';
-import type { ApprovalTemplate } from '@/types/approval.d';
+import { message } from 'antd';
 
 /** 审批模板管理 */
 const ApprovalTemplate: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [form] = Form.useForm();
+  const actionRef = useRef<ActionType>();
 
-  const columns = [
-    { title: '模板名称', dataIndex: 'flowName', key: 'flowName', search: true },
-    { title: '流程编码', dataIndex: 'flowCode', key: 'flowCode' },
-    { title: '状态', dataIndex: 'status', key: 'status' },
-    { title: '创建时间', dataIndex: 'createdTime', key: 'createdTime' },
+  const columns: ProColumns<Record<string, unknown>>[] = [
+    { title: '模板名称', dataIndex: 'flowName', search: true, sorter: true },
+    { title: '流程编码', dataIndex: 'flowCode', search: true },
+    { title: '模块类型', dataIndex: 'moduleType', search: true },
+    { title: '状态', dataIndex: 'status', valueType: 'select', valueEnum: { 0: { text: '禁用' }, 1: { text: '启用' } }, search: true },
+    { title: '创建时间', dataIndex: 'createdTime', sorter: true },
   ];
 
   const handleSave = async () => {
@@ -22,15 +25,21 @@ const ApprovalTemplate: React.FC = () => {
       await approvalApi.templateAdd(values as any);
       message.success('保存成功');
       setModalOpen(false);
+      actionRef.current?.reload();
     } catch {}
   };
+
+  const request = createProTableRequest((params) => approvalApi.templateList(params));
 
   return (
     <div>
       <ProTable
+        actionRef={actionRef}
         columns={columns}
-        fetchData={(params) => approvalApi.templateList(params as any)}
-        toolbarActions={<a onClick={() => { form.resetFields(); setModalOpen(true); }}>新增模板</a>}
+        request={request}
+        search={{ labelWidth: 'auto' }}
+        rowKey="id"
+        toolBarRender={() => [<a key="add" onClick={() => { form.resetFields(); setModalOpen(true); }}>新增模板</a>]}
       />
       <Modal title="新增审批模板" open={modalOpen} onOk={handleSave} onCancel={() => setModalOpen(false)}>
         <Form form={form} layout="vertical">

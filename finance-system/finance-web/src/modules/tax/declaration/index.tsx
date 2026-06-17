@@ -1,29 +1,31 @@
 import React, { useRef } from 'react';
-import { Card, Tag, Space, Button } from 'antd';
-import ProTable, { type ProTableRef } from '@/components/ProTable';
+import { Card } from 'antd';
+import { ProTable, type ProColumns, type ActionType } from '@ant-design/pro-components';
+import { createProTableRequest } from '@/utils/proTableRequest';
 import { taxApi } from '@/api/tax';
-import type { TaxDeclaration } from '@/types/tax.d';
 
 /** 纳税申报 */
 const TaxDeclaration: React.FC = () => {
-  const actionRef = useRef<ProTableRef>(null);
-  const columns = [
-    { title: '申报期间', dataIndex: 'declarePeriod', key: 'declarePeriod', search: true },
-    { title: '税种', dataIndex: 'taxName', key: 'taxName' },
-    { title: '应纳税额', dataIndex: 'taxAmount', key: 'taxAmount', align: 'right' },
-    { title: '实际缴税额', dataIndex: 'actualPaidAmount', key: 'actualPaidAmount', align: 'right' },
+  const actionRef = useRef<ActionType>();
+  const columns: ProColumns<Record<string, unknown>>[] = [
+    { title: '申报期间', dataIndex: 'declarePeriod', search: true, sorter: true },
+    { title: '税种', dataIndex: 'taxName', search: true },
+    { title: '应纳税额', dataIndex: 'taxAmount', align: 'right', sorter: true },
+    { title: '实际缴税额', dataIndex: 'actualPaidAmount', align: 'right', sorter: true },
+    { title: '状态', dataIndex: 'status', valueType: 'select', valueEnum: { 0: { text: '草稿' }, 1: { text: '待申报' }, 2: { text: '已申报' }, 3: { text: '已缴纳' } }, search: true },
+    { title: '创建时间', dataIndex: 'createdTime', sorter: true },
     {
-      title: '状态', dataIndex: 'status', key: 'status',
-      render: (val: number) => [<Tag key={val} color={['', 'default', 'processing', 'success'][val]}>{['', '待申报', '已申报', '已缴纳'][val] || '未知'}</Tag>],
+      title: '操作', key: 'action', search: false,
+      render: (_, record) => {
+        const r = record as any;
+        if (r.status === 0) return <a onClick={() => { taxApi.declarationSubmit(r.id); setTimeout(() => actionRef.current?.reload(), 500); }}>申报</a>;
+        if (r.status === 1) return <a onClick={() => { taxApi.declarationSubmit(r.id); setTimeout(() => actionRef.current?.reload(), 500); }}>确认缴纳</a>;
+        return null;
+      },
     },
-    { title: '操作', key: 'action', render: (_: unknown, record: TaxDeclaration) => (
-      <Space>
-        {record.status === 0 && <a onClick={() => taxApi.declarationSubmit(record.id).then(() => actionRef.current?.refresh())}>申报</a>}
-        {record.status === 1 && <a onClick={() => taxApi.declarationSubmit(record.id).then(() => actionRef.current?.refresh())}>确认缴纳</a>}
-      </Space>
-    )},
   ];
-  return <Card title="纳税申报"><ProTable ref={actionRef} columns={columns} fetchData={(params) => taxApi.declarationList(params as any)} /></Card>;
+  const request = createProTableRequest((params) => taxApi.declarationList(params));
+  return <Card title="纳税申报"><ProTable actionRef={actionRef} columns={columns} request={request} search={{ labelWidth: 'auto' }} rowKey="id" /></Card>;
 };
 
 export default TaxDeclaration;

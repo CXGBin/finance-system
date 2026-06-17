@@ -1,27 +1,29 @@
 import React, { useState, useRef } from 'react';
-import { Modal, Form, Input, InputNumber, DatePicker, Select, Button, message, Space, Tag } from 'antd';
-import ProTable, { type ProTableRef } from '@/components/ProTable';
+import { Modal, Form, Input, InputNumber, DatePicker, Select, message } from 'antd';
+import { ProTable, type ProColumns, type ActionType } from '@ant-design/pro-components';
+import { createProTableRequest } from '@/utils/proTableRequest';
 import { taxApi } from '@/api/tax';
-import type { Invoice } from '@/types/tax.d';
 
 /** 发票登记 */
 const TaxInvoice: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [form] = Form.useForm();
-  const actionRef = useRef<ProTableRef>(null);
+  const actionRef = useRef<ActionType>();
 
-  const columns = [
-    { title: '发票号码', dataIndex: 'invoiceNo', key: 'invoiceNo', search: true },
-    { title: '类型', dataIndex: 'invoiceType', key: 'invoiceType', render: (v: number) => ['', '专票', '普票', '其他'][v] },
-    { title: '方向', dataIndex: 'direction', key: 'direction', render: (v: number) => <Tag color={v === 1 ? 'blue' : 'green'}>{v === 1 ? '进项' : '销项'}</Tag> },
-    { title: '对方名称', dataIndex: 'counterpartyName', key: 'counterpartyName', ellipsis: true },
-    { title: '税额', dataIndex: 'taxAmount', key: 'taxAmount', align: 'right' },
-    { title: '价税合计', dataIndex: 'totalAmount', key: 'totalAmount', align: 'right' },
-    { title: '已认证', dataIndex: 'isVerified', key: 'isVerified', render: (v: number) => v === 1 ? <Tag color="success">已认证</Tag> : <Tag color="default">未认证</Tag> },
+  const columns: ProColumns<Record<string, unknown>>[] = [
+    { title: '发票号码', dataIndex: 'invoiceNo', search: true, sorter: true },
+    { title: '类型', dataIndex: 'invoiceType', valueType: 'select', valueEnum: { 1: { text: '专票' }, 2: { text: '普票' }, 3: { text: '其他' } }, search: true },
+    { title: '方向', dataIndex: 'direction', valueType: 'select', valueEnum: { 1: { text: '进项' }, 2: { text: '销项' } }, search: true },
+    { title: '对方名称', dataIndex: 'counterpartyName', search: true, ellipsis: true },
+    { title: '税额', dataIndex: 'taxAmount', align: 'right', sorter: true },
+    { title: '价税合计', dataIndex: 'totalAmount', align: 'right', sorter: true },
+    { title: '已认证', dataIndex: 'isVerified', valueType: 'select', valueEnum: { 0: { text: '未认证' }, 1: { text: '已认证' } }, search: true },
     {
-      title: '操作', key: 'action', render: (_: unknown, record: Invoice) => (
-        record.isVerified === 0 ? <a onClick={() => taxApi.invoiceRemove(record.id).then(() => actionRef.current?.refresh())} style={{ color: '#ff4d4f' }}>删除</a> : null
-      ),
+      title: '操作', key: 'action', search: false,
+      render: (_, record) => {
+        const r = record as any;
+        return r.isVerified === 0 ? <a style={{ color: '#ff4d4f' }} onClick={() => { taxApi.invoiceRemove(r.id); setTimeout(() => actionRef.current?.reload(), 500); }}>删除</a> : null;
+      },
     },
   ];
 
@@ -31,13 +33,22 @@ const TaxInvoice: React.FC = () => {
       await taxApi.invoiceAdd({ ...values, invoiceDate: values.invoiceDate?.format('YYYY-MM-DD') } as any);
       message.success('登记成功');
       setModalOpen(false);
-      actionRef.current?.refresh();
+      actionRef.current?.reload();
     } catch {}
   };
 
+  const request = createProTableRequest((params) => taxApi.invoiceList(params));
+
   return (
     <div>
-      <ProTable ref={actionRef} columns={columns} fetchData={(params) => taxApi.invoiceList(params as any)} toolbarActions={<a onClick={() => { form.resetFields(); setModalOpen(true); }}>登记发票</a>} />
+      <ProTable
+        actionRef={actionRef}
+        columns={columns}
+        request={request}
+        search={{ labelWidth: 'auto' }}
+        rowKey="id"
+        toolBarRender={() => [<a key="add" onClick={() => { form.resetFields(); setModalOpen(true); }}>登记发票</a>]}
+      />
       <Modal title="登记发票" open={modalOpen} onOk={handleSave} onCancel={() => setModalOpen(false)} width={600}>
         <Form form={form} layout="vertical">
           <Form.Item name="invoiceType" label="发票类型" rules={[{ required: true }]}><Select options={[{ label: '增值税专用', value: 1 }, { label: '增值税普通', value: 2 }, { label: '其他', value: 3 }]} /></Form.Item>

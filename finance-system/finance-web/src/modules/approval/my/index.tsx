@@ -1,80 +1,76 @@
 import React, { useState, useRef } from 'react';
-import { Tag, Button, Space, Tabs } from 'antd';
-import ProTable, { type ProTableRef } from '@/components/ProTable';
+import { Tag, Tabs } from 'antd';
+import { ProTable, type ProColumns, type ActionType } from '@ant-design/pro-components';
+import { createProTableRequest } from '@/utils/proTableRequest';
 import { approvalApi } from '@/api/approval';
 import { useNavigate } from 'react-router-dom';
-import type { ApprovalInstance } from '@/types/approval.d';
-import type { PageParams } from '@/types/api.d';
 
 /** 我的申请页面 */
 const MyApproval: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>('initiated');
-  const actionRef = useRef<ProTableRef>(null);
+  const actionRef = useRef<ActionType>();
 
-  const commonColumns = [
-    { title: '业务ID', dataIndex: 'businessId', key: 'businessId', search: true },
-    { title: '标题', dataIndex: 'title', key: 'title' },
-    {
-      title: '状态', dataIndex: 'status', key: 'status',
-      render: (val: number) => {
-        const map: Record<number, { color: string; text: string }> = { 0: { color: 'default', text: '审批中' }, 1: { color: 'success', text: '已通过' }, 2: { color: 'error', text: '已驳回' } };
-        const info = map[val] || { color: 'default', text: '未知' };
-        return <Tag color={info.color}>{info.text}</Tag>;
-      },
-    },
-    { title: '提交时间', dataIndex: 'createdTime', key: 'createdTime' },
+  const commonColumns: ProColumns<Record<string, unknown>>[] = [
+    { title: '业务ID', dataIndex: 'businessId', search: true, sorter: true },
+    { title: '标题', dataIndex: 'title', search: true },
+    { title: '状态', dataIndex: 'status', valueType: 'select', valueEnum: { 0: { text: '审批中' }, 1: { text: '已通过' }, 2: { text: '已驳回' } }, search: true },
+    { title: '提交时间', dataIndex: 'createdTime', sorter: true },
   ];
 
-  const initiatedColumns = [
-    ...commonColumns,
-    {
-      title: '操作', key: 'action', render: (_: unknown, record: ApprovalInstance) => (
-        <Space>
-          <a onClick={() => navigate(`/approval/${record.id}`)}>详情</a>
-          {record.status === 0 && <a onClick={() => approvalApi.withdraw(record.id).then(() => actionRef.current?.refresh())}>撤回</a>}
-        </Space>
-      ),
-    },
-  ];
-
-  const approvedColumns = [
-    ...commonColumns,
-    {
-      title: '操作', key: 'action', render: (_: unknown, record: ApprovalInstance) => (
-        <a onClick={() => navigate(`/approval/${record.id}`)}>详情</a>
-      ),
-    },
-  ];
-
-  /** 我发起的 */
-  const fetchInitiated = (params: PageParams) => {
-    return approvalApi.list({ ...params, type: 'mine-initiated' });
-  };
-
-  /** 我审批的 */
-  const fetchApproved = (params: PageParams) => {
-    return approvalApi.list({ ...params, type: 'mine-approved' });
-  };
+  const requestInitiated = createProTableRequest((params) => approvalApi.list({ ...params, type: 'mine-initiated' }));
+  const requestApproved = createProTableRequest((params) => approvalApi.list({ ...params, type: 'mine-approved' }));
 
   const tabItems = [
     {
       key: 'initiated',
       label: '我发起的',
-      children: <ProTable ref={actionRef} columns={initiatedColumns} fetchData={fetchInitiated as any} />,
+      children: (
+        <ProTable
+          actionRef={actionRef}
+          columns={[
+            ...commonColumns,
+            {
+              title: '操作', key: 'action', search: false,
+              render: (_, record) => {
+                const r = record as any;
+                return (
+                  <>
+                    <a onClick={() => navigate(`/approval/${r.id}`)}>详情</a>
+                    {r.status === 0 && <a onClick={() => { approvalApi.withdraw(r.id); setTimeout(() => actionRef.current?.reload(), 500); }}>撤回</a>}
+                  </>
+                );
+              },
+            },
+          ]}
+          request={requestInitiated}
+          search={{ labelWidth: 'auto' }}
+          rowKey="id"
+        />
+      ),
     },
     {
       key: 'approved',
       label: '我审批的',
-      children: <ProTable ref={actionRef} columns={approvedColumns} fetchData={fetchApproved as any} />,
+      children: (
+        <ProTable
+          actionRef={actionRef}
+          columns={[
+            ...commonColumns,
+            {
+              title: '操作', key: 'action', search: false,
+              render: (_, record) => <a onClick={() => navigate(`/approval/${(record as any).id}`)}>详情</a>,
+            },
+          ]}
+          request={requestApproved}
+          search={{ labelWidth: 'auto' }}
+          rowKey="id"
+        />
+      ),
     },
   ];
 
-  return (
-    <div>
-      <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
-    </div>
-  );
+  return <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />;
 };
 
 export default MyApproval;
